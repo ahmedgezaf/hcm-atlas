@@ -1,0 +1,48 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements.txt
+
+      # Fails on a chapter naming an unknown lab or term, a term with no
+      # chapter, or a term no chapter lists.
+      - name: Build (validates cross-references)
+        run: python3 build.py
+
+      - name: Build artifact target
+        run: python3 build.py --target artifact
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Check JavaScript parses
+        run: |
+          node --check src/app.js
+          node --check src/labs.js
+
+      - name: Committed dist/ matches a fresh build
+        run: |
+          if ! git diff --quiet -- dist/; then
+            echo "::error::dist/ is out of date. Run 'python3 build.py' and commit the result."
+            git diff --stat -- dist/
+            exit 1
+          fi
+
+      - name: Browser smoke test
+        run: |
+          npm install --no-save playwright@1.49.1
+          npx playwright install --with-deps chromium
+          node scripts/smoke.js

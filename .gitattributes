@@ -1,0 +1,6 @@
+# Normalize to LF in the repository so a build on Windows and a build on Linux
+# produce byte-identical output and dist/ does not churn on checkout.
+* text=auto eol=lf
+*.png binary
+*.jpg binary
+*.ico binary
