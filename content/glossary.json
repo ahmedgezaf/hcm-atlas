@@ -1,0 +1,856 @@
+[
+ {
+  "id": "absence-plan",
+  "name": "Absence plan",
+  "chapter": "absence",
+  "definition": "The rules engine behind an absence type: who is eligible, how entitlement is earned or granted, and how it is paid.",
+  "watchOut": ""
+ },
+ {
+  "id": "absence-type",
+  "name": "Absence type",
+  "chapter": "absence",
+  "definition": "What the worker actually selects when requesting leave — 'Annual Leave', 'Sick Leave', 'Maternity Leave'. Must be associated with at least one absence plan.",
+  "watchOut": ""
+ },
+ {
+  "id": "abstract-role",
+  "name": "Abstract role",
+  "chapter": "security",
+  "definition": "A role held by virtue of being a person in the system rather than because of a specific job — Employee, Line Manager, Contingent Worker.",
+  "watchOut": ""
+ },
+ {
+  "id": "accrual-band",
+  "name": "Accrual band",
+  "chapter": "absence",
+  "definition": "A rule within an accrual plan granting different accrual rates to different populations, usually by length of service.",
+  "watchOut": ""
+ },
+ {
+  "id": "accrual-plan",
+  "name": "Accrual plan",
+  "chapter": "absence",
+  "definition": "A plan where workers accumulate leave over time, with rules for accrual rate, ceilings, and carryover.",
+  "watchOut": ""
+ },
+ {
+  "id": "area-of-responsibility-aor",
+  "name": "Area of Responsibility (AOR)",
+  "chapter": "security",
+  "definition": "An assignment of responsibility for a defined population, used to drive both access and routing.",
+  "watchOut": ""
+ },
+ {
+  "id": "assignment",
+  "name": "Assignment",
+  "chapter": "model",
+  "definition": "The record carrying the actual job details: business unit, department, job, position, grade, location, manager, working hours, assignment status, and the standing data payroll reads.",
+  "watchOut": "Putting person-level data on the assignment or assignment-level data on the person. Knowing which lives where is the whole skill."
+ },
+ {
+  "id": "attrition-turnover",
+  "name": "Attrition / turnover",
+  "chapter": "hrfunction",
+  "definition": "The rate at which people leave the organization over a period, usually expressed annually as a percentage.",
+  "watchOut": ""
+ },
+ {
+  "id": "balance",
+  "name": "Balance",
+  "chapter": "payroll",
+  "definition": "An accumulated total of element results over a defined period and dimension — for example gross pay year-to-date, or taxable earnings month-to-date.",
+  "watchOut": "Expecting balances to survive a global transfer. They do not."
+ },
+ {
+  "id": "bi-publisher-bip",
+  "name": "BI Publisher (BIP)",
+  "chapter": "reporting",
+  "definition": "Oracle's formatted reporting tool, combining a SQL-based data model with a layout template to produce pixel-controlled output.",
+  "watchOut": "Treating them as interchangeable. Using OTBI for a payslip or BIP for a quick headcount list are both wrong answers in an interview."
+ },
+ {
+  "id": "bracket-elimination-for-high-earners",
+  "name": "Bracket elimination for high earners",
+  "chapter": "egypt-payroll",
+  "definition": "A rule progressively removing access to the lower tax bands as net taxable income rises above defined thresholds.",
+  "watchOut": "Building a naive progressive calculation that applies every band to every employee. It will be wrong for senior staff, which is exactly who notices."
+ },
+ {
+  "id": "bursting",
+  "name": "Bursting",
+  "chapter": "reporting",
+  "definition": "Splitting one BI Publisher report run into many individual outputs, each delivered separately.",
+  "watchOut": ""
+ },
+ {
+  "id": "business-unit-bu",
+  "name": "Business unit (BU)",
+  "chapter": "org",
+  "definition": "An operational grouping used for processing transactions, sharing reference data such as jobs and grades, and controlling data access. Not a legal registration.",
+  "watchOut": "'A business unit is just another word for department.' No. A BU is a processing and access construct; departments sit below it on the org chart."
+ },
+ {
+  "id": "carryover",
+  "name": "Carryover",
+  "chapter": "absence",
+  "definition": "The rules governing how much unused leave transfers into the next plan term, and when it expires.",
+  "watchOut": ""
+ },
+ {
+  "id": "casual-leave",
+  "name": "Casual leave",
+  "chapter": "egypt-leave",
+  "definition": "Short-notice leave for unforeseen circumstances.",
+  "watchOut": ""
+ },
+ {
+  "id": "centers-of-excellence-coe",
+  "name": "Centers of Excellence (CoE)",
+  "chapter": "hrfunction",
+  "definition": "Specialist HR teams owning policy in a specific domain — Compensation & Benefits, Talent Acquisition, Learning & Development, Organization Development.",
+  "watchOut": ""
+ },
+ {
+  "id": "change-request",
+  "name": "Change request",
+  "chapter": "method",
+  "definition": "A formal request to alter agreed scope, with its impact on time and cost assessed.",
+  "watchOut": ""
+ },
+ {
+  "id": "compensatory-plan",
+  "name": "Compensatory plan",
+  "chapter": "absence",
+  "definition": "A plan tracking earned compensatory time off, given instead of paying overtime.",
+  "watchOut": ""
+ },
+ {
+  "id": "concurrent-employment",
+  "name": "Concurrent employment",
+  "chapter": "model",
+  "definition": "One person holding multiple simultaneous assignments under the same work relationship, or multiple work relationships across different legal employers.",
+  "watchOut": ""
+ },
+ {
+  "id": "configuration-workbook",
+  "name": "Configuration workbook",
+  "chapter": "method",
+  "definition": "The structured document recording every configuration decision and its agreed values.",
+  "watchOut": ""
+ },
+ {
+  "id": "costing",
+  "name": "Costing",
+  "chapter": "payroll",
+  "definition": "The allocation of payroll results to accounting segments so the cost lands in the right place in the general ledger.",
+  "watchOut": ""
+ },
+ {
+  "id": "crp-conference-room-pilot",
+  "name": "CRP (Conference Room Pilot)",
+  "chapter": "method",
+  "definition": "A structured demonstration of the configured system to the client using their own data and scenarios.",
+  "watchOut": ""
+ },
+ {
+  "id": "cutover",
+  "name": "Cutover",
+  "chapter": "method",
+  "definition": "The sequenced set of activities moving the client from the legacy system to the new one.",
+  "watchOut": ""
+ },
+ {
+  "id": "data-role-and-security-profile",
+  "name": "Data role and security profile",
+  "chapter": "security",
+  "definition": "Where a job role says what a user can do, the data role and security profile say which records they can do it to.",
+  "watchOut": ""
+ },
+ {
+  "id": "department",
+  "name": "Department",
+  "chapter": "org",
+  "definition": "An organization to which workers are assigned — the box on the org chart that a person actually sits in.",
+  "watchOut": ""
+ },
+ {
+  "id": "dff-descriptive-flexfield",
+  "name": "DFF (Descriptive Flexfield)",
+  "chapter": "extend",
+  "definition": "A configurable extra field added to a standard object without customization.",
+  "watchOut": ""
+ },
+ {
+  "id": "division",
+  "name": "Division",
+  "chapter": "org",
+  "definition": "A broader grouping above departments, usually aligned to a product line, business segment, or geography.",
+  "watchOut": ""
+ },
+ {
+  "id": "duty-role",
+  "name": "Duty role",
+  "chapter": "security",
+  "definition": "A granular building block granting specific privileges, aggregated into job and abstract roles.",
+  "watchOut": ""
+ },
+ {
+  "id": "effective-date",
+  "name": "Effective date",
+  "chapter": "dating",
+  "definition": "The date on which a change becomes true in the real world — not the date it was typed into the system.",
+  "watchOut": "'Effective date is the date I entered it.' No — the system tracks the entry date separately."
+ },
+ {
+  "id": "egyptian-annual-leave-entitlement",
+  "name": "Egyptian annual leave entitlement",
+  "chapter": "egypt-leave",
+  "definition": "The statutory leave ladder under Labour Law No. 14 of 2025.",
+  "watchOut": ""
+ },
+ {
+  "id": "element",
+  "name": "Element",
+  "chapter": "payroll",
+  "definition": "The definition of a single thing that can appear on a payslip: a salary, an allowance, a deduction, or an informational item.",
+  "watchOut": "Creating an element and expecting it to appear for employees. Nothing happens until eligibility is defined and an entry exists."
+ },
+ {
+  "id": "element-classification",
+  "name": "Element classification",
+  "chapter": "payroll",
+  "definition": "The category assigned to an element — earnings, deduction, information — which controls processing order and how it feeds balances.",
+  "watchOut": ""
+ },
+ {
+  "id": "element-eligibility-element-link",
+  "name": "Element eligibility (element link)",
+  "chapter": "payroll",
+  "definition": "The rule defining which population of workers an element applies to, based on criteria such as payroll, legal employer, grade, job, or department.",
+  "watchOut": "Defining eligibility too narrowly at build time and then needing to change it after entries already exist, which is considerably messier."
+ },
+ {
+  "id": "element-entry",
+  "name": "Element entry",
+  "chapter": "payroll",
+  "definition": "The actual assignment of an element to a specific person, with its values and dates.",
+  "watchOut": ""
+ },
+ {
+  "id": "eligibility-profile",
+  "name": "Eligibility profile",
+  "chapter": "absence",
+  "definition": "A reusable set of criteria determining whether a person qualifies for an absence plan — based on grade, job, department, location, length of service, and similar.",
+  "watchOut": ""
+ },
+ {
+  "id": "end-of-contract",
+  "name": "End of contract",
+  "chapter": "lifecycle",
+  "definition": "A fixed-term contract reaching its expiry date. Nobody terminates it; it simply lapses.",
+  "watchOut": "Treating all three exit routes as one 'termination' transaction. They have different downstream calculations."
+ },
+ {
+  "id": "end-of-service-benefit-eosb-gratuity",
+  "name": "End of Service Benefit (EOSB) / gratuity",
+  "chapter": "lifecycle",
+  "definition": "A statutory lump sum payable to departing employees in Gulf countries, calculated on length of service and final wage.",
+  "watchOut": "Importing EOSB logic into an Egyptian design, or assuming Egypt has gratuity. It does not work that way."
+ },
+ {
+  "id": "end-dating",
+  "name": "End-dating",
+  "chapter": "dating",
+  "definition": "Closing a record as of a date rather than deleting it, so that history is preserved.",
+  "watchOut": "'I'll just delete the wrong record.' In a date-effective SaaS system you end-date, correct, or reverse. Deletion is rare, restricted, and usually the wrong instinct."
+ },
+ {
+  "id": "enterprise",
+  "name": "Enterprise",
+  "chapter": "org",
+  "definition": "The single top node of the entire organizational structure. There is exactly one enterprise per Oracle HCM implementation, and everything else is defined beneath it.",
+  "watchOut": "Do not describe the enterprise as 'the company'. The company is the legal entity. The enterprise is the whole group."
+ },
+ {
+  "id": "fast-formula",
+  "name": "Fast Formula",
+  "chapter": "ff",
+  "definition": "Oracle's rule language used to express calculations and conditions — payroll rates, accrual rules, eligibility logic.",
+  "watchOut": "'Fast Formula is a programming language to master upfront.' It is a per-context rule language — approach it through examples."
+ },
+ {
+  "id": "final-settlement",
+  "name": "Final settlement",
+  "chapter": "lifecycle",
+  "definition": "The calculation of everything owed to a leaver: final salary, unused leave payout, any severance or end-of-service benefit, minus outstanding deductions such as loans.",
+  "watchOut": ""
+ },
+ {
+  "id": "fit-gap-analysis",
+  "name": "Fit-gap analysis",
+  "chapter": "method",
+  "definition": "Comparing client requirements against delivered functionality and documenting where the product fits, where it does not, and what will be done about the gaps.",
+  "watchOut": ""
+ },
+ {
+  "id": "form-1-and-form-6",
+  "name": "Form 1 and Form 6",
+  "chapter": "egypt-payroll",
+  "definition": "The statutory notifications filed with social insurance on hiring (Form 1) and on termination (Form 6).",
+  "watchOut": ""
+ },
+ {
+  "id": "freeze-period",
+  "name": "Freeze period",
+  "chapter": "method",
+  "definition": "A window during which no changes are permitted in the legacy system, so that final data migration is against a stable base.",
+  "watchOut": ""
+ },
+ {
+  "id": "fte-full-time-equivalent",
+  "name": "FTE (full-time equivalent)",
+  "chapter": "hrfunction",
+  "definition": "A measure of workload rather than of people. An employee working 50% time is 0.5 FTE but still 1 headcount.",
+  "watchOut": "Reporting FTE when the client asked for headcount, or the reverse. They are different numbers and both are 'correct'."
+ },
+ {
+  "id": "global-transfer",
+  "name": "Global transfer",
+  "chapter": "model",
+  "definition": "Moving a worker from one legal employer to another — typically across countries. The source work relationship is terminated and a new one is created under the destination legal employer.",
+  "watchOut": "Expecting balances to carry across. They do not — balances never span payroll relationships, so year-to-date figures start fresh in the new country."
+ },
+ {
+  "id": "gosi",
+  "name": "GOSI",
+  "chapter": "gulf",
+  "definition": "The General Organization for Social Insurance — Saudi Arabia's social insurance authority.",
+  "watchOut": ""
+ },
+ {
+  "id": "grade",
+  "name": "Grade",
+  "chapter": "workforce",
+  "definition": "A level in the organization's hierarchy, used to control compensation ranges and eligibility for benefits or allowances.",
+  "watchOut": "'Grade equals salary.' Grade is a level. Money attaches to it through rate ranges and the salary basis — the two are linked but distinct objects."
+ },
+ {
+  "id": "grade-step",
+  "name": "Grade step",
+  "chapter": "workforce",
+  "definition": "An increment within a single grade, used where progression happens in defined steps rather than across a continuous range. Steps are grouped into grade ladders.",
+  "watchOut": ""
+ },
+ {
+  "id": "hcm-extract",
+  "name": "HCM Extract",
+  "chapter": "reporting",
+  "definition": "A framework for extracting HCM data on a schedule for delivery to external systems.",
+  "watchOut": ""
+ },
+ {
+  "id": "hdl-hcm-data-loader",
+  "name": "HDL (HCM Data Loader)",
+  "chapter": "hdl",
+  "definition": "Oracle's bulk data loading tool, using structured .dat files uploaded as a zip.",
+  "watchOut": "'Functional means no technical work.' In HCM the market pays a premium for functional consultants who handle HDL, formulas, and reporting themselves."
+ },
+ {
+  "id": "headcount",
+  "name": "Headcount",
+  "chapter": "hrfunction",
+  "definition": "A raw count of people, regardless of how much each one works. One person equals one headcount.",
+  "watchOut": ""
+ },
+ {
+  "id": "hrbp-hr-business-partner",
+  "name": "HRBP (HR Business Partner)",
+  "chapter": "hrfunction",
+  "definition": "An HR professional embedded with a specific business division as its strategic HR contact.",
+  "watchOut": ""
+ },
+ {
+  "id": "hsdl-hcm-spreadsheet-data-loader",
+  "name": "HSDL (HCM Spreadsheet Data Loader)",
+  "chapter": "hdl",
+  "definition": "A spreadsheet-based interface over the same loading framework, aimed at business users.",
+  "watchOut": ""
+ },
+ {
+  "id": "hypercare",
+  "name": "Hypercare",
+  "chapter": "method",
+  "definition": "An intensive support period immediately after go-live with heightened staffing and response times.",
+  "watchOut": ""
+ },
+ {
+  "id": "input-value",
+  "name": "Input value",
+  "chapter": "payroll",
+  "definition": "A field on an element that holds the data the calculation needs — typically amount, rate, percentage, or number of units.",
+  "watchOut": ""
+ },
+ {
+  "id": "insurable-wage",
+  "name": "Insurable wage",
+  "chapter": "egypt-payroll",
+  "definition": "The portion of pay on which social insurance contributions are calculated, bounded by a statutory floor and ceiling.",
+  "watchOut": "'Contributions apply to full gross salary.' They do not — they apply to the capped insurable wage. This is the most common calculation error in Egyptian payroll."
+ },
+ {
+  "id": "iqama-and-visa-linked-employment-data",
+  "name": "Iqama and visa-linked employment data",
+  "chapter": "gulf",
+  "definition": "Residency permit and visa information that must be tracked, with expiry alerting, for expatriate employees.",
+  "watchOut": ""
+ },
+ {
+  "id": "job",
+  "name": "Job",
+  "chapter": "workforce",
+  "definition": "A generic definition of a role, independent of the organization chart. Carries attributes such as grade range, qualifications, and job family.",
+  "watchOut": "Never define a job as a specific seat. That is a position."
+ },
+ {
+  "id": "job-family",
+  "name": "Job family",
+  "chapter": "workforce",
+  "definition": "A grouping of related jobs sharing similar characteristics — for example all finance jobs, or all engineering jobs.",
+  "watchOut": ""
+ },
+ {
+  "id": "job-role",
+  "name": "Job role",
+  "chapter": "security",
+  "definition": "A role reflecting a job someone does in the organization — HR Specialist, Line Manager, Payroll Manager.",
+  "watchOut": ""
+ },
+ {
+  "id": "journey",
+  "name": "Journey",
+  "chapter": "extend",
+  "definition": "A configurable checklist of tasks assigned to a person around an event — onboarding, transfer, offboarding.",
+  "watchOut": ""
+ },
+ {
+  "id": "leave-encashment",
+  "name": "Leave encashment",
+  "chapter": "absence",
+  "definition": "Paying out unused leave in cash instead of taking the time off.",
+  "watchOut": ""
+ },
+ {
+  "id": "legal-employer",
+  "name": "Legal employer",
+  "chapter": "org",
+  "definition": "A legal entity that has been explicitly classified as an employer. This is the entity that legally hires workers and appears on employment contracts.",
+  "watchOut": "Treating the two as synonyms. They are related but not interchangeable, and the difference is exactly what the question is testing."
+ },
+ {
+  "id": "legal-entity",
+  "name": "Legal entity",
+  "chapter": "org",
+  "definition": "An organization recognized by law that can own assets, sign contracts, incur liabilities, and be sued. Created in Oracle through the Legal Entity Configurator.",
+  "watchOut": "A legal entity on its own does not employ anybody. It has to be classified as a legal employer before a single person can be hired into it. This distinction is the most commonly missed point in the whole area."
+ },
+ {
+  "id": "legislative-data-group-ldg",
+  "name": "Legislative Data Group (LDG)",
+  "chapter": "org",
+  "definition": "A partition that isolates payroll and related legislative data by country. All payroll configuration — elements, balances, formulas — lives inside exactly one LDG.",
+  "watchOut": "Thinking you can reuse one element library globally. You cannot. Each LDG is its own world."
+ },
+ {
+  "id": "location",
+  "name": "Location",
+  "chapter": "org",
+  "definition": "A physical work site, with an address, attached to positions and assignments.",
+  "watchOut": ""
+ },
+ {
+  "id": "lookup-type-and-lookup-code",
+  "name": "Lookup type and lookup code",
+  "chapter": "extend",
+  "definition": "Configurable lists of values used in dropdowns across the application.",
+  "watchOut": ""
+ },
+ {
+  "id": "martyrs-victims-fund-contribution",
+  "name": "Martyrs & Victims Fund contribution",
+  "chapter": "egypt-payroll",
+  "definition": "A small statutory employee deduction of 0.05% of gross pay.",
+  "watchOut": ""
+ },
+ {
+  "id": "maternity-leave",
+  "name": "Maternity leave",
+  "chapter": "egypt-leave",
+  "definition": "Paid leave around childbirth.",
+  "watchOut": ""
+ },
+ {
+  "id": "minimum-wage-and-mandatory-annual-increment",
+  "name": "Minimum wage and mandatory annual increment",
+  "chapter": "egypt-payroll",
+  "definition": "The statutory wage floor and the legally required yearly increase.",
+  "watchOut": "Calculating the mandatory increment on full gross. It is on the social insurance wage."
+ },
+ {
+  "id": "mudad",
+  "name": "Mudad",
+  "chapter": "gulf",
+  "definition": "The Saudi platform supporting wage protection and payroll compliance.",
+  "watchOut": ""
+ },
+ {
+  "id": "nitaqat-saudization",
+  "name": "Nitaqat / Saudization",
+  "chapter": "gulf",
+  "definition": "The Saudi quota system requiring employers to maintain minimum percentages of Saudi national employees, with a colour-banded compliance rating.",
+  "watchOut": ""
+ },
+ {
+  "id": "no-entitlement-plan",
+  "name": "No entitlement plan",
+  "chapter": "absence",
+  "definition": "A plan that tracks absences without maintaining a balance or providing entitlement — typically for unpaid leave.",
+  "watchOut": ""
+ },
+ {
+  "id": "nosi",
+  "name": "NOSI",
+  "chapter": "egypt-payroll",
+  "definition": "The National Organization for Social Insurance — the Egyptian authority administering social insurance under Law 148 of 2019.",
+  "watchOut": ""
+ },
+ {
+  "id": "notice-period",
+  "name": "Notice period",
+  "chapter": "lifecycle",
+  "definition": "The advance written warning either party must give before terminating an indefinite-term contract.",
+  "watchOut": "Configuring notice rules from a secondary English-language source without verification. Statutory detail is the one area where being confidently wrong is expensive."
+ },
+ {
+  "id": "oracle-true-cloud-method",
+  "name": "Oracle True Cloud Method",
+  "chapter": "method",
+  "definition": "Oracle's current implementation methodology for Fusion Cloud projects.",
+  "watchOut": "'Consultants design the best system.' Consultants get decisions made and documented; the client owns the design."
+ },
+ {
+  "id": "org-chart",
+  "name": "Org chart",
+  "chapter": "hrfunction",
+  "definition": "The visual representation of reporting hierarchy — who reports to whom.",
+  "watchOut": ""
+ },
+ {
+  "id": "otbi",
+  "name": "OTBI",
+  "chapter": "reporting",
+  "definition": "Oracle Transactional Business Intelligence — ad-hoc reporting and analysis directly against live HCM data, using pre-built subject areas.",
+  "watchOut": "Using OTBI for a payslip. Wrong tool — that is BI Publisher."
+ },
+ {
+  "id": "parallel-run",
+  "name": "Parallel run",
+  "chapter": "payroll",
+  "definition": "Running the new system's payroll alongside the legacy payroll for the same period and reconciling the two, line by line.",
+  "watchOut": "'Go-live means done.' Hypercare and the first live payroll after parallel are the actual finish line."
+ },
+ {
+  "id": "payment-process-bank-file",
+  "name": "Payment process / bank file",
+  "chapter": "payroll",
+  "definition": "The process that generates the actual payment instruction file sent to the bank.",
+  "watchOut": ""
+ },
+ {
+  "id": "payroll-definition",
+  "name": "Payroll definition",
+  "chapter": "payroll",
+  "definition": "The configuration of a payroll's calendar: its frequency, period start and end dates, cut-off dates, and payment date.",
+  "watchOut": ""
+ },
+ {
+  "id": "payroll-relationship",
+  "name": "Payroll relationship",
+  "chapter": "model",
+  "definition": "A parallel object linking the person to a payroll statutory unit (PSU). It is the highest level of the payroll employment model and groups a person's assignments for statutory calculation and reporting.",
+  "watchOut": "Thinking payroll runs against the assignment. It runs against the payroll relationship, aggregating across the assignments grouped within it."
+ },
+ {
+  "id": "payroll-run",
+  "name": "Payroll run",
+  "chapter": "payroll",
+  "definition": "The process that calculates gross-to-net for a population of workers for a given period.",
+  "watchOut": ""
+ },
+ {
+  "id": "payroll-statutory-unit-psu",
+  "name": "Payroll Statutory Unit (PSU)",
+  "chapter": "org",
+  "definition": "A legal entity classified as responsible for paying workers, including remitting payroll tax and social insurance to the authorities.",
+  "watchOut": "Assuming one PSU per country automatically. A group with three registered companies in Egypt may well have three PSUs."
+ },
+ {
+  "id": "person",
+  "name": "Person",
+  "chapter": "model",
+  "definition": "The record of a human being, held once globally. Carries what is true of the human regardless of any employer: name, date of birth, national ID, personal contact details, nationality.",
+  "watchOut": "'There is an employee table.' There is not. There is a person, a work relationship, and an assignment."
+ },
+ {
+  "id": "personal-exemption",
+  "name": "Personal exemption",
+  "chapter": "egypt-payroll",
+  "definition": "An annual amount deducted from income before applying the tax brackets.",
+  "watchOut": ""
+ },
+ {
+  "id": "position",
+  "name": "Position",
+  "chapter": "workforce",
+  "definition": "A specific, individual seat: a job tied to a particular department and location, which exists whether or not anyone currently fills it.",
+  "watchOut": "'Job and position are synonyms.' They are not, and this is the fastest way to look unprepared in front of a trainer. Job = what the work is. Position = a specific seat doing it."
+ },
+ {
+  "id": "prepayments",
+  "name": "Prepayments",
+  "chapter": "payroll",
+  "definition": "The process that takes payroll run results and distributes them across the person's payment methods, ready for payment.",
+  "watchOut": ""
+ },
+ {
+  "id": "probation",
+  "name": "Probation",
+  "chapter": "lifecycle",
+  "definition": "An initial period during which either party may end the employment with lighter obligations than after confirmation.",
+  "watchOut": "Assuming probation can be extended by agreement. Under the 2025 law it cannot."
+ },
+ {
+  "id": "progressive-tax-brackets",
+  "name": "Progressive tax brackets",
+  "chapter": "egypt-payroll",
+  "definition": "Egypt's seven-band salary tax scale applied to annual net taxable income.",
+  "watchOut": "'Tax is a flat monthly percentage.' It is annual, progressive, exemption-adjusted, and reconciled."
+ },
+ {
+  "id": "qiwa",
+  "name": "Qiwa",
+  "chapter": "gulf",
+  "definition": "The Saudi Ministry of Human Resources digital labour platform, handling contracts, work permits, and establishment services.",
+  "watchOut": ""
+ },
+ {
+  "id": "qualification-plan",
+  "name": "Qualification plan",
+  "chapter": "absence",
+  "definition": "A plan where workers qualify for entitlement on an event, with payment percentages that can vary by band, rather than accruing a balance.",
+  "watchOut": ""
+ },
+ {
+  "id": "quarterly-update-26a-26d",
+  "name": "Quarterly update (26A–26D)",
+  "chapter": "extend",
+  "definition": "Oracle's fixed quarterly release cycle for Fusion Cloud applications.",
+  "watchOut": ""
+ },
+ {
+  "id": "quickpay",
+  "name": "QuickPay",
+  "chapter": "payroll",
+  "definition": "A process that runs payroll for a single person outside the main run.",
+  "watchOut": ""
+ },
+ {
+  "id": "raid-log",
+  "name": "RAID log",
+  "chapter": "method",
+  "definition": "A tracking log of Risks, Assumptions, Issues, and Dependencies.",
+  "watchOut": ""
+ },
+ {
+  "id": "reconciliation",
+  "name": "Reconciliation",
+  "chapter": "method",
+  "definition": "Comparing outputs between two systems or two runs and explaining every difference.",
+  "watchOut": ""
+ },
+ {
+  "id": "redwood",
+  "name": "Redwood",
+  "chapter": "extend",
+  "definition": "Oracle's current user experience and design system, progressively replacing older pages.",
+  "watchOut": ""
+ },
+ {
+  "id": "resignation",
+  "name": "Resignation",
+  "chapter": "lifecycle",
+  "definition": "Employee-initiated termination of the employment relationship.",
+  "watchOut": ""
+ },
+ {
+  "id": "rest-api",
+  "name": "REST API",
+  "chapter": "reporting",
+  "definition": "Oracle's web service interface for programmatic read and write access to HCM data.",
+  "watchOut": "'I can query the database directly.' There is no SQL Developer connection to a SaaS pod. Your query paths are OTBI, BIP data models, extracts, and REST."
+ },
+ {
+  "id": "retroactive-change-retro",
+  "name": "Retroactive change (retro)",
+  "chapter": "dating",
+  "definition": "A change entered with an effective date in the past, after payroll has already been processed for that period.",
+  "watchOut": "Assuming retro only adds money. It can also create a recovery when a change reduces pay."
+ },
+ {
+  "id": "salary-basis",
+  "name": "Salary basis",
+  "chapter": "payroll",
+  "definition": "The configuration that determines how salary is stored, quoted, and paid — annual, monthly, or hourly — and which element it feeds.",
+  "watchOut": ""
+ },
+ {
+  "id": "sandbox",
+  "name": "Sandbox",
+  "chapter": "extend",
+  "definition": "An isolated workspace for making and testing configuration changes before publishing them to the live environment.",
+  "watchOut": ""
+ },
+ {
+  "id": "shared-services-hr-operations",
+  "name": "Shared services / HR Operations",
+  "chapter": "hrfunction",
+  "definition": "A centralized team handling transactional HR work — payroll processing, data entry, tier-one queries — for the whole organization.",
+  "watchOut": "Treating them as low-level administrators. They hold the operational knowledge no document captures."
+ },
+ {
+  "id": "sick-leave",
+  "name": "Sick leave",
+  "chapter": "egypt-leave",
+  "definition": "Paid leave for illness, with payment rates varying by duration.",
+  "watchOut": ""
+ },
+ {
+  "id": "sit-system-integration-testing",
+  "name": "SIT (System Integration Testing)",
+  "chapter": "method",
+  "definition": "Testing that the configured system works end to end, including integrations with other systems.",
+  "watchOut": ""
+ },
+ {
+  "id": "social-insurance-contribution-rates",
+  "name": "Social insurance contribution rates",
+  "chapter": "egypt-payroll",
+  "definition": "The statutory percentages contributed by employee and employer on the insurable wage.",
+  "watchOut": ""
+ },
+ {
+  "id": "solid-line-vs-dotted-line-reporting",
+  "name": "Solid-line vs dotted-line reporting",
+  "chapter": "hrfunction",
+  "definition": "Solid line is the formal line manager who owns performance and compensation decisions. Dotted line is a secondary, functional reporting relationship without that authority.",
+  "watchOut": ""
+ },
+ {
+  "id": "source-system-key-vs-person-number",
+  "name": "Source system key vs person number",
+  "chapter": "hdl",
+  "definition": "The source system key identifies a record in the legacy system for load and reconciliation purposes; the person number is Oracle's own identifier.",
+  "watchOut": "'Data conversion is a side task.' It is routinely the thing that delays go-live."
+ },
+ {
+  "id": "subject-area",
+  "name": "Subject area",
+  "chapter": "reporting",
+  "definition": "A pre-built, governed data model in OTBI exposing a business domain such as workforce management or absence.",
+  "watchOut": ""
+ },
+ {
+  "id": "tax-reporting-unit-tru",
+  "name": "Tax Reporting Unit (TRU)",
+  "chapter": "org",
+  "definition": "The reporting face of a PSU toward tax and statutory authorities. TRUs are created under a PSU and are what statutory reports and deduction cards actually reference.",
+  "watchOut": ""
+ },
+ {
+  "id": "termination",
+  "name": "Termination",
+  "chapter": "lifecycle",
+  "definition": "Employer-initiated ending of employment, with or without cause.",
+  "watchOut": ""
+ },
+ {
+  "id": "test-script",
+  "name": "Test script",
+  "chapter": "method",
+  "definition": "A step-by-step document defining what to do, what data to use, and what result to expect.",
+  "watchOut": ""
+ },
+ {
+  "id": "uat-user-acceptance-testing",
+  "name": "UAT (User Acceptance Testing)",
+  "chapter": "method",
+  "definition": "Client-executed testing against agreed scripts to confirm the system meets requirements.",
+  "watchOut": "'Testing is the QA team's job.' Not on a functional implementation."
+ },
+ {
+  "id": "ulrich-model",
+  "name": "Ulrich model",
+  "chapter": "hrfunction",
+  "definition": "The dominant model for structuring an HR function into three parts: HRBPs, Centers of Excellence, and Shared Services.",
+  "watchOut": ""
+ },
+ {
+  "id": "universal-health-insurance",
+  "name": "Universal health insurance",
+  "chapter": "egypt-payroll",
+  "definition": "A separate contributory health insurance scheme being progressively rolled out across governorates.",
+  "watchOut": ""
+ },
+ {
+  "id": "update-vs-correction",
+  "name": "Update vs correction",
+  "chapter": "dating",
+  "definition": "An update creates a new dated record and preserves history. A correction overwrites the existing record as if the previous value was never true.",
+  "watchOut": "Using correction to fix a real-world change, thereby destroying legitimate history."
+ },
+ {
+  "id": "value-set",
+  "name": "Value set",
+  "chapter": "extend",
+  "definition": "A definition constraining what values a flexfield segment can accept.",
+  "watchOut": ""
+ },
+ {
+  "id": "work-relationship",
+  "name": "Work relationship",
+  "chapter": "model",
+  "definition": "The link between a person and one legal employer, carrying a worker type and the start date of that employment. Terminating employment end-dates the work relationship.",
+  "watchOut": "Confusing termination of a work relationship with deletion of the person. The person record survives; the work relationship is end-dated."
+ },
+ {
+  "id": "work-terms",
+  "name": "Work terms",
+  "chapter": "model",
+  "definition": "An optional intermediate layer between the work relationship and the assignment, used to group employment terms such as payroll and compensation across multiple assignments.",
+  "watchOut": "Assuming every implementation has work terms. Many do not — the two-tier model omits this layer entirely."
+ },
+ {
+  "id": "worker-types",
+  "name": "Worker types",
+  "chapter": "model",
+  "definition": "The category recorded on a work relationship: employee, contingent worker, pending worker, or non-worker.",
+  "watchOut": ""
+ },
+ {
+  "id": "wps-and-sif-file",
+  "name": "WPS and SIF file",
+  "chapter": "gulf",
+  "definition": "The Wage Protection System and the Salary Information File format used to prove salaries were paid correctly and on time.",
+  "watchOut": ""
+ }
+]

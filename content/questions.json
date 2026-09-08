@@ -1,0 +1,369 @@
+[
+ {
+  "chapter": "model",
+  "question": "After a global transfer from Egypt to Saudi Arabia, how many person records exist? How many work relationships? How many payroll relationships?",
+  "answer": "One person record — the person is held once, globally. Two work relationships: the Egyptian one is terminated (end-dated) and a new one is created under the Saudi legal employer. Two payroll relationships: the Saudi one is created under the Saudi PSU in a different LDG, and because balances never span payroll relationships, year-to-date figures start fresh.",
+  "terms": [
+   "person",
+   "work-relationship",
+   "payroll-relationship",
+   "global-transfer"
+  ]
+ },
+ {
+  "chapter": "org",
+  "question": "What is the difference between a legal entity and a legal employer?",
+  "answer": "A legal entity is an organization recognized by law that can own assets, sign contracts and be sued. A legal employer is a classification applied to a legal entity that enables it to employ workers. Not every legal entity is a legal employer — one may exist only to hold property — and nobody can be hired into an entity until the classification is switched on.",
+  "terms": [
+   "legal-entity",
+   "legal-employer"
+  ]
+ },
+ {
+  "chapter": "org",
+  "question": "A client asks why an Egyptian element does not appear in the Saudi environment. What is checked first?",
+  "answer": "The legislative data group. All payroll configuration — elements, balances, formulas — lives inside exactly one LDG, and an element defined in the Egypt LDG does not exist in the Saudi LDG. It has to be built again there.",
+  "terms": [
+   "legislative-data-group-ldg",
+   "element"
+  ]
+ },
+ {
+  "chapter": "workforce",
+  "question": "Explain job versus position to someone who has never used an HR system.",
+  "answer": "A job is what the work is — 'Accountant' — defined once and reused everywhere. A position is one specific seat doing that work: 'Accountant #3, Finance, Alexandria plant', with its own budget and reporting line, which exists whether or not anyone currently sits in it. When the person leaves, the position stays and becomes a vacancy.",
+  "terms": [
+   "job",
+   "position"
+  ]
+ },
+ {
+  "chapter": "dating",
+  "question": "When is a correction used instead of an update, and what does each do to history?",
+  "answer": "An update records a real-world change: it creates a new dated record and keeps the old one, so a promotion on 1 July leaves both grades in history. A correction fixes a data-entry mistake: it overwrites the record as if the old value was never true. Using a correction for a real event destroys legitimate history and can trigger wrong retroactive payroll.",
+  "terms": [
+   "update-vs-correction",
+   "effective-date"
+  ]
+ },
+ {
+  "chapter": "payroll",
+  "question": "Walk through the payroll object chain from element to payment.",
+  "answer": "Element (the definition) → element eligibility (who could receive it) → element entry (who does, and how much) → payroll run (gross-to-net, held against the payroll relationship) → balances (running totals) → prepayments (distribute results to payment methods) → payment process (the bank file) → costing (to the ledger). Each link depends on the one before it.",
+  "terms": [
+   "element",
+   "element-eligibility-element-link",
+   "element-entry",
+   "payroll-run",
+   "balance",
+   "prepayments",
+   "payment-process-bank-file",
+   "costing"
+  ]
+ },
+ {
+  "chapter": "egypt-payroll",
+  "question": "An employee earns EGP 25,000 per month. What is their monthly social-insurance contribution, and why is it not 11% of 25,000?",
+  "answer": "EGP 1,837.00. Contributions apply to the insurable wage, which is capped at EGP 16,700 in 2026 (floor EGP 2,700). 11% of 16,700 is 1,837; the employer pays 18.75% of the same capped figure, EGP 3,131.25. The cap moves every January.",
+  "terms": [
+   "insurable-wage",
+   "social-insurance-contribution-rates"
+  ]
+ },
+ {
+  "chapter": "model",
+  "question": "Why can balances not span payroll relationships, and when does that become visible to a client?",
+  "answer": "Because payroll processing and aggregation happen at the payroll relationship level, which is tied to one payroll statutory unit and one legislation. A different PSU means different statutory rules and a different LDG, so totals cannot carry across. It becomes visible on a global transfer, when year-to-date balances start from zero in the new country.",
+  "terms": [
+   "payroll-relationship",
+   "balance"
+  ]
+ },
+ {
+  "chapter": "absence",
+  "question": "Which of the six absence plan types fits maternity leave, and why not an accrual plan?",
+  "answer": "A qualification plan. Maternity is not earned day by day — it is triggered by an event and paid at a defined rate over the absence, and it can carry occurrence caps. An accrual plan accumulates a balance over time, which is the wrong shape. The six types are accrual, qualification, no entitlement, compensatory, agreement and donation.",
+  "terms": [
+   "absence-plan",
+   "qualification-plan",
+   "accrual-plan"
+  ]
+ },
+ {
+  "chapter": "hrfunction",
+  "question": "A department has ten people, four of them half-time. What is the headcount and what is the FTE?",
+  "answer": "Headcount 10 — every person counts as one. FTE 8 — six full-timers at 1.0 plus four half-timers at 0.5. Both numbers are correct; they answer different questions, so always ask which one the client means.",
+  "terms": [
+   "headcount",
+   "fte-full-time-equivalent"
+  ]
+ },
+ {
+  "chapter": "reporting",
+  "question": "OTBI or BI Publisher for a payslip? For a headcount dashboard? Justify both.",
+  "answer": "Payslip: BI Publisher — a formatted, per-employee, printable document, produced from a SQL data model and a layout template and delivered by bursting. Headcount dashboard: OTBI — ad-hoc analysis against live data using the Worker Assignment subject area, no layout requirement. Swapping them is wrong in both directions.",
+  "terms": [
+   "otbi",
+   "bi-publisher-bip",
+   "bursting"
+  ]
+ },
+ {
+  "chapter": "payroll",
+  "question": "What does element eligibility do that an element entry does not?",
+  "answer": "Eligibility defines the population an element can apply to — by payroll, legal employer, grade, job, department. It answers 'who could receive this'. An entry is the actual attachment of the element to one person with values and dates — 'who does, and how much'. Without eligibility, no entry can be created.",
+  "terms": [
+   "element-eligibility-element-link",
+   "element-entry"
+  ]
+ },
+ {
+  "chapter": "extend",
+  "question": "A client says 'we need an extra field for equipment number'. What are the first three thoughts?",
+  "answer": "DFF — a descriptive flexfield on the relevant object holds the data without customization. Lookup or value set — should the field be a controlled list rather than free text. Approvals — what the workflow should do when the field changes. That sequence covers most 'can you add a field' requests.",
+  "terms": [
+   "dff-descriptive-flexfield",
+   "lookup-type-and-lookup-code",
+   "value-set"
+  ]
+ },
+ {
+  "chapter": "security",
+  "question": "What is the difference between what a job role controls and what a security profile controls?",
+  "answer": "A job role controls function — what a user can do: the screens, tasks and privileges of, say, an HR Specialist. A security profile controls data scope — whose records they can do it to: by legal employer, business unit, department, position or country. A data role combines the two. Same job role, different profiles, different visible populations.",
+  "terms": [
+   "job-role",
+   "data-role-and-security-profile"
+  ]
+ },
+ {
+  "chapter": "egypt-payroll",
+  "question": "Why does Oracle not deliver a maintained Egyptian payroll localization, and why does that matter for a consultant's value on a project?",
+  "answer": "Oracle maintains localizations for a limited set of markets; Egypt's statutory rules are built by the implementation partner in elements, balances and Fast Formulas. That means someone on the project has to know the Egyptian mechanics — insurable-wage caps, the tax brackets and bracket elimination, the small statutory deductions — and a consultant who knows them is useful from the first workshop.",
+  "terms": [
+   "fast-formula",
+   "insurable-wage",
+   "progressive-tax-brackets"
+  ]
+ },
+ {
+  "chapter": "dating",
+  "question": "A raise is approved in July with an effective date of 1 May. What happens in the July payroll run?",
+  "answer": "Retroactive events are raised for May and June, which were already paid at the old rate. Recalculate Payroll for Retroactive Changes runs before the main calculation, works out the arrears for both months and creates retro entries; the July run then pays them and re-states the affected balances, including social insurance and tax for the prior periods.",
+  "terms": [
+   "retroactive-change-retro"
+  ]
+ },
+ {
+  "chapter": "payroll",
+  "question": "What is a parallel run, and why is it not optional?",
+  "answer": "Running the new system's payroll alongside the legacy payroll for the same period — typically two or three consecutive months — and reconciling the two line by line, explaining every difference. It is the only reliable proof that the new payroll is correct before the old one is switched off.",
+  "terms": [
+   "parallel-run",
+   "reconciliation"
+  ]
+ },
+ {
+  "chapter": "hrfunction",
+  "question": "Name the three parts of the Ulrich model and say which one a consultant works with most day to day.",
+  "answer": "HR business partners embedded in the business, centers of excellence owning policy in a domain, and shared services doing the transactional work. Day to day, the consultant works most with shared services — in Egypt the Personnel and Payroll team — because their work is what the configuration automates; the CoEs sign off design in their domain.",
+  "terms": [
+   "ulrich-model",
+   "hrbp-hr-business-partner",
+   "centers-of-excellence-coe",
+   "shared-services-hr-operations"
+  ]
+ },
+ {
+  "chapter": "egypt-payroll",
+  "question": "What is the mandatory annual increment in Egypt calculated on, and why does that matter for high earners?",
+  "answer": "At least 3% of the social-insurance wage — the insurable wage — not total salary. Because the insurable wage is capped (EGP 16,700 in 2026), the increment is effectively capped at 3% of the ceiling for anyone earning above it.",
+  "terms": [
+   "minimum-wage-and-mandatory-annual-increment",
+   "insurable-wage"
+  ]
+ },
+ {
+  "chapter": "egypt-payroll",
+  "question": "Under the current Egyptian brackets, why might a naive progressive tax calculation understate tax for a senior employee?",
+  "answer": "Because of bracket elimination. Above defined net-income thresholds the lower bands are removed — above EGP 600,000 the 0% band goes, above 700,000 the 10% band too, and so on until above 1.2 million only the 25% and 27.5% bands apply. A calculator that applies every band to everyone gives senior staff lower-band relief they are not entitled to.",
+  "terms": [
+   "bracket-elimination-for-high-earners",
+   "progressive-tax-brackets"
+  ]
+ },
+ {
+  "chapter": "reporting",
+  "question": "What is a subject area, and why does choosing the wrong one produce wrong numbers rather than an error?",
+  "answer": "A pre-built, governed data model in OTBI — pre-joined tables exposed as folders and columns — covering one domain at a fixed grain. Choosing wrong does not fail; it silently reports at the wrong grain: date-effective history multiplies rows and multiple assignments double-count people, so the numbers are plausible and wrong.",
+  "terms": [
+   "subject-area",
+   "otbi"
+  ]
+ },
+ {
+  "chapter": "reporting",
+  "question": "Name the three OTBI constraints that catch people, and the three workarounds.",
+  "answer": "Constraints: no joins across subject areas in one analysis; a default row limit (around 65,000) past which results truncate silently; and predefined grain that cannot be changed. Workarounds: a Combined Analysis on a shared key such as person number; BI Publisher with hand-written SQL; or an HCM Extract for large volumes.",
+  "terms": [
+   "otbi",
+   "hcm-extract",
+   "bi-publisher-bip"
+  ]
+ },
+ {
+  "chapter": "reporting",
+  "question": "OTBI or BI Publisher for a payslip? For a headcount dashboard? For a 200,000-row extract? Justify all three.",
+  "answer": "Payslip: BI Publisher, formatted per-employee output with bursting. Headcount dashboard: OTBI, ad-hoc and live. 200,000 rows: past OTBI's row limit — an HCM Extract, or BI Publisher with its own SQL.",
+  "terms": [
+   "otbi",
+   "bi-publisher-bip",
+   "hcm-extract"
+  ]
+ },
+ {
+  "chapter": "reporting",
+  "question": "What are the two halves of a BI Publisher report, and which one is closest to ordinary SQL work?",
+  "answer": "A data model and a layout template. The data model is genuinely SQL against the reporting schema — that half is ordinary query work. The template controls layout and is the new part.",
+  "terms": [
+   "bi-publisher-bip"
+  ]
+ },
+ {
+  "chapter": "reporting",
+  "question": "Explain bursting to someone who has never heard of it.",
+  "answer": "One report run produces thousands of individual outputs, each delivered separately to the right person — one payroll run becomes one payslip email per employee. Bursting is the splitting and routing step.",
+  "terms": [
+   "bursting"
+  ]
+ },
+ {
+  "chapter": "hdl",
+  "question": "Write a valid METADATA line for a simple object from memory, then a matching MERGE line.",
+  "answer": "METADATA|JobFamily|JobFamilyCode|JobFamilyName|EffectiveStartDate|EffectiveEndDate — then — MERGE|JobFamily|SALES|Sales|2000/01/01|4712/12/31. Same discriminator, same attributes in the same order, pipe-delimited, dates as YYYY/MM/DD.",
+  "terms": [
+   "hdl-hcm-data-loader"
+  ]
+ },
+ {
+  "chapter": "hdl",
+  "question": "Give two reasons an HDL file would be rejected before any data loads.",
+  "answer": "A METADATA line appearing after the MERGE lines it describes; two METADATA lines for the same component in one file; a MERGE line whose attributes do not match the METADATA order (pipe-count mismatch); a wrongly cased attribute name; a file saved with a UTF-8 byte-order mark.",
+  "terms": [
+   "hdl-hcm-data-loader"
+  ]
+ },
+ {
+  "chapter": "hdl",
+  "question": "Can a single .dat file contain two METADATA lines? Under what condition?",
+  "answer": "Yes — a Worker.dat routinely has METADATA lines for Worker, PersonName, WorkRelationship, Assignment and more. The condition is that each METADATA line is for a different component; two for the same component is invalid.",
+  "terms": [
+   "hdl-hcm-data-loader"
+  ]
+ },
+ {
+  "chapter": "hdl",
+  "question": "What is 4712/12/31 and why does it appear everywhere?",
+  "answer": "Oracle's conventional 'end of time' date. Every date-effective record has an end date, and an open-ended, current record ends on 4712/12/31 — so it is on almost every current row in a load and in the tables.",
+  "terms": [
+   "hdl-hcm-data-loader",
+   "effective-date"
+  ]
+ },
+ {
+  "chapter": "hdl",
+  "question": "Explain the difference between a source key and a user key, and say which one to insist on for a migration that must be reconciled.",
+  "answer": "A source key is SourceSystemOwner plus SourceSystemId — the record's identity in the legacy system. A user key is a natural business key such as JobFamilyCode. For a migration that must be reconciled, insist on source keys: they are what trace every Oracle record back to its legacy origin and let every variance be explained.",
+  "terms": [
+   "source-system-key-vs-person-number",
+   "hdl-hcm-data-loader"
+  ]
+ },
+ {
+  "chapter": "hdl",
+  "question": "What does JobFamilyId(SourceSystemId) mean in a METADATA line?",
+  "answer": "A foreign-object reference: the column points at a job family, identified by its source-system id rather than Oracle's internal id. The bracket names the key type used to resolve the reference. It is how child records attach to parents in a load.",
+  "terms": [
+   "hdl-hcm-data-loader"
+  ]
+ },
+ {
+  "chapter": "hdl",
+  "question": "Multiple .dat files are in one zip. Are they loaded in parallel or sequentially, and what does that mean for ordering?",
+  "answer": "Imported in parallel, loaded sequentially. Referenced data must exist before it is referenced: job families before jobs, grades and jobs before assignments, people before work relationships.",
+  "terms": [
+   "hdl-hcm-data-loader"
+  ]
+ },
+ {
+  "chapter": "ff",
+  "question": "What are the four logical sections of a Fast Formula?",
+  "answer": "Inputs (INPUTS ARE), defaults (DEFAULT FOR), logic (assignments and IF/THEN/ELSE), and return (RETURN). Oracle does not strictly enforce the order, but following it avoids errors.",
+  "terms": [
+   "fast-formula"
+  ]
+ },
+ {
+  "chapter": "ff",
+  "question": "Why does Oracle recommend INPUTS statements over database items where possible?",
+  "answer": "Inputs are passed at runtime and need no database read; database items are fetched from the database. Preferring inputs makes the payroll run faster.",
+  "terms": [
+   "fast-formula"
+  ]
+ },
+ {
+  "chapter": "ff",
+  "question": "What is a formula type, and why does it mean Fast Formula cannot be learned purely from grammar?",
+  "answer": "The type fixes which inputs, database items and contexts are available to a formula. The same syntax behaves differently depending on where it runs, and a formula written for one context will not run in another — so the language is learned by reading delivered formulas of the type being built.",
+  "terms": [
+   "fast-formula"
+  ]
+ },
+ {
+  "chapter": "ff",
+  "question": "In words, what is the logic for capping an Egyptian insurable wage before applying the 11% employee contribution?",
+  "answer": "Take the wage as an input. If it is above the ceiling (EGP 16,700 in 2026), use the ceiling. If it is below the floor (EGP 2,700), use the floor. Multiply the result by 0.11 and return it. Cap and floor first, rate last.",
+  "terms": [
+   "fast-formula",
+   "insurable-wage"
+  ]
+ },
+ {
+  "chapter": "extend",
+  "question": "A client wants a new field for equipment number. What are the first three thoughts?",
+  "answer": "DFF, lookup (or value set), approvals — where the data lives, whether it should be a controlled list, and what the workflow should do about it.",
+  "terms": [
+   "dff-descriptive-flexfield",
+   "lookup-type-and-lookup-code"
+  ]
+ },
+ {
+  "chapter": "extend",
+  "question": "What actually happens when a sandbox is published?",
+  "answer": "The configuration changes made and tested in isolation become real for every user. It is a controlled, deliberate step — not an autosave — and the moment at which page and flexfield changes go live.",
+  "terms": [
+   "sandbox"
+  ]
+ },
+ {
+  "chapter": "reporting",
+  "question": "There is no direct database connection to a SaaS pod. Name all four ways to get data out, and when each is right.",
+  "answer": "OTBI for ad-hoc analysis and dashboards; BI Publisher data models for formatted output and complex SQL; HCM Extract for scheduled or large-volume outbound files; REST APIs for real-time integration.",
+  "terms": [
+   "otbi",
+   "bi-publisher-bip",
+   "hcm-extract",
+   "rest-api"
+  ]
+ },
+ {
+  "chapter": "reporting",
+  "question": "Where is the honest boundary between what a strong functional consultant does and what is handed to a technical team?",
+  "answer": "Expected of a functional consultant: HDL loads, simple Fast Formulas, OTBI analyses and basic BI Publisher. Handed off: Oracle Integration Cloud integrations and complex BI Publisher development.",
+  "terms": [
+   "hdl-hcm-data-loader",
+   "fast-formula",
+   "rest-api"
+  ]
+ }
+]

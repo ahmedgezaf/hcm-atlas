@@ -1,0 +1,3 @@
+markdown>=3.5
+# optional, for `python3 build.py --watch`
+# watchdog>=4.0
