@@ -1,6 +1,7 @@
 ---
 id: extend
 num: 14
+track: technical
 title: Extending Without Customizing
 subtitle: Flexfields, lookups, value sets, sandboxes — the answer to "can you add a field?"
 hue: 262
@@ -22,6 +23,8 @@ A **descriptive flexfield (DFF)** is a configurable extra field added to a stand
 ## The three-thought habit
 
 When a client says "we need an extra field for X", the first three thoughts should be: DFF (where does the data live), lookup (should it be a controlled list), and approvals (what should the workflow do about it). Saying that sequence aloud in a workshop or interview is a strong signal. For example: recording which company car each manager has is a DFF on the assignment with a value set; a new resignation reason called "Further Study" is a lookup code; hiding the grade field on the transfer form for non-managers is a page-level change made in a sandbox.
+
+[[fig:extension-ladder]]
 
 ## Sandboxes and publishing
 

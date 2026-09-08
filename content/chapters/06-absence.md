@@ -1,6 +1,7 @@
 ---
 id: absence
 num: 6
+track: functional
 title: Absence Management
 subtitle: Where labour law becomes configuration
 hue: 98

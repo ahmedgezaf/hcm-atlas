@@ -1,6 +1,7 @@
 ---
 id: model
 num: 3
+track: functional
 title: The Employment Data Model
 subtitle: Person → work relationship → assignment. There is no employee table.
 hue: 246

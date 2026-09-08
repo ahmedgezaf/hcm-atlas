@@ -1,6 +1,7 @@
 ---
 id: hrfunction
 num: 7
+track: functional
 title: Headcount, Metrics & the HR Function
 subtitle: The vocabulary HR directors use — speak it fluently
 hue: 46

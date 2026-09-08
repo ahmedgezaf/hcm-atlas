@@ -1,6 +1,7 @@
 ---
 id: egypt-leave
 num: 10
+track: functional
 title: Egypt: Leave Under Labour Law 14/2025
 subtitle: The statutory entitlements that become absence plans
 hue: 16
@@ -20,6 +21,8 @@ Two further rules shape the plan. The worker must take at least 15 days a year, 
 ## Casual leave
 
 **Casual leave** covers unforeseen circumstances: a maximum of 7 days per year (up from 6 under the old law), no more than 2 consecutive days at a time, and — the detail that gets missed in design and surfaces in UAT — counted within the annual-leave entitlement rather than on top of it.
+
+[[fig:egypt-leave-ladder]]
 
 ## Sick leave
 

@@ -1,6 +1,7 @@
 ---
 id: reporting
 num: 13
+track: technical
 title: Reporting & Integration
 subtitle: OTBI, BI Publisher, HCM Extract, REST — four ways out, and when each is right
 hue: 186

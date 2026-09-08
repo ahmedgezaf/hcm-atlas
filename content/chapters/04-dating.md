@@ -1,6 +1,7 @@
 ---
 id: dating
 num: 4
+track: functional
 title: Effective Dating
 subtitle: Nothing is deleted. Everything has the date it became true.
 hue: 278

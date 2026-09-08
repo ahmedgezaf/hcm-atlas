@@ -1,6 +1,7 @@
 <div class="shell">
   <nav class="rail" aria-label="Sections">
     <div class="brand"><div class="brand-mark">H</div><div><div class="brand-name">HCM Atlas</div><div class="brand-sub">Oracle HCM · Egypt &amp; Gulf</div></div></div>
+    <button class="search-btn" id="searchBtn" aria-label="Search the site"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg><span>Search</span><span class="kbd" data-mod>Ctrl K</span></button>
     <button class="nav-btn" data-go="home"><svg viewBox="0 0 24 24"><path d="M3 11l9-8 9 8v10a1 1 0 01-1 1h-5v-7H9v7H4a1 1 0 01-1-1z"/></svg><span>Home</span></button>
     <button class="nav-btn" data-go="chapters"><svg viewBox="0 0 24 24"><path d="M4 4h12a3 3 0 013 3v13H7a3 3 0 00-3 3z"/><path d="M4 4v16a3 3 0 013-3h12"/></svg><span>Chapters</span></button>
     <button class="nav-btn" data-go="labs"><svg viewBox="0 0 24 24"><path d="M9 3v7l-5 9a2 2 0 002 3h12a2 2 0 002-3l-5-9V3"/><path d="M8 3h8M7 15h10"/></svg><span>Labs</span></button>
@@ -10,5 +11,19 @@
     <div class="rail-foot"><div class="sync" id="sync"><i></i><span>Progress saved in this browser</span></div><button class="theme-btn" id="themeBtn">◐ Theme</button></div>
   </nav>
   <main class="main" id="view"></main>
+</div>
+<div class="pal" id="pal" hidden>
+  <div class="pal-bg"></div>
+  <div class="pal-box" role="dialog" aria-modal="true" aria-label="Search HCM Atlas">
+    <div class="pal-in">
+      <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>
+      <input id="palQ" type="text" placeholder="Search chapters, sections, terms, labs, questions&hellip;"
+             autocomplete="off" autocorrect="off" spellcheck="false"
+             role="combobox" aria-expanded="true" aria-controls="palList">
+      <span class="kbd">Esc</span>
+    </div>
+    <div class="pal-list" id="palList" role="listbox" aria-label="Results"></div>
+    <div class="pal-foot"><span><span class="kbd">&uarr;</span><span class="kbd">&darr;</span> move</span><span><span class="kbd">&crarr;</span> open</span><span><span class="kbd">/</span> to search from anywhere</span></div>
+  </div>
 </div>
 <div class="toast" id="toast"></div>

@@ -1,6 +1,7 @@
 ---
 id: org
 num: 1
+track: functional
 title: Enterprise & Organizational Structures
 subtitle: The compliance skeleton — legal view versus operational view
 hue: 214
@@ -10,6 +11,8 @@ terms: enterprise, legal-entity, legal-employer, payroll-statutory-unit-psu, tax
 ---
 
 Every Oracle HCM implementation starts here, because nothing else can be configured until these objects exist. The single hardest idea in this chapter is also the most important one: Oracle deliberately keeps two pictures of the same company. The **legal** picture answers the questions a government asks — who is registered, who employs, who pays, who reports. The **operational** picture answers the questions a manager asks — who runs what, who sits where, who may see whose data. In real companies the two rarely line up, and Oracle's structure exists precisely so they don't have to.
+
+[[fig:legal-vs-operational]]
 
 ## One enterprise, many legal entities
 
@@ -32,6 +35,8 @@ The practical design question on a multi-company client is therefore: which lega
 ## The hard boundary: legislative data groups
 
 A **legislative data group (LDG)** is a partition that isolates payroll and related legislative data by country. All payroll configuration — elements, balances, formulas — lives inside exactly one LDG. Egyptian payroll rules must never leak into Saudi payroll rules, and the LDG is the boundary that guarantees it. An element defined in the Egypt LDG simply does not exist in the Saudi LDG; it must be built again. When someone asks "why can't I see my element?", the first thing to check is which LDG they are in.
+
+[[fig:ldg-wall]]
 
 ## The operational picture
 

@@ -38,14 +38,17 @@ const fmt2 = n => n.toLocaleString('en-EG',{minimumFractionDigits:2,maximumFract
 function toast(m){ const t=$('#toast'); t.textContent=m; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),1800); }
 function pct(a,b){ return b?Math.round(100*a/b):0; }
 function termExplain(id){ const t=TERMS[id]; if(!t) return ''; return `<b>${esc(t.name)}</b><br>${esc(t.what)}${t.trap?`<div class="muted" style="margin-top:6px"><b style="color:var(--gold)">Watch out:</b> ${esc(t.trap)}</div>`:''}`; }
+/* Stable heading ids: derived from the text, so a deep link keeps working when
+   a section moves or a lab is added. Deduped against ids already handed out. */
+function slugId(text, taken){ const base='h-'+String(text).toLowerCase().normalize('NFKD').replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'').slice(0,60); let id=base,n=2; while(taken.has(id)) id=base+'-'+(n++); taken.add(id); return id; }
 function explainBox(id, init){ return `<div class="explain" id="${id}">${init}</div>`; }
 function knownBtn(id){ return `<span class="known ${S.known[id]?'on':''}" data-known="${esc(id)}" title="Mark as known" role="button" tabindex="0"><svg viewBox="0 0 24 24"><path d="M5 12l5 5L19 7"/></svg></span>`; }
 function wireKnown(root){ root.querySelectorAll('[data-known]').forEach(k=>{ const h=e=>{ e.preventDefault(); e.stopPropagation(); const id=k.dataset.known; S.known[id]=!S.known[id]; if(!S.known[id]) delete S.known[id]; save(); k.classList.toggle('on',!!S.known[id]); }; k.onclick=h; k.onkeydown=e=>{ if(e.key==='Enter'||e.key===' ') h(e); }; }); }
 
 /* ---------- router ---------- */
 let route={view:'home'}, lastHash='';
-function go(view, extra={}){ route={view,...extra}; lastHash=[view,extra.ch||extra.lab||''].filter(Boolean).join('/'); location.hash=lastHash; render(); window.scrollTo({top:0}); }
-function parseHash(){ const h=location.hash.slice(1); const [v,x]=h.split('/'); const r={view:v||'home'}; if(v==='chapters'&&x) r.ch=x; if(v==='labs'&&x) r.lab=x; return r; }
+function go(view, extra={}){ route={view,...extra}; lastHash=[view,extra.ch||extra.lab||'',extra.sec||''].filter(Boolean).join('/'); location.hash=lastHash; render(); if(!extra.sec) window.scrollTo({top:0}); }
+function parseHash(){ const h=location.hash.slice(1); const [v,x,y]=h.split('/'); const r={view:v||'home'}; if(v==='chapters'&&x){ r.ch=x; if(y) r.sec=y; } if(v==='labs'&&x) r.lab=x; return r; }
 window.addEventListener('hashchange',()=>{ const h=location.hash.slice(1); if(h===lastHash) return; lastHash=h; route=parseHash(); render(); window.scrollTo({top:0}); });
 function render(){ document.querySelectorAll('.nav-btn').forEach(b=>b.classList.toggle('active',b.dataset.go===route.view)); ({home:renderHome,chapters:renderChapters,labs:renderLabs,glossary:renderGlossary,drill:renderDrill,about:renderAbout}[route.view]||renderHome)($('#view')); }
 document.querySelectorAll('.nav-btn').forEach(b=>b.addEventListener('click',()=>go(b.dataset.go)));
@@ -57,24 +60,46 @@ function cardIds(){ return [...allTerms().map(t=>'t:'+t.id), ...DATA.questions.m
 function progress(){ const total=allTerms().length, known=allTerms().filter(t=>S.known[t.id]).length; const read=CH.filter(c=>S.read[c.id]).length; const cards=cardIds(); const solid=cards.filter(c=>S.drill[c]===2).length, shaky=cards.filter(c=>S.drill[c]===1).length; return {total,known,read,chapters:CH.length,cards:cards.length,solid,shaky}; }
 
 /* ================= HOME ================= */
+/* Per-chapter progress: one column per chapter, filled by the share of its
+   terms marked known, ticked when the chapter is read. Clicking opens it. */
+function chapterProgress(){
+  const rows=CH.map(c=>{ const t=c.terms.length, k=c.terms.filter(id=>S.known[id]).length;
+    return {c,t,k,pct:t?Math.round(100*k/t):0,read:!!S.read[c.id]}; });
+  const done=rows.filter(r=>r.read).length, allKnown=rows.filter(r=>r.t&&r.k===r.t).length;
+  return `<div class="pchart card">
+    <div class="pchart-head"><div><div class="eyebrow">Where you are, chapter by chapter</div><p class="small muted">Column height is the share of that chapter's terms you have marked known. A tick means you marked the chapter read.</p></div>
+      <div class="pchart-key"><span>${done} read</span><span>${allKnown} fully known</span></div></div>
+    <div class="pchart-grid">${rows.map(r=>`<button class="pcol ${r.read?'read':''}" data-h style="--h:${r.c.hue}" data-ch="${r.c.id}" aria-label="Chapter ${r.c.num}, ${esc(r.c.title)} — ${r.k} of ${r.t} terms known${r.read?', read':''}"><span class="pcol-v">${r.pct}%</span><span class="pcol-trk"><i style="height:${r.pct}%"></i></span><span class="pcol-n">${r.c.num}</span>${r.read?'<span class="pcol-ok">✓</span>':'<span class="pcol-ok off"></span>'}</button>`).join('')}</div>
+  </div>`;
+}
+
 function renderHome(v){
   const pr=progress();
-  const node=(id,cls='')=>{const c=chById(id);return `<button class="mnode ${cls}" data-h style="--h:${c.hue}" data-ch="${id}"><span class="k">${c.num}</span><div class="t">${esc(c.title)}</div><div class="s">${esc(c.sub)}</div>${S.read[id]?'<span class="done">✓</span>':''}</button>`;};
-  v.innerHTML=`<section class="hero"><div><div class="eyebrow">Oracle Fusion HCM Cloud · Core HR · Absence · Payroll</div><h1>Oracle HCM, explained for consultants in Egypt and the Gulf</h1><p>Seventeen chapters that read like a book, fifteen interactive labs that behave like the system, a glossary of ${DATA.terms.length} terms, and a drill deck to make it stick. Built for a new functional consultant who has to be useful on a project, not just pass an exam.</p><div class="cta"><button class="btn gold" data-go2="chapters" data-ch2="org">Start with Chapter 1</button><button class="btn" data-go2="labs">Open the labs</button></div></div>
-  <div class="hero-side">
-    <button class="hstat" data-go2="chapters"><div class="ring" style="--v:${pct(pr.read,pr.chapters)}"><b>${pct(pr.read,pr.chapters)}%</b></div><div><div class="big num">${pr.read} / ${pr.chapters}</div><div class="lbl">chapters read</div></div></button>
-    <button class="hstat" data-go2="glossary"><div class="ring" style="--v:${pct(pr.known,pr.total)}"><b>${pct(pr.known,pr.total)}%</b></div><div><div class="big num">${pr.known} / ${pr.total}</div><div class="lbl">terms marked known</div></div></button>
-    <button class="hstat" data-go2="drill"><div class="ring" style="--v:${pct(pr.solid,pr.cards)}"><b>${pct(pr.solid,pr.cards)}%</b></div><div><div class="big num">${pr.solid} / ${pr.cards}</div><div class="lbl">drill cards solid</div></div></button>
-  </div></section>
-  <div class="eyebrow" style="margin:6px 0 10px">The system on one screen — each block is a chapter</div>
-  <div class="sysmap card"><div class="sysmap-inner">
-    <div class="layer-lbl">Structure — what exists before anyone is hired</div>${node('org')}${node('workforce')}${node('security')}
-    <div class="layer-lbl">People — the data model everything reads from</div>${node('model','two')}${node('hrfunction')}
-    ${node('dating','wide')}
-    <div class="layer-lbl">Money &amp; time — what the model feeds</div>${node('payroll')}${node('absence')}${node('lifecycle')}
-    <div class="layer-lbl">Law — the rules configured per country</div>${node('egypt-payroll')}${node('egypt-leave')}${node('gulf')}
-    <div class="layer-lbl">The consultant's toolkit</div>${node('hdl')}${node('ff')}${node('reporting')}${node('extend','two')}${node('method')}
-  </div><div class="legend"><span>Colour is consistent everywhere on this site: the chapter's colour marks its labs, its glossary terms and its drill cards.</span><span>Dashed = a foundation that runs under every record above it.</span></div></div>
+  const node=(id,cls='')=>{const c=chById(id);return `<button class="mnode ${cls}" data-h style="--h:${c.hue}" data-ch="${id}"><span class="k">${c.num}</span><div class="t">${icon(c.id)}<span>${esc(c.title)}</span></div><div class="s">${esc(c.sub)}</div>${S.read[id]?'<span class="done">✓</span>':''}</button>`;};
+  const stat=(to,val,p2,lbl)=>`<button class="hstat" data-go2="${to}"><div class="ring" style="--v:${p2}"><b>${p2}%</b></div><div><div class="big num">${val}</div><div class="lbl">${lbl}</div></div></button>`;
+  const sec=(track,name,blurb)=>`<div class="sec-lbl"><span class="sec-k ${track}">${name}</span><p>${blurb}</p></div>`;
+  v.innerHTML=`<section class="hero">
+    <div class="hero-side">${stat('chapters',`${pr.read} / ${pr.chapters}`,pct(pr.read,pr.chapters),'chapters read')}${stat('glossary',`${pr.known} / ${pr.total}`,pct(pr.known,pr.total),'terms marked known')}${stat('drill',`${pr.solid} / ${pr.cards}`,pct(pr.solid,pr.cards),'drill cards solid')}</div>
+    <div class="hero-main"><div class="eyebrow">Oracle Fusion HCM Cloud · Core HR · Absence · Payroll</div><h1>Oracle HCM, explained for consultants in Egypt and the Gulf</h1><p>Seventeen chapters that read like a book, fifteen interactive labs that behave like the system, a glossary of ${DATA.terms.length} terms, and a drill deck to make it stick. Built for a new functional consultant who has to be useful on a project, not just pass an exam.</p><div class="cta"><button class="btn gold" data-go2="chapters" data-ch2="org">Start with Chapter 1</button><button class="btn" data-go2="labs">Open the labs</button></div></div>
+  </section>
+  ${chapterProgress()}
+  <div class="eyebrow" style="margin:22px 0 10px">The system on one screen — each block is a chapter</div>
+  <div class="sysmap card">
+    ${sec('functional','Functional','What the business configures and runs: the structures people sit in, the record that describes them, and the money, time and law that follow.')}
+    <div class="sysmap-scroll"><div class="sysmap-inner">
+      <div class="layer-lbl">Structure — what exists before anyone is hired</div>${node('org')}${node('workforce','two')}
+      <div class="layer-lbl">People — the data model everything reads from</div>${node('model','two')}${node('hrfunction')}
+      ${node('dating','wide')}
+      <div class="layer-lbl">Money &amp; time — what the model feeds</div>${node('payroll')}${node('absence')}${node('lifecycle')}
+      <div class="layer-lbl">Law — the rules configured per country</div>${node('egypt-payroll')}${node('egypt-leave')}${node('gulf')}
+      <div class="layer-lbl">Delivery — how the project is run</div>${node('method','full')}
+    </div></div>
+    ${sec('technical','Technical','What the consultant builds with: loading data in bulk, writing the calculation logic, getting information back out, extending without customizing, and controlling who sees what.')}
+    <div class="sysmap-scroll"><div class="sysmap-inner">
+      <div class="layer-lbl">The consultant’s toolkit</div>${node('hdl')}${node('ff')}${node('reporting')}${node('extend','two')}${node('security')}
+    </div></div>
+    <div class="legend"><span>Colour is consistent everywhere on this site: the chapter’s colour marks its labs, its glossary terms and its drill cards.</span><span>Dashed = a foundation that runs under every record above it.</span></div>
+  </div>
   <div class="paths3">
     <button class="path3 card" data-go2="chapters" data-ch2="model"><span class="n">If you read one chapter</span><h3>The Employment Data Model</h3><p>Person, work relationship, assignment, payroll relationship. Everything else reads from it.</p></button>
     <button class="path3 card" data-go2="chapters" data-ch2="egypt-payroll"><span class="n">If you work in Egypt</span><h3>Social Insurance &amp; Salary Tax</h3><p>Oracle does not ship these rules. Knowing them is the differentiator.</p></button>
@@ -88,14 +113,20 @@ function renderHome(v){
 /* ================= CHAPTERS ================= */
 function renderChapters(v){
   if(route.ch) return renderReader(v, chById(route.ch)||CH[0]);
+  const row=c=>`<button class="chrow card" data-h style="--h:${c.hue}" data-ch="${c.id}"><div class="n">${icon(c.id)}<span>${c.num}</span></div><div><h3>${esc(c.title)}</h3><div class="s">${esc(c.sub)}</div></div><div class="m">${S.read[c.id]?'<span class="ok">✓ Read</span>':''}<span>${c.minutes} min</span><span>${c.terms.length} terms</span>${c.labs.length?`<span>${c.labs.length} lab${c.labs.length>1?'s':''}</span>`:''}</div></button>`;
+  const group=(track,name,blurb)=>{ const list=CH.filter(c=>c.track===track); if(!list.length) return '';
+    const read=list.filter(c=>S.read[c.id]).length;
+    return `<section class="chgroup"><div class="chgroup-head"><span class="sec-k ${track}">${name}</span><p>${blurb}</p><span class="n num">${read} of ${list.length} read · ${list.reduce((a,c)=>a+c.minutes,0)} min</span></div><div class="chlist">${list.map(row).join('')}</div></section>`; };
   v.innerHTML=`<div class="view-head"><div><div class="eyebrow">${CH.length} chapters · about ${CH.reduce((a,c)=>a+c.minutes,0)} minutes of reading</div><h1>Chapters</h1><p>Read in order the first time — each chapter assumes the ones before it. After that, jump to whatever the project needs.</p></div></div>
-  <div class="chlist">${CH.map(c=>`<button class="chrow card" data-h style="--h:${c.hue}" data-ch="${c.id}"><div class="n"><small>Ch.</small>${c.num}</div><div><h3>${esc(c.title)}</h3><div class="s">${esc(c.sub)}</div></div><div class="m">${S.read[c.id]?'<span class="ok">✓ Read</span>':''}<span>${c.minutes} min</span><span>${c.terms.length} terms</span>${c.labs.length?`<span>${c.labs.length} lab${c.labs.length>1?'s':''}</span>`:''}</div></button>`).join('')}</div>`;
+  ${group('functional','Functional','What the business configures and runs: the structures people sit in, the record that describes them, and the money, time and law that follow.')}
+  ${group('technical','Technical','What the consultant builds with: loading data in bulk, writing the calculation logic, getting information back out, extending without customizing, and controlling who sees what.')}`;
   v.querySelectorAll('[data-ch]').forEach(b=>b.addEventListener('click',()=>go('chapters',{ch:b.dataset.ch})));
 }
 function renderReader(v,c){
   const i=CH.indexOf(c); const prev=CH[i-1], next=CH[i+1];
   const terms=[...c.terms.map(id=>TERMS[id]).filter(Boolean), ...S.custom.filter(t=>t.ch===c.id)];
   v.innerHTML=`<div class="reader" data-h style="--h:${c.hue}"><article>
+    <div class="ch-cover">${c.cover?`<img class="cover-img" src="${c.cover}" alt="">`:coverArt(c.num)}<div class="ch-cover-in"><span class="ch-cover-ico">${icon(c.id)}</span><span class="ch-cover-n num">${String(c.num).padStart(2,'0')}</span></div></div>
     <div class="ch-head"><div class="eyebrow">Chapter ${c.num} of ${CH.length}</div><h1>${esc(c.title)}</h1><p class="sub">${esc(c.sub)}</p><div class="meta"><span>${c.minutes} min read</span><span>·</span><span>${terms.length} key terms</span>${c.labs.length?`<span>·</span><span>${c.labs.length} interactive lab${c.labs.length>1?'s':''}</span>`:''}<label class="toggle" style="margin-left:auto"><input type="checkbox" id="readChk" ${S.read[c.id]?'checked':''}> Mark as read</label></div></div>
     <div class="prose" id="prose">${c.html}</div>
     <section class="keyterms"><h2>Key terms in this chapter</h2><div class="kt">${terms.map(t=>`<div class="row">${knownBtn(t.id)}<div><b>${esc(t.name)}${t.mine?' <span class="mine">yours</span>':''}</b><span>${esc(t.what)}</span></div></div>`).join('')}</div>
@@ -108,11 +139,16 @@ function renderReader(v,c){
     <aside class="reader-toc" id="toc"></aside></div>`;
   // embed labs
   v.querySelectorAll('.lab-embed').forEach(el=>{ const lab=LABS.find(l=>l.id===el.dataset.lab); if(!lab){ el.remove(); return; } el.innerHTML=`<div class="lab card"><div class="lab-head"><span class="eyebrow">Try it</span><h2>${esc(lab.title)}</h2><p>${esc(lab.lead)}</p></div><div class="lab-body"></div></div>`; lab.render(el.querySelector('.lab-body')); });
+  // embed figures
+  v.querySelectorAll('.fig-embed').forEach(el=>{ const f=FIGS.find(x=>x.id===el.dataset.fig); if(!f){ el.remove(); return; } el.id='fig-'+f.id; el.innerHTML=`<div class="fig-scroll">${f.svg()}</div><figcaption><b>${esc(f.title)}</b>${esc(f.caption)}</figcaption>`; });
   // toc
-  const hs=[...v.querySelectorAll('.prose h2')].filter(h=>!h.closest('.sources')); hs.forEach((h,k)=>{ if(!h.id) h.id='s'+k; });
+  const taken=new Set(); const hs=[...v.querySelectorAll('.prose h2')].filter(h=>!h.closest('.sources')&&!h.closest('.lab')); hs.forEach(h=>{ h.id=slugId(h.textContent,taken); });
   $('#toc').innerHTML=`<div class="tt">On this page</div>${hs.map(h=>`<a href="#${h.id}" data-a="${h.id}">${esc(h.textContent)}</a>`).join('')}`;
   $('#toc').querySelectorAll('a').forEach(a=>a.addEventListener('click',e=>{e.preventDefault(); document.getElementById(a.dataset.a).scrollIntoView({behavior:'smooth',block:'start'});}));
   const io=new IntersectionObserver(es=>{ es.forEach(en=>{ if(en.isIntersecting){ $('#toc').querySelectorAll('a').forEach(a=>a.classList.toggle('on',a.dataset.a===en.target.id)); } }); },{rootMargin:'-10% 0px -80% 0px'}); hs.forEach(h=>io.observe(h));
+  // A deep link like #chapters/hdl/h-load-order lands on that section. Consumed
+  // once, so a later re-render (adding a term, say) does not yank the page back.
+  if(route.sec){ const target=document.getElementById(route.sec); delete route.sec; if(target) requestAnimationFrame(()=>target.scrollIntoView({block:'start'})); }
   // wiring
   $('#readChk').addEventListener('change',e=>{ if(e.target.checked) S.read[c.id]=1; else delete S.read[c.id]; save(); toast(e.target.checked?'Chapter marked as read':'Unmarked'); });
   let nt; $('#chNote').addEventListener('input',e=>{ S.notes[c.id]=e.target.value; clearTimeout(nt); nt=setTimeout(save,400); });
@@ -147,7 +183,7 @@ function renderLabs(v){
   const cur=route.lab||S.lastLab||LABS[0].id; S.lastLab=cur; const lab=LABS.find(l=>l.id===cur)||LABS[0]; const c=chById(lab.ch);
   v.innerHTML=`<div class="view-head"><div><div class="eyebrow">${LABS.length} interactive labs</div><h1>See it move</h1><p>Each lab is one idea from a chapter you can push on. Click, drag, change the numbers — the aim is to make the shape obvious, not to memorise words.</p></div></div>
   <div class="labs-nav">${LABS.map(l=>{const cc=chById(l.ch);return `<button data-h style="--h:${cc.hue}" class="${l.id===lab.id?'active':''}" data-lab="${l.id}">${esc(l.title)}</button>`;}).join('')}</div>
-  <div class="lab card" data-h style="--h:${c.hue}"><div class="lab-head"><span class="eyebrow">Chapter ${c.num} · <a href="#chapters/${c.id}" data-ch="${c.id}" style="color:inherit">${esc(c.title)}</a></span><h2>${esc(lab.title)}</h2><p>${esc(lab.lead)}</p></div><div id="labBody"></div></div>`;
+  <div class="lab card" data-h style="--h:${c.hue}"><div class="lab-head"><span class="eyebrow">Chapter ${c.num} · <a href="#chapters/${c.id}" data-ch="${c.id}" style="color:inherit">${esc(c.title)}</a></span><h2>${esc(lab.title)}</h2><p>${esc(lab.lead)}</p></div><div class="lab-body" id="labBody"></div></div>`;
   v.querySelectorAll('[data-lab]').forEach(b=>b.addEventListener('click',()=>go('labs',{lab:b.dataset.lab})));
   v.querySelectorAll('[data-ch]').forEach(a=>a.addEventListener('click',e=>{e.preventDefault();go('chapters',{ch:a.dataset.ch});}));
   lab.render($('#labBody'));
@@ -180,7 +216,7 @@ function renderDrill(v){
     <div class="grade" style="margin-top:12px"><button class="btn no" data-g="0">Not yet</button><button class="btn" id="flipBtn">${D.flipped?'Show front':'Flip'}</button><button class="btn yes" data-g="1">Got it</button></div>
     <div class="selfans card needs-sample" style="padding:14px;margin-top:14px" ${sample?'':'hidden'}><span class="eyebrow">Type an answer and have it checked</span><textarea id="selfA" placeholder="One or two sentences, the way it would be said in an interview…"></textarea><div style="display:flex;gap:8px;align-items:center"><button class="btn sm primary" id="checkA">Check my answer</button><span class="small muted">Graded against the model answer, not the internet.</span></div><div class="feedback" id="fb" hidden></div></div>
   </div>
-  <aside class="drill-side"><div class="card" style="padding:14px"><div class="eyebrow" style="margin-bottom:8px">This deck</div><div class="mastery"><div class="m0"><div class="big num">${counts[0]}</div><div class="lbl">new</div></div><div class="m1"><div class="big num">${counts[1]}</div><div class="lbl">shaky</div></div><div class="m2"><div class="big num">${counts[2]}</div><div class="lbl">solid</div></div></div><div class="bar" style="margin-top:10px"><i style="width:${pct(counts[2],D.queue.length)}%;background:var(--good)"></i></div></div>
+  <aside class="drill-side"><div class="card" style="padding:14px"><div class="eyebrow" style="margin-bottom:8px">This deck</div><div class="mastery"><div class="m0"><div class="big num">${counts[0]}</div><div class="lbl">new</div></div><div class="m1"><div class="big num">${counts[1]}</div><div class="lbl">shaky</div></div><div class="m2"><div class="big num">${counts[2]}</div><div class="lbl">solid</div></div></div><div class="sbar" style="margin-top:10px"><i class="s2" style="width:${pct(counts[2],D.queue.length)}%"></i><i class="s1" style="width:${pct(counts[1],D.queue.length)}%"></i><i class="s0" style="width:${pct(counts[0],D.queue.length)}%"></i></div></div>
    <div class="card" style="padding:14px"><div class="eyebrow" style="margin-bottom:6px">All cards</div><div class="small">${pr.solid} solid · ${pr.shaky} shaky · ${pr.cards-pr.solid-pr.shaky} new</div></div>
    <div class="card" style="padding:14px;font-size:14px;color:var(--ink-2)"><b style="color:var(--ink)">The rule.</b> For every card that is not fluent, go back to that one section of the chapter — not the whole chapter.</div>
   </aside></div>`}
@@ -216,6 +252,12 @@ function renderAbout(v){
   <p>Navy and gold, a serif for reading and a grotesque for the interface, and one colour per chapter carried consistently through labs, glossary and drill so the colour becomes a memory cue. Both light and dark themes are supported; the toggle is in the sidebar. The layout follows common documentation-site practice: a fixed left navigation, a reading column of about 68 characters, a right-hand table of contents on wide screens, and every wide diagram scrolling inside its own container so the page never scrolls sideways.</p>
   </div>`;
 }
+
+/* @include icons.js */
+
+/* @include figures.js */
+
+/* @include search.js */
 
 /* ---------- boot ---------- */
 route=parseHash(); lastHash=location.hash.slice(1); render();

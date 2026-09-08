@@ -24,15 +24,22 @@ Output targets
               own <!doctype>/<head>/<body> wrapper at publish time.
 """
 
-import argparse, html, json, pathlib, re, sys
+import argparse, base64, html, json, pathlib, re, sys
 
 try:
     import markdown
 except ImportError:
     sys.exit("Missing dependency. Run:  pip install markdown")
 
+# Windows consoles default to cp1252, which cannot encode the glyphs below.
+for stream in (sys.stdout, sys.stderr):
+    if hasattr(stream, "reconfigure"):
+        stream.reconfigure(encoding="utf-8", errors="replace")
+
 ROOT = pathlib.Path(__file__).parent
 CONTENT, SRC, DIST = ROOT / "content", ROOT / "src", ROOT / "dist"
+IMAGES = CONTENT / "images"
+COVER_TYPES = {".jpg": "image/jpeg", ".jpeg": "image/jpeg", ".png": "image/png", ".webp": "image/webp", ".avif": "image/avif"}
 
 TITLE = "HCM Atlas"
 DESCRIPTION = ("Oracle Fusion HCM Cloud explained for functional consultants in Egypt and the Gulf: "
@@ -45,6 +52,7 @@ FAVICON = ("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='
            "<text x='16' y='23' font-family='system-ui,sans-serif' font-size='19' font-weight='800'"
            " fill='%23B8871B' text-anchor='middle'>H</text></svg>")
 
+TRACKS = ("functional", "technical")
 LIST_FIELDS = {"labs", "terms"}
 INT_FIELDS = {"num", "hue", "minutes"}
 
@@ -66,9 +74,11 @@ def parse_frontmatter(text, path):
             meta[key] = int(value)
         else:
             meta[key] = value
-    for required in ("id", "num", "title", "subtitle", "hue", "minutes"):
+    for required in ("id", "num", "track", "title", "subtitle", "hue", "minutes"):
         if required not in meta:
             raise SystemExit(f"{path}: frontmatter is missing `{required}`")
+    if meta["track"] not in TRACKS:
+        raise SystemExit(f"{path}: track must be one of {', '.join(TRACKS)}, not '{meta['track']}'")
     meta.setdefault("labs", [])
     meta.setdefault("terms", [])
     return meta, body.strip()
@@ -77,6 +87,7 @@ def parse_frontmatter(text, path):
 def render_chapter_html(body):
     """Markdown -> HTML, with lab embeds and two specially-styled trailing sections."""
     body = re.sub(r"\[\[lab:([a-z0-9-]+)\]\]", r'<div class="lab-embed" data-lab="\1"></div>', body)
+    body = re.sub(r"\[\[fig:([a-z0-9-]+)\]\]", r'<figure class="fig-embed" data-fig="\1"></figure>', body)
     out = markdown.markdown(body, extensions=["fenced_code"])
     sections = []
     for chunk in re.split(r"(?=<h2>)", out):
@@ -90,6 +101,21 @@ def render_chapter_html(body):
     return "".join(sections)
 
 
+def load_cover(name, chapter_id):
+    """A chapter's `cover:` image, inlined as a data URI. Keeps the one-file
+    promise; the cost is that the image is ~33% larger than on disk."""
+    path = IMAGES / name
+    if not path.exists():
+        raise SystemExit(f"chapter {chapter_id}: cover '{name}' not found in content/images/")
+    kind = COVER_TYPES.get(path.suffix.lower())
+    if not kind:
+        raise SystemExit(f"chapter {chapter_id}: cover '{name}' must be one of {', '.join(sorted(COVER_TYPES))}")
+    raw = path.read_bytes()
+    if len(raw) > 400_000:
+        print(f"  ! {name} is {len(raw)//1024} KB; covers above ~400 KB bloat the page badly")
+    return f"data:{kind};base64,{base64.b64encode(raw).decode('ascii')}"
+
+
 def load_content():
     files = sorted((CONTENT / "chapters").glob("*.md"))
     if not files:
@@ -98,9 +124,10 @@ def load_content():
     for path in files:
         meta, body = parse_frontmatter(path.read_text(encoding="utf-8"), path.name)
         chapters.append({
-            "id": meta["id"], "num": meta["num"], "title": meta["title"],
+            "id": meta["id"], "num": meta["num"], "track": meta["track"], "title": meta["title"],
             "sub": meta["subtitle"], "hue": meta["hue"], "minutes": meta["minutes"],
             "labs": meta["labs"], "terms": meta["terms"], "html": render_chapter_html(body),
+            "cover": load_cover(meta["cover"], meta["id"]) if meta.get("cover") else "",
         })
     chapters.sort(key=lambda c: c["num"])
 
@@ -118,7 +145,12 @@ def validate(data):
     problems = []
     chapter_ids = {c["id"] for c in data["chapters"]}
     term_ids = {t["id"] for t in data["terms"]}
-    lab_ids = set(re.findall(r"LABS\.push\(\{\s*id:\s*'([a-z0-9-]+)'", (SRC / "labs.js").read_text()))
+    lab_ids = set(re.findall(r"LABS\.push\(\{\s*id:\s*'([a-z0-9-]+)'", (SRC / "labs.js").read_text(encoding="utf-8")))
+    figs_src = (SRC / "figures.js").read_text(encoding="utf-8")
+    fig_ids = set(re.findall(r"id:\s*'([a-z0-9-]+)',\s*$", figs_src, re.M))
+    fig_owner = dict(re.findall(r"id:\s*'([a-z0-9-]+)',\s*\n\s*ch:\s*'([a-z0-9-]+)'", figs_src))
+    embedded_figs = set()
+    icon_ids = set(re.findall(r"^  '?([a-z0-9-]+)'?:", (SRC / "icons.js").read_text(encoding="utf-8"), re.M))
 
     for c in data["chapters"]:
         for lab in c["labs"]:
@@ -130,6 +162,12 @@ def validate(data):
         for lab in re.findall(r'class="lab-embed" data-lab="([a-z0-9-]+)"', c["html"]):
             if lab not in lab_ids:
                 problems.append(f"chapter {c['id']}: embeds unknown lab '{lab}'")
+        for fig in re.findall(r'class="fig-embed" data-fig="([a-z0-9-]+)"', c['html']):
+            embedded_figs.add(fig)
+            if fig not in fig_ids:
+                problems.append(f"chapter {c['id']}: embeds unknown figure '{fig}'")
+            elif fig_owner.get(fig) != c['id']:
+                problems.append(f"chapter {c['id']}: figure '{fig}' declares ch='{fig_owner.get(fig)}'")
     for t in data["terms"]:
         if t["ch"] not in chapter_ids:
             problems.append(f"term {t['id']}: unknown chapter '{t['ch']}'")
@@ -140,6 +178,22 @@ def validate(data):
             if t not in term_ids:
                 problems.append(f"question {i}: unknown term '{t}'")
 
+    # The home map is hand-laid-out in renderHome, so a new chapter is easy to
+    # add and forget. Every chapter must appear on it exactly once.
+    mapped = re.findall(r"node\('([a-z0-9-]+)'", (SRC / "app.js").read_text(encoding="utf-8"))
+    for cid in sorted(chapter_ids - set(mapped)):
+        problems.append(f"chapter {cid}: missing from the home map in renderHome")
+    for cid in sorted(set(mapped) - chapter_ids):
+        problems.append(f"home map: node('{cid}') is not a chapter")
+    for cid in sorted({m for m in mapped if mapped.count(m) > 1}):
+        problems.append(f"home map: node('{cid}') appears {mapped.count(cid)} times")
+
+    for fig in sorted(fig_ids - embedded_figs):
+        problems.append(f"figure {fig}: never embedded with [[fig:{fig}]]")
+
+    for cid in sorted(chapter_ids - icon_ids):
+        problems.append(f"chapter {cid}: no entry in ICONS (src/icons.js)")
+
     orphan_terms = term_ids - {t for c in data["chapters"] for t in c["terms"]}
     for t in sorted(orphan_terms):
         problems.append(f"term {t}: not listed in any chapter's `terms`")
@@ -148,12 +202,30 @@ def validate(data):
         raise SystemExit("Build failed:\n  " + "\n  ".join(problems))
 
 
+INCLUDE = re.compile(r"^[ 	]*/\* @include ([\w.-]+) \*/[ 	]*$", re.M)
+
+
+def inline_includes(source, seen=None):
+    """Replace `/* @include name.js */` with src/name.js, recursively."""
+    seen = seen or set()
+
+    def sub(match):
+        name = match.group(1)
+        if name in seen:
+            raise SystemExit(f"circular @include of {name}")
+        path = SRC / name
+        if not path.exists():
+            raise SystemExit(f"@include {name}: no such file in src/")
+        return inline_includes(path.read_text(encoding="utf-8"), seen | {name})
+
+    return INCLUDE.sub(sub, source)
+
+
 def build(target="site"):
     data = load_content()
     validate(data)
 
-    app = (SRC / "app.js").read_text(encoding="utf-8")
-    app = app.replace("/* @include labs.js */", (SRC / "labs.js").read_text(encoding="utf-8"))
+    app = inline_includes((SRC / "app.js").read_text(encoding="utf-8"))
     payload = json.dumps(data, ensure_ascii=False, separators=(",", ":")).replace("</", "<\\/")
 
     body = "\n".join([
@@ -193,7 +265,9 @@ def build(target="site"):
 
     DIST.mkdir(exist_ok=True)
     out = DIST / name
-    out.write_text(page, encoding="utf-8")
+    # newline="\n" keeps the output byte-identical on Windows, where
+    # text mode would otherwise translate every \n into \r\n.
+    out.write_text(page, encoding="utf-8", newline="\n")
 
     words = sum(len(re.sub(r"<[^>]+>", " ", c["html"]).split()) for c in data["chapters"])
     print(f"✓ {out.relative_to(ROOT)}  —  {len(page)//1024} KB")

@@ -3,10 +3,10 @@
 **Oracle Fusion HCM Cloud, explained for functional consultants in Egypt and the Gulf.**
 
 Seventeen chapters written to be read, fifteen interactive labs that behave like
-the system, a 122-term glossary, and a drill deck for retrieval practice. It
-covers the three modules junior consultants are usually hired for — Core HR,
-Absence Management and Payroll — plus the Egyptian and Saudi statutory knowledge
-that Oracle does not ship in the product.
+the system, a 122-term glossary, a drill deck for retrieval practice, and search
+across all of it. It covers the three modules junior consultants are usually
+hired for — Core HR, Absence Management and Payroll — plus the Egyptian and Saudi
+statutory knowledge that Oracle does not ship in the product.
 
 The whole site is **one self-contained HTML file**. No framework, no bundler, no
 `node_modules`, no server. Open it from disk and it works.
@@ -30,11 +30,13 @@ python3 build.py --watch
 
 | Section | What it does |
 | --- | --- |
-| **Home** | The whole system on one screen — every block opens a chapter. |
-| **Chapters** | 17 chapters, ~11,600 words, each ending in common mistakes and sources. |
+| **Home** | Progress dashboard and a per-chapter progress chart, then the whole system on one screen — every block opens a chapter, split Functional / Technical. |
+| **Chapters** | 17 chapters, ~11,600 words, grouped into **Functional** (12) and **Technical** (5). Each has its own colour, mark and cover band, and ends in common mistakes and sources. |
+| **Figures** | 7 inline SVG diagrams drawn where the prose explains a shape — the legal/operational split, what an LDG seals off, GOSI's three populations, the WPS chain, the Egyptian leave ladder, the extension decision. |
 | **Labs** | 15 interactive pieces: org tree, global-transfer stepper, payroll chain, effective-dating timelines, Egyptian social-insurance and tax calculators, leave ladder, HDL file anatomy, Fast Formula, security, methodology, headcount vs FTE. Most are embedded in their chapter too. |
 | **Glossary** | Every term, one definition, the trap that comes with it, and a link to the chapter. |
 | **Drill** | 40 questions with model answers plus a card for every term. Grade yourself; missed cards come back first. |
+| **Search** | <kbd>Ctrl</kbd>/<kbd>⌘</kbd>+<kbd>K</kbd>, or just <kbd>/</kbd>, over chapters, every individual section, terms, labs and questions — with snippets, and a jump straight to the heading that answers it. |
 
 Reader progress — terms marked known, chapters read, notes, drill mastery, and
 any terms or questions the reader adds themselves — is stored in the browser.
@@ -46,26 +48,42 @@ content/
   chapters/NN-id.md     one chapter each: frontmatter + Markdown
   glossary.json         terms, definitions, watch-outs
   questions.json        drill questions with model answers
+  images/               optional chapter cover photos (none shipped)
 src/
   shell.html            page markup
-  styles.css            all styles (tokens, light + dark)
+  styles.css            all styles (tokens, light + dark, print)
   app.js                router, reader, glossary, drill, storage
   labs.js               the interactive labs
+  figures.js            static SVG diagrams embedded in chapters
+  icons.js              per-chapter marks and cover-band art
+  search.js             search index and the Ctrl-K palette
 build.py                assembles everything into dist/
-dist/                   build output (generated)
+scripts/smoke.js        browser smoke test
+deploy/                 OCI deployment: script, cloud-init, Dockerfile
+dist/                   build output (generated, but committed)
 CLAUDE.md               conventions and editorial rules
 ```
 
 `build.py` validates cross-references as it builds: a chapter that names a term
-or lab which does not exist, a term with no chapter, or a term no chapter lists
-all fail the build rather than shipping a dead link.
+or lab which does not exist, a term with no chapter, a term no chapter lists, a
+figure embedded in the wrong chapter or never embedded at all, a chapter missing
+from the home map or from the icon set, and a cover image that is not in
+`content/images/` all fail the build rather than shipping something broken.
+
+`.github/workflows/ci.yml` runs that build on every push and pull request, checks
+each `src/*.js` parses, confirms the committed `dist/` matches a fresh build, and
+runs `scripts/smoke.js` — a headless pass over the real page that mounts labs,
+flips a drill card, searches, and follows every section deep link in every
+chapter.
 
 ## Extending it
 
 Adding a chapter means dropping a Markdown file into `content/chapters/` with
-frontmatter for its id, number, title, subtitle, colour, reading time, and the
-labs and terms it covers. Adding a term or a question means appending one object
-to a JSON file. Adding a lab means one `LABS.push({...})` in `src/labs.js`.
+frontmatter for its id, number, track (`functional` or `technical`), title,
+subtitle, colour, reading time, and the labs and terms it covers — plus a block
+on the home map, which the build checks for. Adding a term or a question means
+appending one object to a JSON file. Adding a lab means one `LABS.push({...})`
+in `src/labs.js`.
 `CLAUDE.md` has the full conventions, including the editorial rules — every
 chapter cites sources, statutory figures carry their date, and where sources
 genuinely disagree the site says so instead of picking a side quietly.
@@ -75,6 +93,13 @@ genuinely disagree the site says so instead of picking a side quietly.
 **GitHub Pages** — push to `main`; `.github/workflows/pages.yml` builds and
 deploys `dist/`. Enable Pages with source "GitHub Actions" once in repository
 settings.
+
+**Oracle Cloud Infrastructure** — [`deploy/README.md`](deploy/README.md) covers
+four routes: an Object Storage bucket (one script, two minutes), a bucket behind
+a Load Balancer for a custom domain, an Always Free Compute VM running nginx
+(the one to use for a real site), and a container image for Container Instances
+or OKE. `deploy/` holds the upload script, the cloud-init file and the
+Dockerfile.
 
 **Anywhere else** — `dist/index.html` is a single static file. Netlify, Cloudflare
 Pages, S3, or a folder on any web server all work with no configuration.

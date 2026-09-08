@@ -1,6 +1,7 @@
 ---
 id: method
 num: 16
+track: functional
 title: Implementation Methodology
 subtitle: How projects actually run — and where the real finish line is
 hue: 62

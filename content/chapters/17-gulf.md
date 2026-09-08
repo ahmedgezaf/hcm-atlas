@@ -1,6 +1,7 @@
 ---
 id: gulf
 num: 17
+track: functional
 title: Saudi Arabia & the Gulf
 subtitle: The systems named in every Saudi job posting
 hue: 130
@@ -17,13 +18,19 @@ Saudi job postings name specific government platforms, and knowing them separate
 
 The **General Organization for Social Insurance (GOSI)** is the Saudi counterpart to Egypt's NOSI. The structural difference from Egypt is that contribution treatment depends on nationality. For Saudi nationals registered before the new Social Insurance Law took effect on 3 July 2024, the combined rate is 21.5% of the contributable wage — employee 9.75% (9% pension plus 0.75% SANED unemployment insurance), employer 11.75% (9% pension, 2% occupational hazards, 0.75% SANED). Nationals registered on or after that date fall under a phased schedule that rises from 22.5% to 23.5% combined from 1 July 2026, with further annual steps and a retirement age of 65. Expatriates carry only the employer-paid 2% occupational-hazards contribution — no pension, no SANED. The contributable wage is basic salary plus housing allowance, capped at SAR 45,000 per month; transport, commission and bonuses are excluded.
 
+[[fig:gosi-populations]]
+
 For an Oracle design this means nationality is a payroll-driving attribute, GOSI registration dates matter, and the element inventory needs separate treatment for the two populations.
+
+[[fig:contributable-wage]]
 
 ## Qiwa, Mudad and the Wage Protection System
 
 **Qiwa** is the Ministry of Human Resources' digital labour platform: employment contracts are authenticated through it, and it handles work permits and establishment services. **Mudad** is the platform supporting wage protection and payroll compliance. The **Wage Protection System (WPS)** requires employers to pay salaries through official banking channels and to upload monthly payroll documentation — the **SIF** (Salary Information File) — containing each employee's ID or iqama number, basic salary, allowances, deductions and net pay. The system matches the file against actual bank transfers; when they match, the employee is legally considered paid.
 
 Compliance is enforced through consequences: late files escalate from a minor violation to a partial freeze of Qiwa services, and after three months to the employee's right to transfer sponsorship without consent. The three platforms must agree: the basic salary in the Qiwa contract must equal the basic salary in Mudad and in GOSI, so salary changes have to land on all three at once. In Oracle terms, the payment process (Chapter 5) produces the WPS file, and a Gulf go-live always includes a bank-file test with the actual bank.
+
+[[fig:wps-agreement]]
 
 ## Nitaqat and nationality as compliance data
 
