@@ -1,0 +1,56 @@
+#cloud-config
+# Paste into "Show advanced options -> Initialization script" when creating an
+# OCI Compute instance (Oracle Linux 8/9). Brings up nginx serving
+# /var/www/hcm-atlas, opens the host firewall, and leaves the machine ready for
+# certbot. The site file itself is uploaded afterwards -- see deploy/README.md.
+
+package_update: true
+packages:
+  - nginx
+
+write_files:
+  - path: /etc/nginx/conf.d/hcm-atlas.conf
+    permissions: "0644"
+    content: |
+      server {
+        listen 80 default_server;
+        listen [::]:80 default_server;
+        server_name _;
+        root /var/www/hcm-atlas;
+        index index.html;
+
+        # One self-contained file: everything resolves to it.
+        location / {
+          try_files $uri $uri/ /index.html;
+        }
+
+        gzip on;
+        gzip_types text/html text/css application/javascript;
+        gzip_min_length 1024;
+
+        # The page is one build artifact; revalidate rather than cache hard, so
+        # a redeploy is picked up without a hash in the filename.
+        location = /index.html {
+          add_header Cache-Control "public, max-age=0, must-revalidate";
+        }
+
+        add_header X-Content-Type-Options nosniff;
+        add_header Referrer-Policy strict-origin-when-cross-origin;
+      }
+
+  - path: /var/www/hcm-atlas/index.html
+    permissions: "0644"
+    content: |
+      <!doctype html><meta charset=utf-8><title>HCM Atlas</title>
+      <p style="font:16px system-ui;padding:40px">Placeholder. Upload dist/index.html over this file.</p>
+
+runcmd:
+  # OCI Linux images ship with iptables rules that drop 80/443 even when the
+  # VCN security list allows them. This is the step people miss.
+  - firewall-cmd --permanent --add-service=http
+  - firewall-cmd --permanent --add-service=https
+  - firewall-cmd --reload
+  - setsebool -P httpd_read_user_content 1 || true
+  - chcon -R -t httpd_sys_content_t /var/www/hcm-atlas || true
+  - systemctl enable --now nginx
+  - nginx -t && systemctl reload nginx
