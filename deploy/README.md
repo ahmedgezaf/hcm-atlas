@@ -1,5 +1,11 @@
 # Running HCM Atlas on Oracle Cloud Infrastructure
 
+> **New to this?** There is a plain-language, tick-as-you-go walkthrough that
+> covers Netlify, GitHub Pages and Oracle Cloud, with the jargon explained:
+> https://claude.ai/code/artifact/bea275ac-eaff-4540-9545-6ab0e4c49efc
+>
+> This file is the reference version: terser, and OCI only.
+
 The site is one static file — `dist/index.html`, about 270 KB, no server-side
 anything. That makes every OCI route straightforward; the only real decision is
 whether you want a custom domain and HTTPS.
