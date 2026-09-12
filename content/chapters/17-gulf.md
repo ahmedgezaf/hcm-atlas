@@ -1,6 +1,7 @@
 ---
 id: gulf
 num: 17
+domain: hcm
 track: functional
 title: Saudi Arabia & the Gulf
 subtitle: The systems named in every Saudi job posting

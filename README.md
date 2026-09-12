@@ -1,12 +1,15 @@
-# HCM Atlas
+# Moon Learning
 
-**Oracle Fusion HCM Cloud, explained for functional consultants in Egypt and the Gulf.**
+**A personal study atlas — one collection per subject, each written to teach.**
 
-Seventeen chapters written to be read, fifteen interactive labs that behave like
-the system, a 122-term glossary, a drill deck for retrieval practice, and search
-across all of it. It covers the three modules junior consultants are usually
-hired for — Core HR, Absence Management and Payroll — plus the Egyptian and Saudi
-statutory knowledge that Oracle does not ship in the product.
+Two collections so far. **Oracle HCM** is Fusion HCM Cloud for functional
+consultants in Egypt and the Gulf: seventeen chapters, fifteen interactive labs,
+seven diagrams, a 122-term glossary and a drill deck, covering the three modules
+juniors are hired for plus the Egyptian and Saudi statutory knowledge Oracle does
+not ship. **Data & Analytics** covers SQL, Power BI and Excel.
+
+Every chapter can be read or listened to — the browser's own speech engine reads
+it aloud, highlighting where it is, with no account and no network.
 
 The whole site is **one self-contained HTML file**. No framework, no bundler, no
 `node_modules`, no server. Open it from disk and it works.
@@ -30,13 +33,15 @@ python3 build.py --watch
 
 | Section | What it does |
 | --- | --- |
-| **Home** | Progress dashboard and a per-chapter progress chart, then the whole system on one screen — every block opens a chapter, split Functional / Technical. |
+| **Overview** | Every collection with its size and how far through it you are. |
+| **Home** | Per collection: progress dashboard, a per-chapter progress chart, then the whole subject on one screen — every block opens a chapter, split Functional / Technical. |
 | **Chapters** | 17 chapters, ~11,600 words, grouped into **Functional** (12) and **Technical** (5). Each has its own colour, mark and cover band, and ends in common mistakes and sources. |
 | **Figures** | 7 inline SVG diagrams drawn where the prose explains a shape — the legal/operational split, what an LDG seals off, GOSI's three populations, the WPS chain, the Egyptian leave ladder, the extension decision. |
 | **Labs** | 15 interactive pieces: org tree, global-transfer stepper, payroll chain, effective-dating timelines, Egyptian social-insurance and tax calculators, leave ladder, HDL file anatomy, Fast Formula, security, methodology, headcount vs FTE. Most are embedded in their chapter too. |
 | **Glossary** | Every term, one definition, the trap that comes with it, and a link to the chapter. |
 | **Drill** | 40 questions with model answers plus a card for every term. Grade yourself; missed cards come back first. |
-| **Search** | <kbd>Ctrl</kbd>/<kbd>⌘</kbd>+<kbd>K</kbd>, or just <kbd>/</kbd>, over chapters, every individual section, terms, labs and questions — with snippets, and a jump straight to the heading that answers it. |
+| **Search** | <kbd>Ctrl</kbd>/<kbd>⌘</kbd>+<kbd>K</kbd>, or just <kbd>/</kbd>, across **every** collection at once — chapters, individual sections, terms, labs, figures and questions, with snippets and a jump straight to the heading that answers it. |
+| **Listen** | Any chapter read aloud by the browser's speech engine, paragraph by paragraph with the current one highlighted. Offline, free, no key. |
 
 Reader progress — terms marked known, chapters read, notes, drill mastery, and
 any terms or questions the reader adds themselves — is stored in the browser.
@@ -45,6 +50,7 @@ any terms or questions the reader adds themselves — is stored in the browser.
 
 ```
 content/
+  domains.json          the collections
   chapters/NN-id.md     one chapter each: frontmatter + Markdown
   glossary.json         terms, definitions, watch-outs
   questions.json        drill questions with model answers
@@ -57,6 +63,7 @@ src/
   figures.js            static SVG diagrams embedded in chapters
   icons.js              per-chapter marks and cover-band art
   search.js             search index and the Ctrl-K palette
+  speech.js             read-a-chapter-aloud
 build.py                assembles everything into dist/
 scripts/smoke.js        browser smoke test
 deploy/                 OCI deployment: script, cloud-init, Dockerfile
@@ -79,7 +86,8 @@ chapter.
 ## Extending it
 
 Adding a chapter means dropping a Markdown file into `content/chapters/` with
-frontmatter for its id, number, track (`functional` or `technical`), title,
+frontmatter for its id, number, collection (`domain:`), track (`functional` or
+`technical`), title,
 subtitle, colour, reading time, and the labs and terms it covers — plus a block
 on the home map, which the build checks for. Adding a term or a question means
 appending one object to a JSON file. Adding a lab means one `LABS.push({...})`

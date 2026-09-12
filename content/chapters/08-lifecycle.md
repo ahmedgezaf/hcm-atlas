@@ -1,6 +1,7 @@
 ---
 id: lifecycle
 num: 8
+domain: hcm
 track: functional
 title: The Employment Lifecycle
 subtitle: Hire to exit — every event is a dated transaction with a payroll consequence

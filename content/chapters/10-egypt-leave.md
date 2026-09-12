@@ -1,6 +1,7 @@
 ---
 id: egypt-leave
 num: 10
+domain: hcm
 track: functional
 title: Egypt: Leave Under Labour Law 14/2025
 subtitle: The statutory entitlements that become absence plans

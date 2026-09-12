@@ -1,6 +1,7 @@
 ---
 id: hdl
 num: 11
+domain: hcm
 track: technical
 title: Loading Data: HCM Data Loader
 subtitle: The highest-value technical skill a functional consultant can arrive with

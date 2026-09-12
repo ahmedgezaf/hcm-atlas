@@ -80,7 +80,7 @@ function buildIndex() {
 
   LABS.forEach(l => {
     const c = chById(l.ch);
-    add('lab', l.title, c ? c.title : '', l.lead, { lab: l.id, hue: c ? c.hue : 210 });
+    add('lab', l.title, c ? c.title : '', l.lead, { lab: l.id, ch: l.ch, hue: c ? c.hue : 210 });
   });
 
   FIGS.forEach(f => {
@@ -95,7 +95,7 @@ function buildIndex() {
   });
 
   // Chapters carry their own hue for the row accent.
-  rows.forEach(r => { if (r.nav.hue == null) { const c = chById(r.nav.ch); r.nav.hue = c ? c.hue : 210; } });
+  rows.forEach(r => { const c = chById(r.nav.ch); if (r.nav.hue == null) r.nav.hue = c ? c.hue : 210; r.nav.d = c ? c.domain : DOMAINS[0].id; });
   IDX = rows;
   return IDX;
 }
@@ -151,7 +151,7 @@ function searchRows(q, limit = 40) {
   const toks = tokenize(q);
   if (!toks.length) {
     return CH.map(c => ({
-      kind: 'chapter', title: c.title, sub: c.sub, body: '', nav: { ch: c.id, hue: c.hue }, sc: 0,
+      kind: 'chapter', title: c.title, sub: c.sub, body: '', nav: { ch: c.id, hue: c.hue, d: c.domain }, sc: 0,
     }));
   }
   const phrase = q.trim().toLowerCase();
@@ -224,7 +224,7 @@ function palRender() {
       <span class="pal-kind">${KIND[r.kind].label}</span>
       <span class="pal-main">
         <span class="pal-t">${hilite(r.title, toks)}</span>
-        ${r.sub ? `<span class="pal-sub">${hilite(r.sub, toks)}</span>` : ''}
+        ${r.sub ? `<span class="pal-sub"><span class="pal-dom">${esc(domById(r.nav.d || dom).short)}</span>${hilite(r.sub, toks)}</span>` : ''}
         ${toks.length && r.body ? `<span class="pal-snip">${hilite(snippet(r.body, toks), toks)}</span>` : ''}
       </span>
     </button>`).join('');
@@ -263,18 +263,18 @@ function palGo(i) {
   const r = P.rows[i];
   if (!r) return;
   palClose();
-  const n = r.nav;
-  if (n.lab) return go('labs', { lab: n.lab });
-  if (n.fig) return go('chapters', { ch: n.ch, sec: n.fig });
-  if (n.term) { glQ = n.term; glCh = null; return go('glossary'); }
+  const n = r.nav, d = n.d || dom;
+  if (n.lab) return go('labs', { dom: d, lab: n.lab });
+  if (n.fig) return go('chapters', { dom: d, ch: n.ch, sec: n.fig });
+  if (n.term) { glQ = n.term; glCh = null; return go('glossary', { dom: d }); }
   if (n.q) {
     D.mode = 'questions'; D.ch = null; D.rebuild = true; D.flipped = false;
-    go('drill');
+    go('drill', { dom: d });
     const at = D.queue.findIndex(x => x.id === n.q);
     if (at >= 0) { D.idx = at; renderDrill($('#view')); }
     return;
   }
-  return go('chapters', n.sec ? { ch: n.ch, sec: n.sec } : { ch: n.ch });
+  return go('chapters', n.sec ? { dom: d, ch: n.ch, sec: n.sec } : { dom: d, ch: n.ch });
 }
 
 /* ---------- wiring ---------- */

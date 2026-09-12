@@ -1,6 +1,7 @@
 ---
 id: security
 num: 15
+domain: hcm
 track: technical
 title: The Security Model
 subtitle: What you can do versus whose data you can see

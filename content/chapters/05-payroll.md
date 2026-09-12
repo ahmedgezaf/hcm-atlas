@@ -1,6 +1,7 @@
 ---
 id: payroll
 num: 5
+domain: hcm
 track: functional
 title: The Payroll Object Chain
 subtitle: Element → eligibility → entry → run → balance → prepayment → payment → costing

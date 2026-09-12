@@ -1,20 +1,31 @@
-<div class="shell">
-  <nav class="rail" aria-label="Sections">
-    <div class="brand"><div class="brand-mark">H</div><div><div class="brand-name">HCM Atlas</div><div class="brand-sub">Oracle HCM · Egypt &amp; Gulf</div></div></div>
-    <button class="search-btn" id="searchBtn" aria-label="Search the site"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg><span>Search</span><span class="kbd" data-mod>Ctrl K</span></button>
-    <button class="nav-btn" data-go="home"><svg viewBox="0 0 24 24"><path d="M3 11l9-8 9 8v10a1 1 0 01-1 1h-5v-7H9v7H4a1 1 0 01-1-1z"/></svg><span>Home</span></button>
-    <button class="nav-btn" data-go="chapters"><svg viewBox="0 0 24 24"><path d="M4 4h12a3 3 0 013 3v13H7a3 3 0 00-3 3z"/><path d="M4 4v16a3 3 0 013-3h12"/></svg><span>Chapters</span></button>
-    <button class="nav-btn" data-go="labs"><svg viewBox="0 0 24 24"><path d="M9 3v7l-5 9a2 2 0 002 3h12a2 2 0 002-3l-5-9V3"/><path d="M8 3h8M7 15h10"/></svg><span>Labs</span></button>
-    <button class="nav-btn" data-go="glossary"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h10M4 18h7"/></svg><span>Glossary</span></button>
-    <button class="nav-btn" data-go="drill"><svg viewBox="0 0 24 24"><rect x="3" y="6" width="14" height="12" rx="2"/><path d="M7 4h14v12M8 12h4"/></svg><span>Drill</span></button>
-    <button class="nav-btn" data-go="about"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 8h.01M11 12h1v4h1"/></svg><span>About</span></button>
-    <div class="rail-foot"><div class="sync" id="sync"><i></i><span>Progress saved in this browser</span></div><button class="theme-btn" id="themeBtn">◐ Theme</button></div>
-  </nav>
+<div class="app">
+  <header class="topbar">
+    <div class="tbar">
+      <button class="brand" data-go="overview" aria-label="Moon Learning — all collections">
+        <span class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><path d="M15.5 2.4A9.6 9.6 0 1021.6 15 7.6 7.6 0 0115.5 2.4z"/></svg>
+        </span>
+        <span class="brand-txt"><span class="brand-name">Moon Learning</span><span class="brand-sub">Ahmed&rsquo;s study atlas</span></span>
+      </button>
+      <nav class="domains" id="domainNav" aria-label="Collections"></nav>
+      <div class="bar-actions">
+        <button class="search-btn" id="searchBtn" aria-label="Search everything">
+          <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>
+          <span class="lbl">Search</span><span class="kbd" data-mod>Ctrl K</span>
+        </button>
+        <button class="icon-btn" id="themeBtn" aria-label="Switch light or dark theme" title="Theme">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 3.5v17" /><path d="M12 3.5a8.5 8.5 0 010 17z" fill="currentColor" stroke="none"/></svg>
+        </button>
+      </div>
+    </div>
+    <nav class="sections" id="sectionNav" aria-label="Sections"></nav>
+  </header>
   <main class="main" id="view"></main>
 </div>
+
 <div class="pal" id="pal" hidden>
   <div class="pal-bg"></div>
-  <div class="pal-box" role="dialog" aria-modal="true" aria-label="Search HCM Atlas">
+  <div class="pal-box" role="dialog" aria-modal="true" aria-label="Search Moon Learning">
     <div class="pal-in">
       <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>
       <input id="palQ" type="text" placeholder="Search chapters, sections, terms, labs, questions&hellip;"
@@ -26,4 +37,25 @@
     <div class="pal-foot"><span><span class="kbd">&uarr;</span><span class="kbd">&darr;</span> move</span><span><span class="kbd">&crarr;</span> open</span><span><span class="kbd">/</span> to search from anywhere</span></div>
   </div>
 </div>
+
+<div class="reader-bar" id="speechBar" hidden>
+  <div class="sb-in">
+    <button class="sb-play" id="sbPlay" aria-label="Play"></button>
+    <div class="sb-meta"><span class="sb-title" id="sbTitle"></span><span class="sb-pos" id="sbPos"></span></div>
+    <div class="sb-track" id="sbTrack"><i id="sbFill"></i></div>
+    <label class="sb-rate"><span class="vh">Speed</span>
+      <select id="sbRate">
+        <option value="0.8">0.8&times;</option>
+        <option value="1" selected>1&times;</option>
+        <option value="1.2">1.2&times;</option>
+        <option value="1.5">1.5&times;</option>
+        <option value="1.8">1.8&times;</option>
+      </select>
+    </label>
+    <label class="sb-voice"><span class="vh">Voice</span><select id="sbVoice"></select></label>
+    <button class="sb-x" id="sbStop" aria-label="Stop reading">&times;</button>
+  </div>
+</div>
+
+<div class="sync" id="sync" hidden><i></i><span>Progress saved in this browser</span></div>
 <div class="toast" id="toast"></div>

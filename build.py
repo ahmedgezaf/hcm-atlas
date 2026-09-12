@@ -41,9 +41,10 @@ CONTENT, SRC, DIST = ROOT / "content", ROOT / "src", ROOT / "dist"
 IMAGES = CONTENT / "images"
 COVER_TYPES = {".jpg": "image/jpeg", ".jpeg": "image/jpeg", ".png": "image/png", ".webp": "image/webp", ".avif": "image/avif"}
 
-TITLE = "HCM Atlas"
-DESCRIPTION = ("Oracle Fusion HCM Cloud explained for functional consultants in Egypt and the Gulf: "
-               "17 chapters, interactive labs, a glossary and a drill deck.")
+TITLE = "Moon Learning"
+DESCRIPTION = ("A personal learning atlas: Oracle Fusion HCM Cloud for consultants in Egypt and the Gulf, "
+               "and the SQL, Power BI and Excel toolkit behind data analytics. Chapters, interactive labs, "
+               "a glossary and a drill deck.")
 FONTS = ("https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800"
          "&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400"
          "&family=JetBrains+Mono:wght@400;600&display=swap")
@@ -74,9 +75,12 @@ def parse_frontmatter(text, path):
             meta[key] = int(value)
         else:
             meta[key] = value
-    for required in ("id", "num", "track", "title", "subtitle", "hue", "minutes"):
+    for required in ("id", "num", "domain", "track", "title", "subtitle", "hue", "minutes"):
         if required not in meta:
             raise SystemExit(f"{path}: frontmatter is missing `{required}`")
+    domain_ids = {d["id"] for d in json.loads((CONTENT / "domains.json").read_text(encoding="utf-8"))}
+    if meta["domain"] not in domain_ids:
+        raise SystemExit(f"{path}: domain must be one of {', '.join(sorted(domain_ids))}, not '{meta['domain']}'")
     if meta["track"] not in TRACKS:
         raise SystemExit(f"{path}: track must be one of {', '.join(TRACKS)}, not '{meta['track']}'")
     meta.setdefault("labs", [])
@@ -124,20 +128,22 @@ def load_content():
     for path in files:
         meta, body = parse_frontmatter(path.read_text(encoding="utf-8"), path.name)
         chapters.append({
-            "id": meta["id"], "num": meta["num"], "track": meta["track"], "title": meta["title"],
+            "id": meta["id"], "num": meta["num"], "domain": meta["domain"], "track": meta["track"],
+            "title": meta["title"],
             "sub": meta["subtitle"], "hue": meta["hue"], "minutes": meta["minutes"],
             "labs": meta["labs"], "terms": meta["terms"], "html": render_chapter_html(body),
             "cover": load_cover(meta["cover"], meta["id"]) if meta.get("cover") else "",
         })
     chapters.sort(key=lambda c: c["num"])
 
+    domains = json.loads((CONTENT / "domains.json").read_text(encoding="utf-8"))
     glossary = json.loads((CONTENT / "glossary.json").read_text(encoding="utf-8"))
     questions = json.loads((CONTENT / "questions.json").read_text(encoding="utf-8"))
     terms = [{"id": t["id"], "name": t["name"], "what": t["definition"],
               "trap": t.get("watchOut", ""), "ch": t["chapter"]} for t in glossary]
     qs = [{"ch": q["chapter"], "q": q["question"], "a": q["answer"],
            "terms": q.get("terms", [])} for q in questions]
-    return {"chapters": chapters, "terms": terms, "questions": qs}
+    return {"domains": domains, "chapters": chapters, "terms": terms, "questions": qs}
 
 
 def validate(data):

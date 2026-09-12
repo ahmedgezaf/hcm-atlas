@@ -1,6 +1,7 @@
 ---
 id: workforce
 num: 2
+domain: hcm
 track: functional
 title: Workforce Structures
 subtitle: Jobs, positions, grades — what work exists and at what level

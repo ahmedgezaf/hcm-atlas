@@ -1,6 +1,7 @@
 ---
 id: egypt-payroll
 num: 9
+domain: hcm
 track: functional
 title: Egypt: Social Insurance & Salary Tax
 subtitle: The mechanics Oracle does not ship — and the consultant's biggest differentiator

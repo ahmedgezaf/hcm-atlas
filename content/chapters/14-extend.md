@@ -1,6 +1,7 @@
 ---
 id: extend
 num: 14
+domain: hcm
 track: technical
 title: Extending Without Customizing
 subtitle: Flexfields, lookups, value sets, sandboxes — the answer to "can you add a field?"

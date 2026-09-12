@@ -44,6 +44,18 @@ const ICONS = {
   method: '<path d="M5 21V4M5 4h11l-2 3.5L16 11H5"/><path d="M5 15h8"/>',
   /* a region on the globe */
   gulf: '<circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3a13 13 0 010 18a13 13 0 010-18z"/>',
+
+  /* ---- collections (top bar) ---- */
+  'domain-hcm': '<path d="M3 21h18"/><path d="M5 21V8l7-5 7 5v13"/><path d="M10 21v-6h4v6"/><path d="M9 11h2M13 11h2"/>',
+  'domain-analytics': '<path d="M3 3v18h18"/><path d="M7 15l4-5 3 3 5-7"/><circle cx="7" cy="15" r="1.4"/><circle cx="11" cy="10" r="1.4"/><circle cx="14" cy="13" r="1.4"/><circle cx="19" cy="6" r="1.4"/>',
+
+  /* ---- sections (nav row) ---- */
+  'nav-home': '<path d="M3 11l9-8 9 8v10a1 1 0 01-1 1h-5v-7H9v7H4a1 1 0 01-1-1z"/>',
+  'nav-chapters': '<path d="M4 4h12a3 3 0 013 3v13H7a3 3 0 00-3 3z"/><path d="M4 4v16a3 3 0 013-3h12"/>',
+  'nav-labs': '<path d="M9 3v7l-5 9a2 2 0 002 3h12a2 2 0 002-3l-5-9V3"/><path d="M8 3h8M7 15h10"/>',
+  'nav-glossary': '<path d="M4 6h16M4 12h10M4 18h7"/>',
+  'nav-drill': '<rect x="3" y="6" width="14" height="12" rx="2"/><path d="M7 4h14v12M8 12h4"/>',
+  'nav-about': '<circle cx="12" cy="12" r="9"/><path d="M12 8h.01M11 12h1v4h1"/>',
 };
 
 const icon = (id, cls = '') =>

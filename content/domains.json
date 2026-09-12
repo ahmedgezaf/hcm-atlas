@@ -1,0 +1,18 @@
+[
+  {
+    "id": "hcm",
+    "name": "Oracle HCM",
+    "short": "HCM",
+    "tagline": "Fusion HCM Cloud for functional consultants in Egypt and the Gulf",
+    "blurb": "The three modules junior consultants are hired for — Core HR, Absence and Payroll — plus the Egyptian and Saudi statutory knowledge Oracle does not ship in the product.",
+    "hue": 214
+  },
+  {
+    "id": "analytics",
+    "name": "Data & Analytics",
+    "short": "Analytics",
+    "tagline": "SQL, Power BI and Excel — the analyst's toolkit, and when to reach for which",
+    "blurb": "The three tools every analytics job posting names, treated as one craft: get the rows out with SQL, model and publish them in Power BI, and know what Excel is still the fastest answer to.",
+    "hue": 272
+  }
+]

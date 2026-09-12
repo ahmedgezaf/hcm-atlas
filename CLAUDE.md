@@ -1,29 +1,32 @@
 # Working in this repo
 
-HCM Atlas is a study site about Oracle Fusion HCM Cloud for functional consultants
-working in Egypt and the Gulf. It ships as **one self-contained HTML file** built
-from Markdown and JSON by `build.py`. There is no framework, no bundler and no
-`node_modules`. Keep it that way unless the user asks otherwise.
+Moon Learning is a personal study atlas. It holds one **collection** per subject —
+currently Oracle Fusion HCM Cloud for consultants in Egypt and the Gulf, and the
+SQL / Power BI / Excel side of data analytics. It ships as **one self-contained
+HTML file** built from Markdown and JSON by `build.py`. There is no framework, no
+bundler and no `node_modules`. Keep it that way unless the user asks otherwise.
 
 ```
+content/domains.json        the collections: id, name, tagline, blurb, hue
 content/chapters/NN-id.md   one chapter each: frontmatter + Markdown
 content/glossary.json       every term, its definition, its chapter
 content/questions.json      drill questions with model answers
 content/images/             optional chapter cover photos
-src/shell.html              page markup (nav rail, main, toast)
+src/shell.html              page markup (top bar, main, palette, speech bar)
 src/styles.css              all styles, token-driven, light + dark
 src/app.js                  router, chapter reader, glossary, drill, storage
 src/labs.js                 the interactive labs
 src/figures.js              static SVG diagrams embedded in chapters
 src/icons.js                one mark per chapter, plus the cover-band art
 src/search.js               the search index and the Ctrl-K palette
+src/speech.js               read-a-chapter-aloud, on the browser's own engine
 build.py                    assembles dist/index.html (and dist/artifact.html)
 dist/                       build output — generated, but committed and CI-checked
 ```
 
-`app.js` pulls the others in at `/* @include labs.js */`,
-`/* @include icons.js */`, `/* @include figures.js */` and
-`/* @include search.js */`. Any `src/*.js` can be included that way; the build
+`app.js` pulls the others in at `/* @include speech.js */`,
+`/* @include icons.js */`, `/* @include labs.js */`, `/* @include figures.js */`
+and `/* @include search.js */`. Any `src/*.js` can be included that way; the build
 resolves them recursively and fails on a missing file or a cycle.
 
 Build and check after **every** content or code change:
@@ -50,6 +53,7 @@ files after it if you insert one in the middle.
 ---
 id: costing
 num: 18
+domain: hcm
 track: technical
 title: Payroll Costing
 subtitle: Where HR and Finance meet
@@ -76,6 +80,11 @@ Prose. **Bold** the term the first time it is defined.
 - Publisher, "Title". https://url
 ```
 
+`domain` is a collection id from `content/domains.json` — nothing else builds.
+Chapter numbering restarts per collection, and so does everything scoped to it:
+the chapter list, the home map, the glossary, the drill deck and the progress
+rings all show one collection at a time. Only search reaches across all of them.
+
 `track` is `functional` or `technical` — nothing else builds. It groups the
 Chapters list and the home map. Functional is what the business configures and
 runs (structures, the data model, money, time, law, delivery); technical is what
@@ -85,9 +94,10 @@ the consultant builds with (HDL, Fast Formula, reporting, extension, security).
 block on the home map, its labs, its glossary entries, its drill cards. Pick one
 that is not already close to a neighbour's.
 
-The home map in `renderHome` is laid out by hand, so add the new chapter to the
-right track's grid there too — the build fails if a chapter is missing from it,
-listed twice, or names a chapter that does not exist. Rows are three columns
+The home map for each collection is laid out by hand in the `MAPS` object in
+`renderHome`, so add the new chapter to the right collection's grid there too —
+the build fails if a chapter is missing from it, listed twice, or names a
+chapter that does not exist. Rows are three columns
 wide: `two` spans two, `full` spans three, and `wide` spans three *and* goes
 dashed, which the legend reads as "a foundation under every record above it".
 Use `full`, not `wide`, unless that is what you mean.
@@ -184,6 +194,41 @@ photograph via `cover: filename.jpg` in its frontmatter, read from
 `content/images/` and inlined as a data URI. See `content/images/README.md` for
 sizing and licensing — nothing ships with the repo.
 
+## Collections
+
+A collection is a subject. Adding one means an entry in `content/domains.json`
+(`id`, `name`, `short`, `tagline`, `blurb`, `hue`), an icon keyed
+`domain-<id>` in `src/icons.js`, at least one chapter carrying that `domain:`,
+and a hand-laid map in `MAPS` — without a map the home page falls back to a
+plain grouping by track, which works but says less.
+
+The collection's `hue` is the accent for the top bar and its own pages; chapter
+hues are independent and are the memory cue within a collection.
+
+Routes are `#<collection>/<view>[/<id>[/<section>]]` — `#hcm/chapters/org/h-…`.
+A hash whose first segment is a view instead still resolves against the first
+collection, so links written before collections existed keep working.
+
+## Reading aloud
+
+`src/speech.js` uses the browser's `SpeechSynthesis`: no key, no network, works
+offline, and the voices are whatever the reader's OS ships — which is also why
+quality varies and why the control is absent where there are no voices. It reads
+paragraph by paragraph rather than as one utterance so the current paragraph can
+be highlighted, the progress bar means something, and long chapters do not hit
+per-utterance limits. Labs, figures and the Sources list are skipped: they are to
+be looked at. Anything new that should not be read aloud must be excluded in
+`speechChunks` — the smoke test asserts nothing leaks in from those three.
+
+## Glass
+
+The top bar, the search palette, the speech bar and the collection cards on the
+overview are translucent with a backdrop blur; nothing else is. That is the whole
+rule — glass marks the surfaces that float above the page, so it reads as depth.
+Spreading it further flattens the effect and costs scrolling performance. The
+tokens are `--glass`, `--glass-2`, `--glass-edge` and `--glass-hi` (the specular
+top edge), declared in all three theme blocks like every other colour.
+
 ## Search and heading ids
 
 Every `## heading` in a chapter becomes a scroll target with a **slug id**
@@ -209,7 +254,7 @@ assertions.
 ## Printing
 
 `@media print` at the foot of `styles.css` turns a chapter into a clean
-document: the rail, palette, notes, drill controls and table of contents are
+document: the top bar, palette, speech bar, notes, drill controls and contents are
 dropped, tokens are forced back to the light set so dark-mode readers do not
 print a black page, wide diagrams stop scrolling and shrink instead, and links
 outside the Sources list reveal their URL. Anything new that is interactive-only
@@ -258,7 +303,7 @@ use that class.
 ## State
 
 Reader progress (`known`, `read`, `notes`, `drill`, `custom`, `customQ`) lives in
-`localStorage` under `hcm-atlas-v2`. When the page is published as a Claude
+`localStorage` under `hcm-atlas-v2` (kept for continuity with earlier versions). When the page is published as a Claude
 Artifact with the `db` capability it also syncs; when it is not, `claude.use()`
 resolves null and the page carries on with local storage only. Both paths must
 keep working — never make a feature depend on the Claude runtime being present.

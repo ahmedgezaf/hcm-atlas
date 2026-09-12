@@ -1,6 +1,7 @@
 ---
 id: org
 num: 1
+domain: hcm
 track: functional
 title: Enterprise & Organizational Structures
 subtitle: The compliance skeleton — legal view versus operational view

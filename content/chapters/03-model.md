@@ -1,6 +1,7 @@
 ---
 id: model
 num: 3
+domain: hcm
 track: functional
 title: The Employment Data Model
 subtitle: Person → work relationship → assignment. There is no employee table.

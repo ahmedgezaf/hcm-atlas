@@ -11,6 +11,7 @@ const path = require('path');
 const { chromium } = require('playwright');
 
 const FILE = 'file://' + path.resolve(__dirname, '..', 'dist', 'index.html');
+const DOMAIN_COUNT = require('../content/domains.json').length;
 const results = [];
 const check = (name, pass, detail = '') => results.push({ name, pass, detail });
 
@@ -26,6 +27,16 @@ const check = (name, pass, detail = '') => results.push({ name, pass, detail });
   await page.goto(FILE, { waitUntil: 'load' });
   await page.waitForTimeout(400);
 
+  const over = await page.evaluate(() => ({
+    cards: document.querySelectorAll('.dcard').length,
+    tabs: [...document.querySelectorAll('.dtab')].map(b => b.textContent.trim()),
+    hash: location.hash,
+  }));
+  check('overview lists every collection',
+    over.cards === DOMAIN_COUNT && over.tabs.length === DOMAIN_COUNT, JSON.stringify(over.tabs));
+
+  await page.evaluate(() => { location.hash = 'hcm/home'; });
+  await page.waitForTimeout(400);
   check('home renders every chapter block',
     (await page.locator('.mnode').count()) > 0,
     `${await page.locator('.mnode').count()} blocks`);
@@ -195,13 +206,35 @@ const check = (name, pass, detail = '') => results.push({ name, pass, detail });
   await wide.goto(FILE, { waitUntil: 'load' });
   await wide.waitForTimeout(300);
   const centred = await wide.evaluate(() => {
-    const rail = document.querySelector('.rail').getBoundingClientRect();
     const main = document.querySelector('.main').getBoundingClientRect();
-    return { left: Math.round(main.left - rail.right), right: Math.round(innerWidth - main.right) };
+    return { left: Math.round(main.left), right: Math.round(innerWidth - main.right) };
   });
   check('reading column is centred at 1920px', Math.abs(centred.left - centred.right) <= 2,
     `${centred.left}px left, ${centred.right}px right`);
   await wide.close();
+
+  // ---- collections and speech
+  await page.evaluate(() => { location.hash = 'hcm/chapters'; });
+  await page.waitForTimeout(350);
+  const hcmRows = await page.evaluate(() => document.querySelectorAll('.chrow').length);
+  await page.evaluate(() => { location.hash = 'analytics/chapters'; });
+  await page.waitForTimeout(350);
+  const anaRows = await page.evaluate(() => document.querySelectorAll('.chrow').length);
+  check('switching collection changes the chapter list', hcmRows === 17 && anaRows !== 17,
+    `hcm ${hcmRows}, analytics ${anaRows}`);
+
+  await page.evaluate(() => { location.hash = 'hcm/chapters/dating'; });
+  await page.waitForTimeout(450);
+  const speech = await page.evaluate(() => {
+    const btn = document.getElementById('listenBtn');
+    if (!btn) return { ok: false, why: 'no listen button' };
+    const chunks = speechChunks(document.getElementById('prose'));
+    const leaked = chunks.filter(c => c.el.closest('.sources') || c.el.closest('.lab') || c.el.closest('.fig-embed')).length;
+    return { ok: true, chunks: chunks.length, leaked, bar: !!document.getElementById('speechBar') };
+  });
+  check('listen control builds readable chunks',
+    speech.ok && speech.chunks > 5 && speech.leaked === 0 && speech.bar,
+    JSON.stringify(speech));
 
   check('no runtime errors', errors.length === 0, errors.join(' | '));
   await browser.close();
