@@ -1,369 +1,597 @@
 [
- {
-  "chapter": "model",
-  "question": "After a global transfer from Egypt to Saudi Arabia, how many person records exist? How many work relationships? How many payroll relationships?",
-  "answer": "One person record — the person is held once, globally. Two work relationships: the Egyptian one is terminated (end-dated) and a new one is created under the Saudi legal employer. Two payroll relationships: the Saudi one is created under the Saudi PSU in a different LDG, and because balances never span payroll relationships, year-to-date figures start fresh.",
-  "terms": [
-   "person",
-   "work-relationship",
-   "payroll-relationship",
-   "global-transfer"
-  ]
- },
- {
-  "chapter": "org",
-  "question": "What is the difference between a legal entity and a legal employer?",
-  "answer": "A legal entity is an organization recognized by law that can own assets, sign contracts and be sued. A legal employer is a classification applied to a legal entity that enables it to employ workers. Not every legal entity is a legal employer — one may exist only to hold property — and nobody can be hired into an entity until the classification is switched on.",
-  "terms": [
-   "legal-entity",
-   "legal-employer"
-  ]
- },
- {
-  "chapter": "org",
-  "question": "A client asks why an Egyptian element does not appear in the Saudi environment. What is checked first?",
-  "answer": "The legislative data group. All payroll configuration — elements, balances, formulas — lives inside exactly one LDG, and an element defined in the Egypt LDG does not exist in the Saudi LDG. It has to be built again there.",
-  "terms": [
-   "legislative-data-group-ldg",
-   "element"
-  ]
- },
- {
-  "chapter": "workforce",
-  "question": "Explain job versus position to someone who has never used an HR system.",
-  "answer": "A job is what the work is — 'Accountant' — defined once and reused everywhere. A position is one specific seat doing that work: 'Accountant #3, Finance, Alexandria plant', with its own budget and reporting line, which exists whether or not anyone currently sits in it. When the person leaves, the position stays and becomes a vacancy.",
-  "terms": [
-   "job",
-   "position"
-  ]
- },
- {
-  "chapter": "dating",
-  "question": "When is a correction used instead of an update, and what does each do to history?",
-  "answer": "An update records a real-world change: it creates a new dated record and keeps the old one, so a promotion on 1 July leaves both grades in history. A correction fixes a data-entry mistake: it overwrites the record as if the old value was never true. Using a correction for a real event destroys legitimate history and can trigger wrong retroactive payroll.",
-  "terms": [
-   "update-vs-correction",
-   "effective-date"
-  ]
- },
- {
-  "chapter": "payroll",
-  "question": "Walk through the payroll object chain from element to payment.",
-  "answer": "Element (the definition) → element eligibility (who could receive it) → element entry (who does, and how much) → payroll run (gross-to-net, held against the payroll relationship) → balances (running totals) → prepayments (distribute results to payment methods) → payment process (the bank file) → costing (to the ledger). Each link depends on the one before it.",
-  "terms": [
-   "element",
-   "element-eligibility-element-link",
-   "element-entry",
-   "payroll-run",
-   "balance",
-   "prepayments",
-   "payment-process-bank-file",
-   "costing"
-  ]
- },
- {
-  "chapter": "egypt-payroll",
-  "question": "An employee earns EGP 25,000 per month. What is their monthly social-insurance contribution, and why is it not 11% of 25,000?",
-  "answer": "EGP 1,837.00. Contributions apply to the insurable wage, which is capped at EGP 16,700 in 2026 (floor EGP 2,700). 11% of 16,700 is 1,837; the employer pays 18.75% of the same capped figure, EGP 3,131.25. The cap moves every January.",
-  "terms": [
-   "insurable-wage",
-   "social-insurance-contribution-rates"
-  ]
- },
- {
-  "chapter": "model",
-  "question": "Why can balances not span payroll relationships, and when does that become visible to a client?",
-  "answer": "Because payroll processing and aggregation happen at the payroll relationship level, which is tied to one payroll statutory unit and one legislation. A different PSU means different statutory rules and a different LDG, so totals cannot carry across. It becomes visible on a global transfer, when year-to-date balances start from zero in the new country.",
-  "terms": [
-   "payroll-relationship",
-   "balance"
-  ]
- },
- {
-  "chapter": "absence",
-  "question": "Which of the six absence plan types fits maternity leave, and why not an accrual plan?",
-  "answer": "A qualification plan. Maternity is not earned day by day — it is triggered by an event and paid at a defined rate over the absence, and it can carry occurrence caps. An accrual plan accumulates a balance over time, which is the wrong shape. The six types are accrual, qualification, no entitlement, compensatory, agreement and donation.",
-  "terms": [
-   "absence-plan",
-   "qualification-plan",
-   "accrual-plan"
-  ]
- },
- {
-  "chapter": "hrfunction",
-  "question": "A department has ten people, four of them half-time. What is the headcount and what is the FTE?",
-  "answer": "Headcount 10 — every person counts as one. FTE 8 — six full-timers at 1.0 plus four half-timers at 0.5. Both numbers are correct; they answer different questions, so always ask which one the client means.",
-  "terms": [
-   "headcount",
-   "fte-full-time-equivalent"
-  ]
- },
- {
-  "chapter": "reporting",
-  "question": "OTBI or BI Publisher for a payslip? For a headcount dashboard? Justify both.",
-  "answer": "Payslip: BI Publisher — a formatted, per-employee, printable document, produced from a SQL data model and a layout template and delivered by bursting. Headcount dashboard: OTBI — ad-hoc analysis against live data using the Worker Assignment subject area, no layout requirement. Swapping them is wrong in both directions.",
-  "terms": [
-   "otbi",
-   "bi-publisher-bip",
-   "bursting"
-  ]
- },
- {
-  "chapter": "payroll",
-  "question": "What does element eligibility do that an element entry does not?",
-  "answer": "Eligibility defines the population an element can apply to — by payroll, legal employer, grade, job, department. It answers 'who could receive this'. An entry is the actual attachment of the element to one person with values and dates — 'who does, and how much'. Without eligibility, no entry can be created.",
-  "terms": [
-   "element-eligibility-element-link",
-   "element-entry"
-  ]
- },
- {
-  "chapter": "extend",
-  "question": "A client says 'we need an extra field for equipment number'. What are the first three thoughts?",
-  "answer": "DFF — a descriptive flexfield on the relevant object holds the data without customization. Lookup or value set — should the field be a controlled list rather than free text. Approvals — what the workflow should do when the field changes. That sequence covers most 'can you add a field' requests.",
-  "terms": [
-   "dff-descriptive-flexfield",
-   "lookup-type-and-lookup-code",
-   "value-set"
-  ]
- },
- {
-  "chapter": "security",
-  "question": "What is the difference between what a job role controls and what a security profile controls?",
-  "answer": "A job role controls function — what a user can do: the screens, tasks and privileges of, say, an HR Specialist. A security profile controls data scope — whose records they can do it to: by legal employer, business unit, department, position or country. A data role combines the two. Same job role, different profiles, different visible populations.",
-  "terms": [
-   "job-role",
-   "data-role-and-security-profile"
-  ]
- },
- {
-  "chapter": "egypt-payroll",
-  "question": "Why does Oracle not deliver a maintained Egyptian payroll localization, and why does that matter for a consultant's value on a project?",
-  "answer": "Oracle maintains localizations for a limited set of markets; Egypt's statutory rules are built by the implementation partner in elements, balances and Fast Formulas. That means someone on the project has to know the Egyptian mechanics — insurable-wage caps, the tax brackets and bracket elimination, the small statutory deductions — and a consultant who knows them is useful from the first workshop.",
-  "terms": [
-   "fast-formula",
-   "insurable-wage",
-   "progressive-tax-brackets"
-  ]
- },
- {
-  "chapter": "dating",
-  "question": "A raise is approved in July with an effective date of 1 May. What happens in the July payroll run?",
-  "answer": "Retroactive events are raised for May and June, which were already paid at the old rate. Recalculate Payroll for Retroactive Changes runs before the main calculation, works out the arrears for both months and creates retro entries; the July run then pays them and re-states the affected balances, including social insurance and tax for the prior periods.",
-  "terms": [
-   "retroactive-change-retro"
-  ]
- },
- {
-  "chapter": "payroll",
-  "question": "What is a parallel run, and why is it not optional?",
-  "answer": "Running the new system's payroll alongside the legacy payroll for the same period — typically two or three consecutive months — and reconciling the two line by line, explaining every difference. It is the only reliable proof that the new payroll is correct before the old one is switched off.",
-  "terms": [
-   "parallel-run",
-   "reconciliation"
-  ]
- },
- {
-  "chapter": "hrfunction",
-  "question": "Name the three parts of the Ulrich model and say which one a consultant works with most day to day.",
-  "answer": "HR business partners embedded in the business, centers of excellence owning policy in a domain, and shared services doing the transactional work. Day to day, the consultant works most with shared services — in Egypt the Personnel and Payroll team — because their work is what the configuration automates; the CoEs sign off design in their domain.",
-  "terms": [
-   "ulrich-model",
-   "hrbp-hr-business-partner",
-   "centers-of-excellence-coe",
-   "shared-services-hr-operations"
-  ]
- },
- {
-  "chapter": "egypt-payroll",
-  "question": "What is the mandatory annual increment in Egypt calculated on, and why does that matter for high earners?",
-  "answer": "At least 3% of the social-insurance wage — the insurable wage — not total salary. Because the insurable wage is capped (EGP 16,700 in 2026), the increment is effectively capped at 3% of the ceiling for anyone earning above it.",
-  "terms": [
-   "minimum-wage-and-mandatory-annual-increment",
-   "insurable-wage"
-  ]
- },
- {
-  "chapter": "egypt-payroll",
-  "question": "Under the current Egyptian brackets, why might a naive progressive tax calculation understate tax for a senior employee?",
-  "answer": "Because of bracket elimination. Above defined net-income thresholds the lower bands are removed — above EGP 600,000 the 0% band goes, above 700,000 the 10% band too, and so on until above 1.2 million only the 25% and 27.5% bands apply. A calculator that applies every band to everyone gives senior staff lower-band relief they are not entitled to.",
-  "terms": [
-   "bracket-elimination-for-high-earners",
-   "progressive-tax-brackets"
-  ]
- },
- {
-  "chapter": "reporting",
-  "question": "What is a subject area, and why does choosing the wrong one produce wrong numbers rather than an error?",
-  "answer": "A pre-built, governed data model in OTBI — pre-joined tables exposed as folders and columns — covering one domain at a fixed grain. Choosing wrong does not fail; it silently reports at the wrong grain: date-effective history multiplies rows and multiple assignments double-count people, so the numbers are plausible and wrong.",
-  "terms": [
-   "subject-area",
-   "otbi"
-  ]
- },
- {
-  "chapter": "reporting",
-  "question": "Name the three OTBI constraints that catch people, and the three workarounds.",
-  "answer": "Constraints: no joins across subject areas in one analysis; a default row limit (around 65,000) past which results truncate silently; and predefined grain that cannot be changed. Workarounds: a Combined Analysis on a shared key such as person number; BI Publisher with hand-written SQL; or an HCM Extract for large volumes.",
-  "terms": [
-   "otbi",
-   "hcm-extract",
-   "bi-publisher-bip"
-  ]
- },
- {
-  "chapter": "reporting",
-  "question": "OTBI or BI Publisher for a payslip? For a headcount dashboard? For a 200,000-row extract? Justify all three.",
-  "answer": "Payslip: BI Publisher, formatted per-employee output with bursting. Headcount dashboard: OTBI, ad-hoc and live. 200,000 rows: past OTBI's row limit — an HCM Extract, or BI Publisher with its own SQL.",
-  "terms": [
-   "otbi",
-   "bi-publisher-bip",
-   "hcm-extract"
-  ]
- },
- {
-  "chapter": "reporting",
-  "question": "What are the two halves of a BI Publisher report, and which one is closest to ordinary SQL work?",
-  "answer": "A data model and a layout template. The data model is genuinely SQL against the reporting schema — that half is ordinary query work. The template controls layout and is the new part.",
-  "terms": [
-   "bi-publisher-bip"
-  ]
- },
- {
-  "chapter": "reporting",
-  "question": "Explain bursting to someone who has never heard of it.",
-  "answer": "One report run produces thousands of individual outputs, each delivered separately to the right person — one payroll run becomes one payslip email per employee. Bursting is the splitting and routing step.",
-  "terms": [
-   "bursting"
-  ]
- },
- {
-  "chapter": "hdl",
-  "question": "Write a valid METADATA line for a simple object from memory, then a matching MERGE line.",
-  "answer": "METADATA|JobFamily|JobFamilyCode|JobFamilyName|EffectiveStartDate|EffectiveEndDate — then — MERGE|JobFamily|SALES|Sales|2000/01/01|4712/12/31. Same discriminator, same attributes in the same order, pipe-delimited, dates as YYYY/MM/DD.",
-  "terms": [
-   "hdl-hcm-data-loader"
-  ]
- },
- {
-  "chapter": "hdl",
-  "question": "Give two reasons an HDL file would be rejected before any data loads.",
-  "answer": "A METADATA line appearing after the MERGE lines it describes; two METADATA lines for the same component in one file; a MERGE line whose attributes do not match the METADATA order (pipe-count mismatch); a wrongly cased attribute name; a file saved with a UTF-8 byte-order mark.",
-  "terms": [
-   "hdl-hcm-data-loader"
-  ]
- },
- {
-  "chapter": "hdl",
-  "question": "Can a single .dat file contain two METADATA lines? Under what condition?",
-  "answer": "Yes — a Worker.dat routinely has METADATA lines for Worker, PersonName, WorkRelationship, Assignment and more. The condition is that each METADATA line is for a different component; two for the same component is invalid.",
-  "terms": [
-   "hdl-hcm-data-loader"
-  ]
- },
- {
-  "chapter": "hdl",
-  "question": "What is 4712/12/31 and why does it appear everywhere?",
-  "answer": "Oracle's conventional 'end of time' date. Every date-effective record has an end date, and an open-ended, current record ends on 4712/12/31 — so it is on almost every current row in a load and in the tables.",
-  "terms": [
-   "hdl-hcm-data-loader",
-   "effective-date"
-  ]
- },
- {
-  "chapter": "hdl",
-  "question": "Explain the difference between a source key and a user key, and say which one to insist on for a migration that must be reconciled.",
-  "answer": "A source key is SourceSystemOwner plus SourceSystemId — the record's identity in the legacy system. A user key is a natural business key such as JobFamilyCode. For a migration that must be reconciled, insist on source keys: they are what trace every Oracle record back to its legacy origin and let every variance be explained.",
-  "terms": [
-   "source-system-key-vs-person-number",
-   "hdl-hcm-data-loader"
-  ]
- },
- {
-  "chapter": "hdl",
-  "question": "What does JobFamilyId(SourceSystemId) mean in a METADATA line?",
-  "answer": "A foreign-object reference: the column points at a job family, identified by its source-system id rather than Oracle's internal id. The bracket names the key type used to resolve the reference. It is how child records attach to parents in a load.",
-  "terms": [
-   "hdl-hcm-data-loader"
-  ]
- },
- {
-  "chapter": "hdl",
-  "question": "Multiple .dat files are in one zip. Are they loaded in parallel or sequentially, and what does that mean for ordering?",
-  "answer": "Imported in parallel, loaded sequentially. Referenced data must exist before it is referenced: job families before jobs, grades and jobs before assignments, people before work relationships.",
-  "terms": [
-   "hdl-hcm-data-loader"
-  ]
- },
- {
-  "chapter": "ff",
-  "question": "What are the four logical sections of a Fast Formula?",
-  "answer": "Inputs (INPUTS ARE), defaults (DEFAULT FOR), logic (assignments and IF/THEN/ELSE), and return (RETURN). Oracle does not strictly enforce the order, but following it avoids errors.",
-  "terms": [
-   "fast-formula"
-  ]
- },
- {
-  "chapter": "ff",
-  "question": "Why does Oracle recommend INPUTS statements over database items where possible?",
-  "answer": "Inputs are passed at runtime and need no database read; database items are fetched from the database. Preferring inputs makes the payroll run faster.",
-  "terms": [
-   "fast-formula"
-  ]
- },
- {
-  "chapter": "ff",
-  "question": "What is a formula type, and why does it mean Fast Formula cannot be learned purely from grammar?",
-  "answer": "The type fixes which inputs, database items and contexts are available to a formula. The same syntax behaves differently depending on where it runs, and a formula written for one context will not run in another — so the language is learned by reading delivered formulas of the type being built.",
-  "terms": [
-   "fast-formula"
-  ]
- },
- {
-  "chapter": "ff",
-  "question": "In words, what is the logic for capping an Egyptian insurable wage before applying the 11% employee contribution?",
-  "answer": "Take the wage as an input. If it is above the ceiling (EGP 16,700 in 2026), use the ceiling. If it is below the floor (EGP 2,700), use the floor. Multiply the result by 0.11 and return it. Cap and floor first, rate last.",
-  "terms": [
-   "fast-formula",
-   "insurable-wage"
-  ]
- },
- {
-  "chapter": "extend",
-  "question": "A client wants a new field for equipment number. What are the first three thoughts?",
-  "answer": "DFF, lookup (or value set), approvals — where the data lives, whether it should be a controlled list, and what the workflow should do about it.",
-  "terms": [
-   "dff-descriptive-flexfield",
-   "lookup-type-and-lookup-code"
-  ]
- },
- {
-  "chapter": "extend",
-  "question": "What actually happens when a sandbox is published?",
-  "answer": "The configuration changes made and tested in isolation become real for every user. It is a controlled, deliberate step — not an autosave — and the moment at which page and flexfield changes go live.",
-  "terms": [
-   "sandbox"
-  ]
- },
- {
-  "chapter": "reporting",
-  "question": "There is no direct database connection to a SaaS pod. Name all four ways to get data out, and when each is right.",
-  "answer": "OTBI for ad-hoc analysis and dashboards; BI Publisher data models for formatted output and complex SQL; HCM Extract for scheduled or large-volume outbound files; REST APIs for real-time integration.",
-  "terms": [
-   "otbi",
-   "bi-publisher-bip",
-   "hcm-extract",
-   "rest-api"
-  ]
- },
- {
-  "chapter": "reporting",
-  "question": "Where is the honest boundary between what a strong functional consultant does and what is handed to a technical team?",
-  "answer": "Expected of a functional consultant: HDL loads, simple Fast Formulas, OTBI analyses and basic BI Publisher. Handed off: Oracle Integration Cloud integrations and complex BI Publisher development.",
-  "terms": [
-   "hdl-hcm-data-loader",
-   "fast-formula",
-   "rest-api"
-  ]
- }
+  {
+    "chapter": "model",
+    "question": "After a global transfer from Egypt to Saudi Arabia, how many person records exist? How many work relationships? How many payroll relationships?",
+    "answer": "One person record — the person is held once, globally. Two work relationships: the Egyptian one is terminated (end-dated) and a new one is created under the Saudi legal employer. Two payroll relationships: the Saudi one is created under the Saudi PSU in a different LDG, and because balances never span payroll relationships, year-to-date figures start fresh.",
+    "terms": [
+      "person",
+      "work-relationship",
+      "payroll-relationship",
+      "global-transfer"
+    ]
+  },
+  {
+    "chapter": "org",
+    "question": "What is the difference between a legal entity and a legal employer?",
+    "answer": "A legal entity is an organization recognized by law that can own assets, sign contracts and be sued. A legal employer is a classification applied to a legal entity that enables it to employ workers. Not every legal entity is a legal employer — one may exist only to hold property — and nobody can be hired into an entity until the classification is switched on.",
+    "terms": [
+      "legal-entity",
+      "legal-employer"
+    ]
+  },
+  {
+    "chapter": "org",
+    "question": "A client asks why an Egyptian element does not appear in the Saudi environment. What is checked first?",
+    "answer": "The legislative data group. All payroll configuration — elements, balances, formulas — lives inside exactly one LDG, and an element defined in the Egypt LDG does not exist in the Saudi LDG. It has to be built again there.",
+    "terms": [
+      "legislative-data-group-ldg",
+      "element"
+    ]
+  },
+  {
+    "chapter": "workforce",
+    "question": "Explain job versus position to someone who has never used an HR system.",
+    "answer": "A job is what the work is — 'Accountant' — defined once and reused everywhere. A position is one specific seat doing that work: 'Accountant #3, Finance, Alexandria plant', with its own budget and reporting line, which exists whether or not anyone currently sits in it. When the person leaves, the position stays and becomes a vacancy.",
+    "terms": [
+      "job",
+      "position"
+    ]
+  },
+  {
+    "chapter": "dating",
+    "question": "When is a correction used instead of an update, and what does each do to history?",
+    "answer": "An update records a real-world change: it creates a new dated record and keeps the old one, so a promotion on 1 July leaves both grades in history. A correction fixes a data-entry mistake: it overwrites the record as if the old value was never true. Using a correction for a real event destroys legitimate history and can trigger wrong retroactive payroll.",
+    "terms": [
+      "update-vs-correction",
+      "effective-date"
+    ]
+  },
+  {
+    "chapter": "payroll",
+    "question": "Walk through the payroll object chain from element to payment.",
+    "answer": "Element (the definition) → element eligibility (who could receive it) → element entry (who does, and how much) → payroll run (gross-to-net, held against the payroll relationship) → balances (running totals) → prepayments (distribute results to payment methods) → payment process (the bank file) → costing (to the ledger). Each link depends on the one before it.",
+    "terms": [
+      "element",
+      "element-eligibility-element-link",
+      "element-entry",
+      "payroll-run",
+      "balance",
+      "prepayments",
+      "payment-process-bank-file",
+      "costing"
+    ]
+  },
+  {
+    "chapter": "egypt-payroll",
+    "question": "An employee earns EGP 25,000 per month. What is their monthly social-insurance contribution, and why is it not 11% of 25,000?",
+    "answer": "EGP 1,837.00. Contributions apply to the insurable wage, which is capped at EGP 16,700 in 2026 (floor EGP 2,700). 11% of 16,700 is 1,837; the employer pays 18.75% of the same capped figure, EGP 3,131.25. The cap moves every January.",
+    "terms": [
+      "insurable-wage",
+      "social-insurance-contribution-rates"
+    ]
+  },
+  {
+    "chapter": "model",
+    "question": "Why can balances not span payroll relationships, and when does that become visible to a client?",
+    "answer": "Because payroll processing and aggregation happen at the payroll relationship level, which is tied to one payroll statutory unit and one legislation. A different PSU means different statutory rules and a different LDG, so totals cannot carry across. It becomes visible on a global transfer, when year-to-date balances start from zero in the new country.",
+    "terms": [
+      "payroll-relationship",
+      "balance"
+    ]
+  },
+  {
+    "chapter": "absence",
+    "question": "Which of the six absence plan types fits maternity leave, and why not an accrual plan?",
+    "answer": "A qualification plan. Maternity is not earned day by day — it is triggered by an event and paid at a defined rate over the absence, and it can carry occurrence caps. An accrual plan accumulates a balance over time, which is the wrong shape. The six types are accrual, qualification, no entitlement, compensatory, agreement and donation.",
+    "terms": [
+      "absence-plan",
+      "qualification-plan",
+      "accrual-plan"
+    ]
+  },
+  {
+    "chapter": "hrfunction",
+    "question": "A department has ten people, four of them half-time. What is the headcount and what is the FTE?",
+    "answer": "Headcount 10 — every person counts as one. FTE 8 — six full-timers at 1.0 plus four half-timers at 0.5. Both numbers are correct; they answer different questions, so always ask which one the client means.",
+    "terms": [
+      "headcount",
+      "fte-full-time-equivalent"
+    ]
+  },
+  {
+    "chapter": "reporting",
+    "question": "OTBI or BI Publisher for a payslip? For a headcount dashboard? Justify both.",
+    "answer": "Payslip: BI Publisher — a formatted, per-employee, printable document, produced from a SQL data model and a layout template and delivered by bursting. Headcount dashboard: OTBI — ad-hoc analysis against live data using the Worker Assignment subject area, no layout requirement. Swapping them is wrong in both directions.",
+    "terms": [
+      "otbi",
+      "bi-publisher-bip",
+      "bursting"
+    ]
+  },
+  {
+    "chapter": "payroll",
+    "question": "What does element eligibility do that an element entry does not?",
+    "answer": "Eligibility defines the population an element can apply to — by payroll, legal employer, grade, job, department. It answers 'who could receive this'. An entry is the actual attachment of the element to one person with values and dates — 'who does, and how much'. Without eligibility, no entry can be created.",
+    "terms": [
+      "element-eligibility-element-link",
+      "element-entry"
+    ]
+  },
+  {
+    "chapter": "extend",
+    "question": "A client says 'we need an extra field for equipment number'. What are the first three thoughts?",
+    "answer": "DFF — a descriptive flexfield on the relevant object holds the data without customization. Lookup or value set — should the field be a controlled list rather than free text. Approvals — what the workflow should do when the field changes. That sequence covers most 'can you add a field' requests.",
+    "terms": [
+      "dff-descriptive-flexfield",
+      "lookup-type-and-lookup-code",
+      "value-set"
+    ]
+  },
+  {
+    "chapter": "security",
+    "question": "What is the difference between what a job role controls and what a security profile controls?",
+    "answer": "A job role controls function — what a user can do: the screens, tasks and privileges of, say, an HR Specialist. A security profile controls data scope — whose records they can do it to: by legal employer, business unit, department, position or country. A data role combines the two. Same job role, different profiles, different visible populations.",
+    "terms": [
+      "job-role",
+      "data-role-and-security-profile"
+    ]
+  },
+  {
+    "chapter": "egypt-payroll",
+    "question": "Why does Oracle not deliver a maintained Egyptian payroll localization, and why does that matter for a consultant's value on a project?",
+    "answer": "Oracle maintains localizations for a limited set of markets; Egypt's statutory rules are built by the implementation partner in elements, balances and Fast Formulas. That means someone on the project has to know the Egyptian mechanics — insurable-wage caps, the tax brackets and bracket elimination, the small statutory deductions — and a consultant who knows them is useful from the first workshop.",
+    "terms": [
+      "fast-formula",
+      "insurable-wage",
+      "progressive-tax-brackets"
+    ]
+  },
+  {
+    "chapter": "dating",
+    "question": "A raise is approved in July with an effective date of 1 May. What happens in the July payroll run?",
+    "answer": "Retroactive events are raised for May and June, which were already paid at the old rate. Recalculate Payroll for Retroactive Changes runs before the main calculation, works out the arrears for both months and creates retro entries; the July run then pays them and re-states the affected balances, including social insurance and tax for the prior periods.",
+    "terms": [
+      "retroactive-change-retro"
+    ]
+  },
+  {
+    "chapter": "payroll",
+    "question": "What is a parallel run, and why is it not optional?",
+    "answer": "Running the new system's payroll alongside the legacy payroll for the same period — typically two or three consecutive months — and reconciling the two line by line, explaining every difference. It is the only reliable proof that the new payroll is correct before the old one is switched off.",
+    "terms": [
+      "parallel-run",
+      "reconciliation"
+    ]
+  },
+  {
+    "chapter": "hrfunction",
+    "question": "Name the three parts of the Ulrich model and say which one a consultant works with most day to day.",
+    "answer": "HR business partners embedded in the business, centers of excellence owning policy in a domain, and shared services doing the transactional work. Day to day, the consultant works most with shared services — in Egypt the Personnel and Payroll team — because their work is what the configuration automates; the CoEs sign off design in their domain.",
+    "terms": [
+      "ulrich-model",
+      "hrbp-hr-business-partner",
+      "centers-of-excellence-coe",
+      "shared-services-hr-operations"
+    ]
+  },
+  {
+    "chapter": "egypt-payroll",
+    "question": "What is the mandatory annual increment in Egypt calculated on, and why does that matter for high earners?",
+    "answer": "At least 3% of the social-insurance wage — the insurable wage — not total salary. Because the insurable wage is capped (EGP 16,700 in 2026), the increment is effectively capped at 3% of the ceiling for anyone earning above it.",
+    "terms": [
+      "minimum-wage-and-mandatory-annual-increment",
+      "insurable-wage"
+    ]
+  },
+  {
+    "chapter": "egypt-payroll",
+    "question": "Under the current Egyptian brackets, why might a naive progressive tax calculation understate tax for a senior employee?",
+    "answer": "Because of bracket elimination. Above defined net-income thresholds the lower bands are removed — above EGP 600,000 the 0% band goes, above 700,000 the 10% band too, and so on until above 1.2 million only the 25% and 27.5% bands apply. A calculator that applies every band to everyone gives senior staff lower-band relief they are not entitled to.",
+    "terms": [
+      "bracket-elimination-for-high-earners",
+      "progressive-tax-brackets"
+    ]
+  },
+  {
+    "chapter": "reporting",
+    "question": "What is a subject area, and why does choosing the wrong one produce wrong numbers rather than an error?",
+    "answer": "A pre-built, governed data model in OTBI — pre-joined tables exposed as folders and columns — covering one domain at a fixed grain. Choosing wrong does not fail; it silently reports at the wrong grain: date-effective history multiplies rows and multiple assignments double-count people, so the numbers are plausible and wrong.",
+    "terms": [
+      "subject-area",
+      "otbi"
+    ]
+  },
+  {
+    "chapter": "reporting",
+    "question": "Name the three OTBI constraints that catch people, and the three workarounds.",
+    "answer": "Constraints: no joins across subject areas in one analysis; a default row limit (around 65,000) past which results truncate silently; and predefined grain that cannot be changed. Workarounds: a Combined Analysis on a shared key such as person number; BI Publisher with hand-written SQL; or an HCM Extract for large volumes.",
+    "terms": [
+      "otbi",
+      "hcm-extract",
+      "bi-publisher-bip"
+    ]
+  },
+  {
+    "chapter": "reporting",
+    "question": "OTBI or BI Publisher for a payslip? For a headcount dashboard? For a 200,000-row extract? Justify all three.",
+    "answer": "Payslip: BI Publisher, formatted per-employee output with bursting. Headcount dashboard: OTBI, ad-hoc and live. 200,000 rows: past OTBI's row limit — an HCM Extract, or BI Publisher with its own SQL.",
+    "terms": [
+      "otbi",
+      "bi-publisher-bip",
+      "hcm-extract"
+    ]
+  },
+  {
+    "chapter": "reporting",
+    "question": "What are the two halves of a BI Publisher report, and which one is closest to ordinary SQL work?",
+    "answer": "A data model and a layout template. The data model is genuinely SQL against the reporting schema — that half is ordinary query work. The template controls layout and is the new part.",
+    "terms": [
+      "bi-publisher-bip"
+    ]
+  },
+  {
+    "chapter": "reporting",
+    "question": "Explain bursting to someone who has never heard of it.",
+    "answer": "One report run produces thousands of individual outputs, each delivered separately to the right person — one payroll run becomes one payslip email per employee. Bursting is the splitting and routing step.",
+    "terms": [
+      "bursting"
+    ]
+  },
+  {
+    "chapter": "hdl",
+    "question": "Write a valid METADATA line for a simple object from memory, then a matching MERGE line.",
+    "answer": "METADATA|JobFamily|JobFamilyCode|JobFamilyName|EffectiveStartDate|EffectiveEndDate — then — MERGE|JobFamily|SALES|Sales|2000/01/01|4712/12/31. Same discriminator, same attributes in the same order, pipe-delimited, dates as YYYY/MM/DD.",
+    "terms": [
+      "hdl-hcm-data-loader"
+    ]
+  },
+  {
+    "chapter": "hdl",
+    "question": "Give two reasons an HDL file would be rejected before any data loads.",
+    "answer": "A METADATA line appearing after the MERGE lines it describes; two METADATA lines for the same component in one file; a MERGE line whose attributes do not match the METADATA order (pipe-count mismatch); a wrongly cased attribute name; a file saved with a UTF-8 byte-order mark.",
+    "terms": [
+      "hdl-hcm-data-loader"
+    ]
+  },
+  {
+    "chapter": "hdl",
+    "question": "Can a single .dat file contain two METADATA lines? Under what condition?",
+    "answer": "Yes — a Worker.dat routinely has METADATA lines for Worker, PersonName, WorkRelationship, Assignment and more. The condition is that each METADATA line is for a different component; two for the same component is invalid.",
+    "terms": [
+      "hdl-hcm-data-loader"
+    ]
+  },
+  {
+    "chapter": "hdl",
+    "question": "What is 4712/12/31 and why does it appear everywhere?",
+    "answer": "Oracle's conventional 'end of time' date. Every date-effective record has an end date, and an open-ended, current record ends on 4712/12/31 — so it is on almost every current row in a load and in the tables.",
+    "terms": [
+      "hdl-hcm-data-loader",
+      "effective-date"
+    ]
+  },
+  {
+    "chapter": "hdl",
+    "question": "Explain the difference between a source key and a user key, and say which one to insist on for a migration that must be reconciled.",
+    "answer": "A source key is SourceSystemOwner plus SourceSystemId — the record's identity in the legacy system. A user key is a natural business key such as JobFamilyCode. For a migration that must be reconciled, insist on source keys: they are what trace every Oracle record back to its legacy origin and let every variance be explained.",
+    "terms": [
+      "source-system-key-vs-person-number",
+      "hdl-hcm-data-loader"
+    ]
+  },
+  {
+    "chapter": "hdl",
+    "question": "What does JobFamilyId(SourceSystemId) mean in a METADATA line?",
+    "answer": "A foreign-object reference: the column points at a job family, identified by its source-system id rather than Oracle's internal id. The bracket names the key type used to resolve the reference. It is how child records attach to parents in a load.",
+    "terms": [
+      "hdl-hcm-data-loader"
+    ]
+  },
+  {
+    "chapter": "hdl",
+    "question": "Multiple .dat files are in one zip. Are they loaded in parallel or sequentially, and what does that mean for ordering?",
+    "answer": "Imported in parallel, loaded sequentially. Referenced data must exist before it is referenced: job families before jobs, grades and jobs before assignments, people before work relationships.",
+    "terms": [
+      "hdl-hcm-data-loader"
+    ]
+  },
+  {
+    "chapter": "ff",
+    "question": "What are the four logical sections of a Fast Formula?",
+    "answer": "Inputs (INPUTS ARE), defaults (DEFAULT FOR), logic (assignments and IF/THEN/ELSE), and return (RETURN). Oracle does not strictly enforce the order, but following it avoids errors.",
+    "terms": [
+      "fast-formula"
+    ]
+  },
+  {
+    "chapter": "ff",
+    "question": "Why does Oracle recommend INPUTS statements over database items where possible?",
+    "answer": "Inputs are passed at runtime and need no database read; database items are fetched from the database. Preferring inputs makes the payroll run faster.",
+    "terms": [
+      "fast-formula"
+    ]
+  },
+  {
+    "chapter": "ff",
+    "question": "What is a formula type, and why does it mean Fast Formula cannot be learned purely from grammar?",
+    "answer": "The type fixes which inputs, database items and contexts are available to a formula. The same syntax behaves differently depending on where it runs, and a formula written for one context will not run in another — so the language is learned by reading delivered formulas of the type being built.",
+    "terms": [
+      "fast-formula"
+    ]
+  },
+  {
+    "chapter": "ff",
+    "question": "In words, what is the logic for capping an Egyptian insurable wage before applying the 11% employee contribution?",
+    "answer": "Take the wage as an input. If it is above the ceiling (EGP 16,700 in 2026), use the ceiling. If it is below the floor (EGP 2,700), use the floor. Multiply the result by 0.11 and return it. Cap and floor first, rate last.",
+    "terms": [
+      "fast-formula",
+      "insurable-wage"
+    ]
+  },
+  {
+    "chapter": "extend",
+    "question": "A client wants a new field for equipment number. What are the first three thoughts?",
+    "answer": "DFF, lookup (or value set), approvals — where the data lives, whether it should be a controlled list, and what the workflow should do about it.",
+    "terms": [
+      "dff-descriptive-flexfield",
+      "lookup-type-and-lookup-code"
+    ]
+  },
+  {
+    "chapter": "extend",
+    "question": "What actually happens when a sandbox is published?",
+    "answer": "The configuration changes made and tested in isolation become real for every user. It is a controlled, deliberate step — not an autosave — and the moment at which page and flexfield changes go live.",
+    "terms": [
+      "sandbox"
+    ]
+  },
+  {
+    "chapter": "reporting",
+    "question": "There is no direct database connection to a SaaS pod. Name all four ways to get data out, and when each is right.",
+    "answer": "OTBI for ad-hoc analysis and dashboards; BI Publisher data models for formatted output and complex SQL; HCM Extract for scheduled or large-volume outbound files; REST APIs for real-time integration.",
+    "terms": [
+      "otbi",
+      "bi-publisher-bip",
+      "hcm-extract",
+      "rest-api"
+    ]
+  },
+  {
+    "chapter": "reporting",
+    "question": "Where is the honest boundary between what a strong functional consultant does and what is handed to a technical team?",
+    "answer": "Expected of a functional consultant: HDL loads, simple Fast Formulas, OTBI analyses and basic BI Publisher. Handed off: Oracle Integration Cloud integrations and complex BI Publisher development.",
+    "terms": [
+      "hdl-hcm-data-loader",
+      "fast-formula",
+      "rest-api"
+    ]
+  },
+  {
+    "chapter": "tables",
+    "question": "Someone hands you a table and asks for total revenue. What do you establish first?",
+    "answer": "What one row represents — the grain. If one row is one order, summing the order total is right. If the table has been joined to order lines, each order now appears once per line and the same sum is inflated by the average lines per order. Nothing errors; the number just looks plausible and is wrong. I'd confirm the primary key, check row count against distinct key count, and only then sum.",
+    "terms": [
+      "grain",
+      "primary-key",
+      "fan-out"
+    ]
+  },
+  {
+    "chapter": "tables",
+    "question": "Why prefer a surrogate key over a natural one for joining?",
+    "answer": "Because natural keys change. Email addresses, national IDs and company codes all get reassigned or corrected, and when a key changes every row that referenced it breaks. A surrogate key is a meaningless generated number that never changes, so relationships stay intact. The working rule is join on surrogates, report on naturals — the user still wants to see the email, not the integer.",
+    "terms": [
+      "surrogate-key",
+      "primary-key"
+    ]
+  },
+  {
+    "chapter": "tables",
+    "question": "What is wrong with a table whose columns are Jan, Feb, Mar?",
+    "answer": "The month is encoded in the column header rather than stored as a value, so it's wide rather than long. It's readable for a human scanning across, but pivot tables, Power BI and most charting tools all compute on long data — one row per observation, with a month column and a value column. It has to be unpivoted before you can group or chart by month, and doing that with the tool's unpivot rather than by hand is what makes it repeatable.",
+    "terms": [
+      "long-and-wide",
+      "tidy-data"
+    ]
+  },
+  {
+    "chapter": "sql-shape",
+    "question": "Why can't you use a SELECT alias in the WHERE clause?",
+    "answer": "Because of logical processing order. The engine resolves FROM, then WHERE, then GROUP BY, then HAVING, and only then SELECT — so at the point WHERE runs, the alias doesn't exist yet. You either repeat the expression in WHERE or wrap the query in a subquery or CTE. The same alias usually does work in ORDER BY, because ORDER BY runs last.",
+    "terms": [
+      "logical-processing-order",
+      "alias-scope"
+    ]
+  },
+  {
+    "chapter": "sql-shape",
+    "question": "When does a filter belong in HAVING rather than WHERE?",
+    "answer": "When it's a condition on an aggregate. 'Orders over 100' is a row condition and goes in WHERE. 'Customers whose total is over 1,000' is a condition on a SUM that doesn't exist until GROUP BY has run, so it has to go in HAVING. Putting a plain row filter in HAVING usually works but is slower — you've grouped rows you were always going to throw away.",
+    "terms": [
+      "where-vs-having",
+      "group-by"
+    ]
+  },
+  {
+    "chapter": "sql-shape",
+    "question": "A colleague's NOT IN query returns no rows at all, and there's no error. What do you check?",
+    "answer": "Whether the list or subquery can return NULL. SQL has three-valued logic, so any comparison with NULL is unknown, and x NOT IN (1, 2, NULL) is never true for any x — the result set comes back empty and nothing complains. NOT EXISTS doesn't have that behaviour, so I'd rewrite it that way, and it's the safer default habit regardless.",
+    "terms": [
+      "three-valued-logic",
+      "null-in-data"
+    ]
+  },
+  {
+    "chapter": "sql-shape",
+    "question": "What's the difference between COUNT(*), COUNT(column) and COUNT(DISTINCT column)?",
+    "answer": "COUNT(*) counts rows. COUNT(column) counts rows where that column isn't NULL. COUNT(DISTINCT column) counts distinct non-null values. They're three different questions, and the gap between the first two is exactly the number of NULLs — which is often the more interesting number.",
+    "terms": [
+      "count-star-vs-column",
+      "aggregate-function"
+    ]
+  },
+  {
+    "chapter": "sql-joins",
+    "question": "Why does a LEFT JOIN sometimes behave like an INNER JOIN?",
+    "answer": "Because of a condition on the right table in the WHERE clause. Unmatched rows get NULL in the right-hand columns, NULL = anything is unknown, and WHERE discards them — so you're left with exactly what an inner join would return. The fix is to move that condition into the ON clause, where it decides what counts as a match instead of filtering the result. The exception is an anti-join, where filtering IS NULL in WHERE is the whole point.",
+    "terms": [
+      "left-join",
+      "anti-join"
+    ]
+  },
+  {
+    "chapter": "sql-joins",
+    "question": "Revenue in your report is roughly double what finance says. Where do you look first?",
+    "answer": "A join that changed the grain. If orders were joined to order lines, every order-level value now appears once per line, so SUM(order_total) is weighted by line count. I'd compare the row count before and after each join — if a join changed it and I didn't expect that, stop there. The fix is to aggregate the many side to the grain I want before joining, usually in a CTE, rather than reaching for DISTINCT afterwards.",
+    "terms": [
+      "fan-out",
+      "cardinality",
+      "grain"
+    ]
+  },
+  {
+    "chapter": "sql-joins",
+    "question": "A join returns far fewer rows than you expected. What do you suspect?",
+    "answer": "The keys, before the logic. Trailing whitespace, one side stored as text and the other as an integer, case sensitivity differing by collation, leading zeros stripped by a spreadsheet upstream. I'd count distinct keys on both sides and eyeball a handful that failed to match. It's nearly always the data rather than the SQL.",
+    "terms": [
+      "join-key-mismatch"
+    ]
+  },
+  {
+    "chapter": "sql-windows",
+    "question": "What does a window function do that GROUP BY cannot?",
+    "answer": "It computes across a set of rows and returns the answer on every row, instead of collapsing them. That's what makes running totals, rankings, each row's share of its group, and period-on-period change possible while keeping the detail. PARTITION BY is the window equivalent of GROUP BY, except the rows survive.",
+    "terms": [
+      "window-function",
+      "partition-by"
+    ]
+  },
+  {
+    "chapter": "sql-windows",
+    "question": "Your running total is wrong on days that have two orders. Why?",
+    "answer": "The default frame. With an ORDER BY and no frame clause, the default is RANGE BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW, and RANGE treats every row sharing an ordering value as one unit — so both rows on that date get the total including both, rather than stepping one at a time. Writing ROWS explicitly fixes it. It's a nasty bug because on data with no ties the two are identical, so it survives testing.",
+    "terms": [
+      "frame-clause",
+      "window-function"
+    ]
+  },
+  {
+    "chapter": "sql-windows",
+    "question": "How do you keep exactly one row per customer — say their most recent order?",
+    "answer": "ROW_NUMBER() OVER (PARTITION BY customer_id ORDER BY order_date DESC) in a CTE, then filter to row number 1 outside it. You can't filter a window function in WHERE because WHERE runs before SELECT. And the ORDER BY needs a deliberate tiebreaker — otherwise two orders on the same date make the result unstable between runs.",
+    "terms": [
+      "row-number-rank-dense-rank",
+      "cte",
+      "window-function"
+    ]
+  },
+  {
+    "chapter": "excel",
+    "question": "You inherit a spreadsheet full of VLOOKUPs. What do you check first?",
+    "answer": "The fourth argument. Omitted, it defaults to TRUE — approximate match — which assumes the lookup column is sorted and returns the nearest smaller value if it isn't. On unsorted data that gives confidently wrong answers rather than errors, so nobody notices. Anything new I'd write as XLOOKUP, which defaults to exact match, can look left, and references arrays rather than a column number so inserting a column doesn't break it.",
+    "terms": [
+      "xlookup",
+      "index-match"
+    ]
+  },
+  {
+    "chapter": "excel",
+    "question": "When is Excel the right answer, and when has it stopped being one?",
+    "answer": "It's the fastest tool in existence for a question nobody has asked before, on data just handed to you, where the answer is needed in ten minutes and never again. It stops the moment a number matters to more than one person or has to be reproduced next month — because a spreadsheet has no audit trail, no real access control, and no way to tell whether the copy you were emailed is current. At that point it becomes a query against the source and a model somebody can refresh.",
+    "terms": [
+      "excel-limits",
+      "power-query"
+    ]
+  },
+  {
+    "chapter": "excel",
+    "question": "Why is Power Query the highest-return thing to learn in Excel?",
+    "answer": "Because it makes the cleaning repeatable and inspectable. It imports, reshapes, unpivots, splits and joins, and it records every step — so next month's file is one click, and a colleague can read what you did. A folder of manually cleaned spreadsheets contains no such record. And it's the same engine in Power BI, so none of the effort is Excel-specific.",
+    "terms": [
+      "power-query",
+      "excel-table"
+    ]
+  },
+  {
+    "chapter": "powerbi-model",
+    "question": "Why does Power BI want a star schema rather than one flat table?",
+    "answer": "Because the engine's compression and its filter propagation are both built around it. One fact table of the events you measure, surrounded by dimension tables of the things you slice by, each joined on a single key. It's smaller, faster and far easier to reason about than a flat wide table, and Microsoft's own guidance says so. Given a flat export, splitting the dimensions out of it is the first modelling job.",
+    "terms": [
+      "star-schema",
+      "fact-table",
+      "dimension-table"
+    ]
+  },
+  {
+    "chapter": "powerbi-model",
+    "question": "A slicer isn't filtering a visual. Someone suggests turning on bidirectional filtering. What do you say?",
+    "answer": "That it's the tempting fix and usually the wrong one. Filters are meant to flow from the one side to the many — select a product, the sales rows filter. Making a relationship filter both ways can create ambiguous paths through the model, make results depend on evaluation order, and slow queries down. I'd look first for a missing bridge table or a model that isn't really a star, and reach for bidirectional last, deliberately.",
+    "terms": [
+      "cross-filter-direction",
+      "relationship-cardinality"
+    ]
+  },
+  {
+    "chapter": "powerbi-model",
+    "question": "How do you decide whether a calculation belongs in Power Query or DAX?",
+    "answer": "Roche's Maxim: transform as far upstream as possible, and as far downstream as necessary. If the calculation gives the same answer regardless of what the user has selected, it's a transformation — do it in the source or Power Query, where it happens once at refresh and every report benefits. Leave to DAX only what genuinely depends on the filter context. Otherwise nobody can find where a number is defined, and the same fix has to be made four times.",
+    "terms": [
+      "roches-maxim",
+      "power-query"
+    ]
+  },
+  {
+    "chapter": "dax",
+    "question": "When do you write a measure and when a calculated column?",
+    "answer": "A calculated column is computed row by row at refresh and stored, so it knows the current row and nothing about the report — use it for something you need to slice, group or filter by. A measure is computed at query time in the filter context of each cell, so it knows nothing about rows and everything about what the user selected — use it for anything you aggregate. The default should be a measure; a calculated column holding Quantity times Price on ten million rows costs memory and can't respond to a slicer.",
+    "terms": [
+      "measure-vs-calculated-column",
+      "filter-context"
+    ]
+  },
+  {
+    "chapter": "dax",
+    "question": "A stakeholder says your measure is wrong in the total row. What's usually going on?",
+    "answer": "The total row is a different filter context, not the sum of the rows above it. The measure is evaluated once per cell under whatever filters that cell sits in, and the total cell has fewer filters — so for anything non-additive, like a ratio or a distinct count, the total legitimately isn't the column sum. It's almost never the measure and almost always the context, and the explanation is usually what the stakeholder actually needs.",
+    "terms": [
+      "filter-context",
+      "measure-vs-calculated-column"
+    ]
+  },
+  {
+    "chapter": "dax",
+    "question": "What does CALCULATE do, and what surprises people about it?",
+    "answer": "It evaluates an expression in a filter context it has modified — it's the centre of the language. What surprises people is that its filter arguments replace existing filters on the same column rather than adding to them, so filtering to Cairo returns Cairo even in a cell already filtered to Alexandria. KEEPFILTERS makes it intersect instead. The other surprise is context transition: called in a row context, it turns that row into a filter context, which is behind most DAX behaviour that looks like magic.",
+    "terms": [
+      "calculate",
+      "context-transition"
+    ]
+  },
+  {
+    "chapter": "question-to-chart",
+    "question": "Someone asks you to 'look at our sales'. What happens next?",
+    "answer": "A short conversation, not three hours of dashboard building. What decision does the answer feed? Over what period, and compared with what — a number with nothing to compare it to isn't information. Which population counts: are churned customers, test accounts and trials in or out? What would count as a surprising answer? Then I repeat it back as one sentence and get agreement. That sentence is the specification, and it's usually the chart title.",
+    "terms": [
+      "business-question",
+      "dashboard-vs-report"
+    ]
+  },
+  {
+    "chapter": "question-to-chart",
+    "question": "Why must a bar chart's axis start at zero when a line chart's need not?",
+    "answer": "Because they encode differently. Bars encode value by length, so truncating the axis at 90 makes a 2% difference look like a doubling — the reader is comparing lengths that no longer mean what they look like. A line encodes change by slope, and forcing a zero baseline often flattens exactly the movement you're showing, so truncation is legitimate there as long as the axis is labelled honestly.",
+    "terms": [
+      "truncated-axis",
+      "chart-choice"
+    ]
+  },
+  {
+    "chapter": "question-to-chart",
+    "question": "What do you do before presenting a number?",
+    "answer": "Reconcile it against something the business already trusts — last month's close, the finance figure, the count in the source system. If it doesn't match, find out why before the meeting, because someone in the room will ask. Then spot-check individual rows against the source and look at the boundaries: first period, last period, nulls, categories with one row. And say what I'm unsure about — a flagged caveat costs nothing, a number that quietly turns out to be wrong costs trust.",
+    "terms": [
+      "sanity-check",
+      "business-question"
+    ]
+  }
 ]

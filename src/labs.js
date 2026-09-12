@@ -169,3 +169,148 @@ LABS.push({id:'jobpos',ch:'workforce',title:'Job vs position',lead:'The single m
   draw();
 }});
 
+/* ===================== DATA & ANALYTICS ===================== */
+
+LABS.push({id:'query-order',ch:'sql-shape',title:'What the engine does, in its own order',lead:'The same query, stepped through the order the database actually resolves it in. Watch the rows disappear before SELECT ever runs — that is why an alias defined in SELECT cannot be used in WHERE.',render(b){
+  const ROWS=[{id:101,cust:'Amal',amt:120,st:'shipped'},{id:102,cust:'Amal',amt:60,st:'shipped'},
+              {id:103,cust:'Karim',amt:200,st:'cancelled'},{id:104,cust:'Karim',amt:90,st:'shipped'},
+              {id:105,cust:'Nour',amt:45,st:'shipped'},{id:106,cust:'Nour',amt:30,st:'pending'}];
+  const STEPS=[
+    {k:'FROM',   t:'orders',                         say:'Every row in the table, before anything is discarded.'},
+    {k:'WHERE',  t:"status = 'shipped'",             say:'Rows are thrown away first. This is why a filter here cannot reference an alias from SELECT — SELECT has not run yet.'},
+    {k:'GROUP BY',t:'customer',                      say:'The survivors collapse into one row per customer. From here on there are groups, not rows.'},
+    {k:'HAVING', t:'SUM(amount) > 100',              say:'Groups are thrown away. A condition on an aggregate can only live here, because the aggregate did not exist until GROUP BY ran.'},
+    {k:'SELECT', t:'customer, SUM(amount) AS total', say:'Only now are the output columns worked out — and only now does the alias `total` exist.'},
+    {k:'ORDER BY',t:'total DESC',                    say:'Sorting is last, which is the one place the alias from SELECT is usually allowed.'}];
+  let at=0;
+  const draw=()=>{
+    const kept=ROWS.filter(r=>at<1||r.st==='shipped');
+    let grouped=null;
+    if(at>=2){ const m={}; kept.forEach(r=>{ m[r.cust]=(m[r.cust]||0)+r.amt; });
+      grouped=Object.entries(m).map(([cust,total])=>({cust,total})); }
+    if(at>=3) grouped=grouped.filter(g=>g.total>100);
+    if(at>=5) grouped=[...grouped].sort((x,y)=>y.total-x.total);
+    const table = at<2
+      ? `<table class="dt"><thead><tr><th>id</th><th>customer</th><th>amount</th><th>status</th></tr></thead><tbody>${ROWS.map(r=>{
+          const gone=at>=1&&r.st!=='shipped';
+          return `<tr class="${gone?'gone':''}"><td>${r.id}</td><td>${r.cust}</td><td class="n">${r.amt}</td><td>${r.st}</td></tr>`;}).join('')}</tbody></table>`
+      : `<table class="dt"><thead><tr><th>customer</th><th>${at>=4?'total':'SUM(amount)'}</th></tr></thead><tbody>${grouped.map(g=>
+          `<tr><td>${g.cust}</td><td class="n">${g.total}</td></tr>`).join('')}</tbody></table>`;
+    b.innerHTML=`<div class="stepper" style="margin-bottom:14px">${STEPS.map((s,i)=>
+        `<button class="${i===at?'active':''}" data-s="${i}">${s.k}</button>`).join('')}</div>
+      <div class="stage"><div style="min-width:420px">
+        <div class="qline">${STEPS.slice(0,at+1).map(s=>`<span><b>${s.k}</b> ${esc(s.t)}</span>`).join('')}</div>
+        ${table}
+        <div class="qcount">${at<2?`${ROWS.filter(r=>at<1||r.st==='shipped').length} rows`:`${grouped.length} groups`}</div>
+      </div></div>
+      <div class="explain" style="margin-top:12px"><b>${STEPS[at].k}</b><br>${STEPS[at].say}</div>`;
+    b.querySelectorAll('[data-s]').forEach(x=>x.addEventListener('click',()=>{ at=+x.dataset.s; draw(); }));
+  };
+  draw();
+}});
+
+LABS.push({id:'joins',ch:'sql-joins',title:'Which rows survive, and which multiply',lead:'Three customers, four orders, one of them orphaned. Change the join and watch what happens to the row count — then look at what fan-out does to a total.',render(b){
+  const C=[{id:1,name:'Amal'},{id:2,name:'Karim'},{id:3,name:'Nour'}];
+  const O=[{id:'A-1',cid:1,amt:120},{id:'A-2',cid:1,amt:60},{id:'K-1',cid:2,amt:90},{id:'X-9',cid:99,amt:75}];
+  const KINDS={
+    inner:{lbl:'INNER JOIN', say:'Only rows that matched on both sides. Nour has no orders and disappears; the orphaned order X-9 disappears too. Rows vanish silently — that is how records go missing from a report.'},
+    left: {lbl:'LEFT JOIN',  say:'Every customer survives. Nour gets NULLs where the order columns would be. The orphaned order is still dropped, because it is on the right.'},
+    right:{lbl:'RIGHT JOIN', say:'Every order survives, including the orphan X-9 whose customer does not exist. Almost nobody writes this deliberately — a LEFT JOIN with the tables swapped reads better.'},
+    full: {lbl:'FULL OUTER', say:'Nothing is lost from either side. Useful for reconciling two sources: the NULLs on each side are exactly the rows that failed to match.'},
+    trap: {lbl:'LEFT + WHERE',say:'A LEFT JOIN with a condition on the right table in WHERE. Nour’s NULL fails the comparison and she is discarded — so this returns exactly what an INNER JOIN returns. Put the condition in ON instead.'}};
+  let k='inner';
+  const rowsFor=()=>{
+    const out=[];
+    if(k==='right'||k==='full'){
+      O.forEach(o=>{ const c=C.find(x=>x.id===o.cid); out.push({c:c||null,o}); });
+      if(k==='full') C.forEach(c=>{ if(!O.some(o=>o.cid===c.id)) out.push({c,o:null}); });
+      return out;
+    }
+    C.forEach(c=>{ const mine=O.filter(o=>o.cid===c.id);
+      if(mine.length) mine.forEach(o=>out.push({c,o}));
+      else if(k==='left') out.push({c,o:null}); });
+    return out;
+  };
+  const draw=()=>{
+    const rows=rowsFor();
+    const total=rows.reduce((a,r)=>a+(r.o?r.o.amt:0),0);
+    const dupes=rows.filter(r=>r.c&&rows.filter(x=>x.c&&x.c.id===r.c.id).length>1).length;
+    b.innerHTML=`<div class="stepper" style="margin-bottom:14px">${Object.entries(KINDS).map(([id,v])=>
+        `<button class="${id===k?'active':''}" data-k="${id}">${v.lbl}</button>`).join('')}</div>
+      <div class="stage"><table class="dt" style="min-width:430px"><thead><tr><th>customer</th><th>order</th><th>amount</th></tr></thead><tbody>${rows.map(r=>
+        `<tr><td class="${r.c?'':'nul'}">${r.c?r.c.name:'NULL'}</td><td class="${r.o?'':'nul'}">${r.o?r.o.id:'NULL'}</td><td class="n ${r.o?'':'nul'}">${r.o?r.o.amt:'NULL'}</td></tr>`).join('')}</tbody></table></div>
+      <div class="counter" style="margin-top:12px">
+        <div><div class="big num">${rows.length}</div><div class="lbl">rows out (3 customers, 4 orders in)</div></div>
+        <div><div class="big num">${total}</div><div class="lbl">SUM(amount)</div></div>
+        <div><div class="big num">${dupes}</div><div class="lbl">rows where a customer repeats</div></div>
+      </div>
+      <div class="explain" style="margin-top:12px"><b>${KINDS[k].lbl}</b><br>${KINDS[k].say}
+        ${dupes?'<div class="muted" style="margin-top:6px"><b style="color:var(--gold)">Fan-out:</b> Amal has two orders, so her row is repeated. Any customer-level column — a credit limit, a region, an annual fee — would now be counted twice by a SUM.</div>':''}</div>`;
+    b.querySelectorAll('[data-k]').forEach(x=>x.addEventListener('click',()=>{ k=x.dataset.k; draw(); }));
+  };
+  draw();
+}});
+
+LABS.push({id:'windows',ch:'sql-windows',title:'The frame nobody writes, and the bug it hides',lead:'A running total over four days, two of which fall on the same date. Switch the frame between ROWS and RANGE — the default — and watch the tied rows disagree.',render(b){
+  const R=[{d:'2026-01-01',amt:100},{d:'2026-01-02',amt:80},{d:'2026-01-02',amt:40},{d:'2026-01-03',amt:60}];
+  let frame='RANGE', rank='ROW_NUMBER';
+  const running=()=>R.map((r,i)=>{
+    if(frame==='ROWS') return R.slice(0,i+1).reduce((a,x)=>a+x.amt,0);
+    return R.filter(x=>x.d<=r.d).reduce((a,x)=>a+x.amt,0);   // RANGE: peers share a value
+  });
+  const ranks=()=>{ const sorted=[...R].map((r,i)=>({...r,i})).sort((a,c)=>c.amt-a.amt);
+    const out=Array(R.length); let prev=null, rk=0, dense=0;
+    sorted.forEach((r,n)=>{ if(r.amt!==prev){ rk=n+1; dense+=1; prev=r.amt; }
+      out[r.i]= rank==='ROW_NUMBER'?n+1 : rank==='RANK'?rk : dense; });
+    return out; };
+  const draw=()=>{
+    const run=running(), rk=ranks();
+    const tie=frame==='RANGE';
+    b.innerHTML=`<div style="display:flex;gap:18px;flex-wrap:wrap;margin-bottom:14px">
+        <div><div class="eyebrow" style="margin-bottom:5px">Frame</div><div class="stepper">${['ROWS','RANGE'].map(f=>
+          `<button class="${f===frame?'active':''}" data-f="${f}">${f}${f==='RANGE'?' (default)':''}</button>`).join('')}</div></div>
+        <div><div class="eyebrow" style="margin-bottom:5px">Ranking</div><div class="stepper">${['ROW_NUMBER','RANK','DENSE_RANK'].map(f=>
+          `<button class="${f===rank?'active':''}" data-r="${f}">${f}</button>`).join('')}</div></div></div>
+      <div class="stage"><table class="dt" style="min-width:470px"><thead><tr><th>order_date</th><th>amount</th><th>running total</th><th>${rank}() by amount</th></tr></thead><tbody>${R.map((r,i)=>
+        `<tr class="${tie&&r.d==='2026-01-02'?'tie':''}"><td>${r.d}</td><td class="n">${r.amt}</td><td class="n"><b>${run[i]}</b></td><td class="n">${rk[i]}</td></tr>`).join('')}</tbody></table></div>
+      <div class="explain" style="margin-top:12px">${frame==='RANGE'
+        ? '<b>RANGE — what you get if you write no frame at all</b><br>RANGE treats every row sharing the ordering value as one unit, so both rows dated 2 January show 220: the total including <em>both</em> of them. Nothing is wrong with the SQL, and on data with no ties this is identical to ROWS — which is exactly why the bug survives testing and turns up in production.'
+        : '<b>ROWS — one row at a time</b><br>The total steps 100, 180, 220, 280 as you would expect. If you mean row-by-row, write <code>ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW</code> and say so.'}
+        <div class="muted" style="margin-top:8px">${rank==='ROW_NUMBER'?'ROW_NUMBER never ties — the two 80/40 rows get distinct numbers, and with no tiebreaker in ORDER BY, which one comes first is not stable between runs.':rank==='RANK'?'RANK ties and then skips: 1, 2, 2, 4.':'DENSE_RANK ties and does not skip: 1, 2, 2, 3.'}</div></div>`;
+    b.querySelectorAll('[data-f]').forEach(x=>x.addEventListener('click',()=>{ frame=x.dataset.f; draw(); }));
+    b.querySelectorAll('[data-r]').forEach(x=>x.addEventListener('click',()=>{ rank=x.dataset.r; draw(); }));
+  };
+  draw();
+}});
+
+LABS.push({id:'dax-context',ch:'dax',title:'The same measure, a different answer every time',lead:'One measure, six rows of sales. Move the slicers and watch what the filter context does to it — then see why CALCULATE ignores the slicer you just set.',render(b){
+  const S=[{cat:'Books',reg:'Cairo',amt:120},{cat:'Books',reg:'Alexandria',amt:80},
+           {cat:'Toys',reg:'Cairo',amt:200},{cat:'Toys',reg:'Alexandria',amt:60},
+           {cat:'Toys',reg:'Cairo',amt:40},{cat:'Books',reg:'Cairo',amt:30}];
+  let cat='All', reg='All';
+  const draw=()=>{
+    const inCtx=S.filter(r=>(cat==='All'||r.cat===cat)&&(reg==='All'||r.reg===reg));
+    const total=inCtx.reduce((a,r)=>a+r.amt,0);
+    const cairo=S.filter(r=>(cat==='All'||r.cat===cat)&&r.reg==='Cairo').reduce((a,r)=>a+r.amt,0);
+    const keep=inCtx.filter(r=>r.reg==='Cairo').reduce((a,r)=>a+r.amt,0);
+    b.innerHTML=`<div style="display:flex;gap:18px;flex-wrap:wrap;margin-bottom:14px">
+        <div><div class="eyebrow" style="margin-bottom:5px">Category slicer</div><div class="stepper">${['All','Books','Toys'].map(v=>
+          `<button class="${v===cat?'active':''}" data-c="${v}">${v}</button>`).join('')}</div></div>
+        <div><div class="eyebrow" style="margin-bottom:5px">Region slicer</div><div class="stepper">${['All','Cairo','Alexandria'].map(v=>
+          `<button class="${v===reg?'active':''}" data-g="${v}">${v}</button>`).join('')}</div></div></div>
+      <div class="stage"><table class="dt" style="min-width:380px"><thead><tr><th>category</th><th>region</th><th>amount</th></tr></thead><tbody>${S.map(r=>{
+        const on=(cat==='All'||r.cat===cat)&&(reg==='All'||r.reg===reg);
+        return `<tr class="${on?'':'gone'}"><td>${r.cat}</td><td>${r.reg}</td><td class="n">${r.amt}</td></tr>`;}).join('')}</tbody></table></div>
+      <div class="out" style="margin-top:14px">
+        <div class="kv"><span><code>Total Sales = SUM(Sales[Amount])</code></span><b>${total}</b></div>
+        <div class="kv"><span><code>Sales Cairo = CALCULATE([Total Sales], Region = "Cairo")</code></span><b>${cairo}</b></div>
+        <div class="kv total"><span><code>… with KEEPFILTERS</code></span><b>${keep}</b></div>
+      </div>
+      <div class="explain" style="margin-top:12px"><b>${inCtx.length} of ${S.length} rows are in the filter context</b><br>
+        The measure is one expression. It is evaluated again under whatever filters apply, which is why the same measure returns a different number in every cell of a matrix — and why a total row is a different context rather than the sum of the rows above it.
+        ${reg==='Alexandria'?'<div class="muted" style="margin-top:8px"><b style="color:var(--gold)">Look at the second line.</b> The region slicer says Alexandria, and <code>Sales Cairo</code> still returns Cairo. CALCULATE’s filter arguments <em>replace</em> existing filters on the same column rather than adding to them. <code>KEEPFILTERS</code> on the third line intersects instead, which is why it returns 0.</div>':'<div class="muted" style="margin-top:8px">Set the region slicer to Alexandria and compare the second and third lines — that is the difference between replacing a filter and intersecting with it.</div>'}</div>`;
+    b.querySelectorAll('[data-c]').forEach(x=>x.addEventListener('click',()=>{ cat=x.dataset.c; draw(); }));
+    b.querySelectorAll('[data-g]').forEach(x=>x.addEventListener('click',()=>{ reg=x.dataset.g; draw(); }));
+  };
+  draw();
+}});

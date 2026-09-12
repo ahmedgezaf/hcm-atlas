@@ -277,3 +277,59 @@ FIGS.push({
     ])}
   </svg>`,
 });
+
+/* ------------------------------------------------------------------ */
+FIGS.push({
+  id: 'grain',
+  ch: 'tables',
+  title: 'The same sale, at three grains',
+  caption: 'Every one of these is a correct table about the same order. They just answer different questions — and the column called amount means something different in each. Sum the wrong one and the total is wrong in a way nothing warns you about.',
+  svg: () => `<svg viewBox="0 0 760 300" role="img" aria-label="The same sale shown at order grain as one row, at order-line grain as three rows, and at product-per-day grain as two rows.">
+    ${FIG_DEFS}
+    ${F.head(30, 20, 'ONE ROW IS ONE ORDER')}
+    ${F.box(30, 30, 700, 40, 'order 1041 · Amal · 3 Jan · total 260', null, 'accent')}
+    ${F.note(30, 88, 'SUM(total) = 260. Correct — one row, one order.')}
+
+    ${F.head(30, 124, 'ONE ROW IS ONE ORDER LINE')}
+    ${F.box(30, 134, 226, 38, 'line 1 · Notebook · 120')}
+    ${F.box(267, 134, 226, 38, 'line 2 · Pen set · 90')}
+    ${F.box(504, 134, 226, 38, 'line 3 · Folder · 50')}
+    ${F.note(30, 192, 'SUM(line amount) = 260. Also correct. But if the order total came along on every line, SUM(total) = 780.', 'strong')}
+
+    ${F.head(30, 228, 'ONE ROW IS ONE PRODUCT, PER STORE, PER DAY')}
+    ${F.box(30, 238, 344, 38, 'Notebook · Cairo HO · 3 Jan · qty 2 · 120')}
+    ${F.box(386, 238, 344, 38, 'Pen set · Cairo HO · 3 Jan · qty 1 · 90')}
+  </svg>`,
+});
+
+/* ------------------------------------------------------------------ */
+FIGS.push({
+  id: 'star-schema',
+  ch: 'powerbi-model',
+  title: 'One fact, dimensions around it',
+  caption: 'Filters travel from the one side to the many: pick a product and the sales rows filter, never the other way. That single direction is what keeps the model unambiguous — and it is why turning on bidirectional filtering to fix a slicer so often breaks something else.',
+  svg: () => `<svg viewBox="0 0 760 330" role="img" aria-label="A star schema: a central Sales fact table joined to Date, Product, Customer and Store dimension tables, with filters flowing from each dimension into the fact.">
+    ${FIG_DEFS}
+    ${F.box(276, 130, 208, 66, 'FACT · Sales', ['one row per sale', 'keys + the numbers'], 'accent')}
+
+    ${F.box(30, 24, 200, 52, 'DIM · Date', 'one row per day, no gaps')}
+    ${F.box(530, 24, 200, 52, 'DIM · Product', 'name, category, price')}
+    ${F.box(30, 250, 200, 52, 'DIM · Customer', 'segment, country')}
+    ${F.box(530, 250, 200, 52, 'DIM · Store', 'city, region, format')}
+
+    <path class="f-line" d="M180 76 L296 130" marker-end="url(#fig-ar)"/>
+    <path class="f-line" d="M580 76 L464 130" marker-end="url(#fig-ar)"/>
+    <path class="f-line" d="M180 250 L296 196" marker-end="url(#fig-ar)"/>
+    <path class="f-line" d="M580 250 L464 196" marker-end="url(#fig-ar)"/>
+
+    ${F.note(196, 108, '1', 'strong')}
+    ${F.note(556, 108, '1', 'strong')}
+    ${F.note(196, 232, '1', 'strong')}
+    ${F.note(556, 232, '1', 'strong')}
+    ${F.note(264, 122, '∞', 'strong')}
+    ${F.note(486, 122, '∞', 'strong')}
+    ${F.note(264, 214, '∞', 'strong')}
+    ${F.note(486, 214, '∞', 'strong')}
+    ${F.note(380, 320, 'Arrows show the direction a filter travels: one → many.', 'mid')}
+  </svg>`,
+});

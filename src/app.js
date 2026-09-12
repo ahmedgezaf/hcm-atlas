@@ -149,15 +149,28 @@ const MAPS = {
     <div class="sysmap-scroll"><div class="sysmap-inner">
       <div class="layer-lbl">The consultant’s toolkit</div>${node('hdl')}${node('ff')}${node('reporting')}${node('extend','two')}${node('security')}
     </div></div>`,
+
+  analytics: (node, sec) => `
+    ${sec('functional')}
+    <div class="sysmap-scroll"><div class="sysmap-inner">
+      <div class="layer-lbl">Before the tool — what a row means</div>${node('tables','full')}
+      <div class="layer-lbl">And after it — what a reader takes away</div>${node('excel')}${node('question-to-chart','two')}
+    </div></div>
+    ${sec('technical')}
+    <div class="sysmap-scroll"><div class="sysmap-inner">
+      <div class="layer-lbl">SQL — getting the rows out, in three passes</div>${node('sql-shape')}${node('sql-joins')}${node('sql-windows')}
+      <div class="layer-lbl">Power BI — the model decides whether the numbers are right</div>${node('powerbi-model','two')}${node('dax')}
+    </div></div>`,
 };
 
 function renderHome(v){
   const d=domById(dom), pr=progress();
   const node=(id,cls='')=>{const c=chById(id);return `<button class="mnode ${cls}" data-h style="--h:${c.hue}" data-ch="${id}"><span class="k">${c.num}</span><div class="t">${icon(c.id)}<span>${esc(c.title)}</span></div><div class="s">${esc(c.sub)}</div>${S.read[id]?'<span class="done">✓</span>':''}</button>`;};
   const stat=(to,val,p2,lbl)=>`<button class="hstat" data-go2="${to}"><div class="ring" style="--v:${p2}"><b>${p2}%</b></div><div><div class="big num">${val}</div><div class="lbl">${lbl}</div></div></button>`;
-  const sec=(track,name,blurb)=>`<div class="sec-lbl"><span class="sec-k ${track}">${name}</span>${blurb?`<p>${blurb}</p>`:''}</div>`;
+  const L=t=>d.tracks[t];
+  const sec=(track,name,blurb)=>`<div class="sec-lbl"><span class="sec-k ${track}">${name||L(track).name}</span>${(blurb||L(track).blurb)?`<p>${blurb||L(track).blurb}</p>`:''}</div>`;
   const auto=()=>['functional','technical'].map(t=>{ const list=CHD().filter(c=>c.track===t); if(!list.length) return '';
-      return sec(t,t==='functional'?'Functional':'Technical','')+`<div class="sysmap-scroll"><div class="sysmap-inner">${list.map(c=>node(c.id)).join('')}</div></div>`; }).join('');
+      return sec(t)+`<div class="sysmap-scroll"><div class="sysmap-inner">${list.map(c=>node(c.id)).join('')}</div></div>`; }).join('');
   const first=CHD()[0];
   v.innerHTML=`<section class="hero" data-h style="--h:${d.hue}">
     <div class="hero-side">${stat('chapters',`${pr.read} / ${pr.chapters}`,pct(pr.read,pr.chapters),'chapters read')}${stat('glossary',`${pr.known} / ${pr.total}`,pct(pr.known,pr.total),'terms marked known')}${stat('drill',`${pr.solid} / ${pr.cards}`,pct(pr.solid,pr.cards),'drill cards solid')}</div>
@@ -211,8 +224,7 @@ function renderChapters(v){
     const read=list.filter(c=>S.read[c.id]).length;
     return `<section class="chgroup"><div class="chgroup-head"><span class="sec-k ${track}">${name}</span><p>${blurb}</p><span class="n num">${read} of ${list.length} read · ${list.reduce((a,c)=>a+c.minutes,0)} min</span></div><div class="chlist">${list.map(row).join('')}</div></section>`; };
   v.innerHTML=`<div class="view-head"><div><div class="eyebrow">${CHD().length} chapters · about ${CHD().reduce((a,c)=>a+c.minutes,0)} minutes of reading</div><h1>Chapters</h1><p>Read in order the first time — each chapter assumes the ones before it. After that, jump to whatever the project needs.</p></div></div>
-  ${group('functional','Functional','What the business configures and runs: the structures people sit in, the record that describes them, and the money, time and law that follow.')}
-  ${group('technical','Technical','What the consultant builds with: loading data in bulk, writing the calculation logic, getting information back out, extending without customizing, and controlling who sees what.')}`;
+  ${['functional','technical'].map(t=>{const L=domById(dom).tracks[t]; return group(t,L.name,L.blurb);}).join('')}`;
   v.querySelectorAll('[data-ch]').forEach(b=>b.addEventListener('click',()=>go('chapters',{ch:b.dataset.ch})));
 }
 function renderReader(v,c){

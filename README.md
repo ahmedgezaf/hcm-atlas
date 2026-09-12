@@ -6,7 +6,9 @@ Two collections so far. **Oracle HCM** is Fusion HCM Cloud for functional
 consultants in Egypt and the Gulf: seventeen chapters, fifteen interactive labs,
 seven diagrams, a 122-term glossary and a drill deck, covering the three modules
 juniors are hired for plus the Egyptian and Saudi statutory knowledge Oracle does
-not ship. **Data & Analytics** covers SQL, Power BI and Excel.
+not ship. **Data & Analytics** covers SQL, Power BI and Excel in eight chapters, with four
+labs of its own — a join visualiser, a query-execution stepper, a window-frame
+demo and a DAX filter-context explorer.
 
 Every chapter can be read or listened to — the browser's own speech engine reads
 it aloud, highlighting where it is, with no account and no network.
@@ -35,11 +37,11 @@ python3 build.py --watch
 | --- | --- |
 | **Overview** | Every collection with its size and how far through it you are. |
 | **Home** | Per collection: progress dashboard, a per-chapter progress chart, then the whole subject on one screen — every block opens a chapter, split Functional / Technical. |
-| **Chapters** | 17 chapters, ~11,600 words, grouped into **Functional** (12) and **Technical** (5). Each has its own colour, mark and cover band, and ends in common mistakes and sources. |
-| **Figures** | 7 inline SVG diagrams drawn where the prose explains a shape — the legal/operational split, what an LDG seals off, GOSI's three populations, the WPS chain, the Egyptian leave ladder, the extension decision. |
-| **Labs** | 15 interactive pieces: org tree, global-transfer stepper, payroll chain, effective-dating timelines, Egyptian social-insurance and tax calculators, leave ladder, HDL file anatomy, Fast Formula, security, methodology, headcount vs FTE. Most are embedded in their chapter too. |
-| **Glossary** | Every term, one definition, the trap that comes with it, and a link to the chapter. |
-| **Drill** | 40 questions with model answers plus a card for every term. Grade yourself; missed cards come back first. |
+| **Chapters** | 25 chapters, ~18,100 words across both collections, grouped into two tracks each. Every chapter has its own colour, mark and cover band, and ends in common mistakes and sources. |
+| **Figures** | 9 inline SVG diagrams drawn where the prose explains a shape — the legal/operational split, what an LDG seals off, GOSI's three populations, the WPS chain, the Egyptian leave ladder, the extension decision. |
+| **Labs** | 19 interactive pieces: org tree, global-transfer stepper, payroll chain, effective-dating timelines, Egyptian social-insurance and tax calculators, leave ladder, HDL file anatomy, Fast Formula, security, methodology, headcount vs FTE. Most are embedded in their chapter too. |
+| **Glossary** | 184 terms — one definition each, the trap that comes with it, and a link to the chapter. |
+| **Drill** | 65 questions with model answers plus a card for every term. Grade yourself; missed cards come back first. |
 | **Search** | <kbd>Ctrl</kbd>/<kbd>⌘</kbd>+<kbd>K</kbd>, or just <kbd>/</kbd>, across **every** collection at once — chapters, individual sections, terms, labs, figures and questions, with snippets and a jump straight to the heading that answers it. |
 | **Listen** | Any chapter read aloud by the browser's speech engine, paragraph by paragraph with the current one highlighted. Offline, free, no key. |
 

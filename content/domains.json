@@ -5,7 +5,17 @@
     "short": "HCM",
     "tagline": "Fusion HCM Cloud for functional consultants in Egypt and the Gulf",
     "blurb": "The three modules junior consultants are hired for — Core HR, Absence and Payroll — plus the Egyptian and Saudi statutory knowledge Oracle does not ship in the product.",
-    "hue": 214
+    "hue": 214,
+    "tracks": {
+      "functional": {
+        "name": "Functional",
+        "blurb": "What the business configures and runs: the structures people sit in, the record that describes them, and the money, time and law that follow."
+      },
+      "technical": {
+        "name": "Technical",
+        "blurb": "What the consultant builds with: loading data in bulk, writing the calculation logic, getting information back out, extending without customizing, and controlling who sees what."
+      }
+    }
   },
   {
     "id": "analytics",
@@ -13,6 +23,16 @@
     "short": "Analytics",
     "tagline": "SQL, Power BI and Excel — the analyst's toolkit, and when to reach for which",
     "blurb": "The three tools every analytics job posting names, treated as one craft: get the rows out with SQL, model and publish them in Power BI, and know what Excel is still the fastest answer to.",
-    "hue": 272
+    "hue": 272,
+    "tracks": {
+      "functional": {
+        "name": "Foundations",
+        "blurb": "How to think about data before you touch a tool: what a row means, what a spreadsheet is still best at, and how a question becomes a chart someone trusts."
+      },
+      "technical": {
+        "name": "Tools",
+        "blurb": "The three the job postings name. SQL to get the rows out, Power BI to model and publish them, and the language underneath it that decides what a number means."
+      }
+    }
   }
 ]

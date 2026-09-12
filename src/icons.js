@@ -45,6 +45,24 @@ const ICONS = {
   /* a region on the globe */
   gulf: '<circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3a13 13 0 010 18a13 13 0 010-18z"/>',
 
+  /* ---- Data & Analytics ---- */
+  /* a grid of rows and columns: what one row means */
+  tables: '<rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M3 14.5h18M9.5 9v11"/>',
+  /* the clauses of a query, narrowing */
+  'sql-shape': '<path d="M3.5 5h17l-6.5 7.5V20l-4-2.5v-5z"/>',
+  /* two overlapping sets */
+  'sql-joins': '<circle cx="9" cy="12" r="6"/><circle cx="15" cy="12" r="6"/>',
+  /* a frame sliding over a sequence */
+  'sql-windows': '<path d="M3 20V9M8 20V5M13 20v-8M18 20V7"/><rect x="5.5" y="3" width="10" height="18" rx="1.5" stroke-dasharray="3 2.5"/>',
+  /* a spreadsheet cell with a formula mark */
+  excel: '<rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M8 9v11"/><path d="M12 12.5l4 4M16 12.5l-4 4"/>',
+  /* the star: one fact, dimensions around it */
+  'powerbi-model': '<rect x="9" y="9" width="6" height="6" rx="1"/><rect x="2" y="2" width="5" height="4" rx="1"/><rect x="17" y="2" width="5" height="4" rx="1"/><rect x="2" y="18" width="5" height="4" rx="1"/><rect x="17" y="18" width="5" height="4" rx="1"/><path d="M7 5h1.5a1.5 1.5 0 011.5 1.5V9M17 5h-1.5a1.5 1.5 0 00-1.5 1.5V9M7 19H8.5A1.5 1.5 0 0010 17.5V15M17 19h-1.5a1.5 1.5 0 01-1.5-1.5V15"/>',
+  /* a funnel: the filter context a measure sees */
+  dax: '<path d="M4 4h16l-6 7v8l-4-2.5V11z"/><path d="M9.5 7.5h5"/>',
+  /* bars, and the question mark that preceded them */
+  'question-to-chart': '<path d="M3 21h18"/><rect x="4" y="13" width="4" height="8" rx="1"/><rect x="10" y="9" width="4" height="12" rx="1"/><rect x="16" y="16" width="4" height="5" rx="1"/><path d="M15.5 5.5a2 2 0 113 1.7V8"/><path d="M18.5 10.5h.01"/>',
+
   /* ---- collections (top bar) ---- */
   'domain-hcm': '<path d="M3 21h18"/><path d="M5 21V8l7-5 7 5v13"/><path d="M10 21v-6h4v6"/><path d="M9 11h2M13 11h2"/>',
   'domain-analytics': '<path d="M3 3v18h18"/><path d="M7 15l4-5 3 3 5-7"/><circle cx="7" cy="15" r="1.4"/><circle cx="11" cy="10" r="1.4"/><circle cx="14" cy="13" r="1.4"/><circle cx="19" cy="6" r="1.4"/>',
