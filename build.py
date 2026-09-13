@@ -279,6 +279,13 @@ def build(target="site"):
     print(f"✓ {out.relative_to(ROOT)}  —  {len(page)//1024} KB")
     print(f"  {len(data['chapters'])} chapters · ~{words:,} words · "
           f"{len(data['terms'])} terms · {len(data['questions'])} questions")
+    if target == "site":
+        # The editable edition: the same site with its content left as plain
+        # Markdown and JSON, rendered in the browser. See portable.py.
+        import portable
+        editable = portable.render(ROOT, inline_includes, TITLE, DESCRIPTION, FONTS, FAVICON)
+        (DIST / "moon-learning.html").write_text(editable, encoding="utf-8", newline=chr(10))
+        print(f"✓ dist/moon-learning.html  —  {len(editable)//1024} KB  (editable edition)")
     return out
 
 
@@ -317,5 +324,14 @@ if __name__ == "__main__":
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--target", choices=["site", "artifact"], default="site")
     ap.add_argument("--watch", action="store_true", help="rebuild on file change")
+    ap.add_argument("--check-portable", action="store_true",
+                    help="prove the editable edition renders every chapter exactly as the build does")
     args = ap.parse_args()
-    watch() if args.watch else build(args.target)
+    if args.check_portable:
+        import portable
+        n = portable.check(CONTENT, SRC, parse_frontmatter, render_chapter_html)
+        print(f"✓ the editable edition renders all {n} chapters exactly as the build does")
+    elif args.watch:
+        watch()
+    else:
+        build(args.target)

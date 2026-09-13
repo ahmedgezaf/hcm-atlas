@@ -17,21 +17,32 @@ jobs:
           python-version: "3.12"
       - run: pip install -r requirements.txt
 
-      # Fails on a chapter naming an unknown lab or term, a term with no
-      # chapter, or a term no chapter lists.
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      # Fails on a chapter naming an unknown lab, term or figure, a term with no
+      # chapter, a term no chapter lists, or a chapter missing from its home map.
+      # Writes dist/index.html and the editable edition, dist/moon-learning.html.
       - name: Build (validates cross-references)
         run: python3 build.py
 
       - name: Build artifact target
         run: python3 build.py --target artifact
 
-      - uses: actions/setup-node@v4
-        with:
-          node-version: "20"
       - name: Check JavaScript parses
         run: |
-          node --check src/app.js
-          node --check src/labs.js
+          for f in src/*.js scripts/*.js; do node --check "$f"; done
+
+      # The editable edition renders chapters in the browser with
+      # src/portable-md.js instead of Python-Markdown. Both must agree exactly.
+      - name: Editable edition renders exactly like the build
+        run: python3 build.py --check-portable
+
+      # Exporting and immediately re-importing must change nothing, or edits made
+      # in the editable edition would not come back intact.
+      - name: Editable edition round-trips losslessly
+        run: python3 scripts/import_portable.py dist/moon-learning.html --check
 
       - name: Committed dist/ matches a fresh build
         run: |
@@ -41,8 +52,13 @@ jobs:
             exit 1
           fi
 
-      - name: Browser smoke test
+      - name: Install browser
         run: |
           npm install --no-save playwright@1.49.1
           npx playwright install --with-deps chromium
-          node scripts/smoke.js
+
+      - name: Browser smoke test — site
+        run: node scripts/smoke.js
+
+      - name: Browser smoke test — editable edition
+        run: node scripts/smoke.js dist/moon-learning.html

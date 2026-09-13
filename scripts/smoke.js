@@ -10,7 +10,10 @@
 const path = require('path');
 const { chromium } = require('playwright');
 
-const FILE = 'file://' + path.resolve(__dirname, '..', 'dist', 'index.html');
+// Defaults to the built site. Pass another file to run the same checks against
+// it:  node scripts/smoke.js dist/moon-learning.html
+const TARGET = process.argv[2] || path.join('dist', 'index.html');
+const FILE = 'file://' + path.resolve(__dirname, '..', TARGET);
 const DOMAIN_COUNT = require('../content/domains.json').length;
 const results = [];
 const check = (name, pass, detail = '') => results.push({ name, pass, detail });
@@ -143,7 +146,7 @@ const check = (name, pass, detail = '') => results.push({ name, pass, detail });
   // Every heading the index points at must exist once the chapter renders, and
   // every rendered heading must be in the index. Lab titles are H2s too, so
   // this is what catches positional ids drifting out of step.
-  const mismatches = await page.evaluate(async () => {
+  const deep = await page.evaluate(async () => {
     const byCh = {};
     buildIndex().filter(r => r.nav.sec).forEach(r => { (byCh[r.nav.ch] = byCh[r.nav.ch] || []).push(r.nav.sec); });
     const bad = [];
@@ -156,10 +159,11 @@ const check = (name, pass, detail = '') => results.push({ name, pass, detail });
       want.forEach(id => { if (!dom.includes(id)) bad.push(c.id + ' -> missing ' + id); });
       dom.forEach(id => { if (!want.includes(id)) bad.push(c.id + ' -> unindexed ' + id); });
     }
-    return bad;
+    return { bad, links: Object.values(byCh).reduce((a, v) => a + v.length, 0), chapters: CH.length };
   });
+  const mismatches = deep.bad;
   check('every section deep link resolves', mismatches.length === 0,
-    mismatches.length ? mismatches.slice(0, 3).join(' | ') : '86 links');
+    mismatches.length ? mismatches.slice(0, 3).join(' | ') : `${deep.links} links across ${deep.chapters} chapters`);
 
   await page.evaluate(() => { location.hash = 'home'; });
   await page.keyboard.press('Control+KeyK');

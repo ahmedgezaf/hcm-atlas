@@ -31,6 +31,23 @@ pip install watchdog
 python3 build.py --watch
 ```
 
+## Editing without the tooling
+
+**`dist/moon-learning.html` is the whole site as one file you can edit.** Open it
+and it is the website. Open it in a text editor and every chapter is plain
+Markdown near the top, with the glossary and drill questions as readable JSON
+below — no build step, no Python, no Git. A guide at the top of the file says
+where everything is. Hand it to Claude in any conversation and ask for changes.
+
+If an edit breaks something — a term that does not exist, a missing comma — the
+page shows a red bar saying exactly what and where. To bring the edits back into
+the project:
+
+```bash
+python scripts/import_portable.py path/to/moon-learning.html          # show what would change
+python scripts/import_portable.py path/to/moon-learning.html --apply  # write it
+```
+
 ## What's in it
 
 | Section | What it does |
@@ -67,6 +84,7 @@ src/
   search.js             search index and the Ctrl-K palette
   speech.js             read-a-chapter-aloud
 build.py                assembles everything into dist/
+portable.py             writes the editable edition, dist/moon-learning.html
 scripts/smoke.js        browser smoke test
 deploy/                 OCI deployment: script, cloud-init, Dockerfile
 dist/                   build output (generated, but committed)

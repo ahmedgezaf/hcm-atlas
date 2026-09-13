@@ -20,7 +20,10 @@ src/figures.js              static SVG diagrams embedded in chapters
 src/icons.js                one mark per chapter, plus the cover-band art
 src/search.js               the search index and the Ctrl-K palette
 src/speech.js               read-a-chapter-aloud, on the browser's own engine
-build.py                    assembles dist/index.html (and dist/artifact.html)
+src/portable-md.js          the in-browser Markdown renderer the editable edition uses
+build.py                    assembles dist/index.html, dist/moon-learning.html, dist/artifact.html
+portable.py                 writes the editable edition, and checks it against the build
+scripts/import_portable.py  brings an edited moon-learning.html back into content/
 dist/                       build output — generated, but committed and CI-checked
 ```
 
@@ -228,6 +231,47 @@ rule — glass marks the surfaces that float above the page, so it reads as dept
 Spreading it further flattens the effect and costs scrolling performance. The
 tokens are `--glass`, `--glass-2`, `--glass-edge` and `--glass-hi` (the specular
 top edge), declared in all three theme blocks like every other colour.
+
+## The editable edition
+
+`dist/moon-learning.html` is the whole site as one file whose **content is left
+as the plain text it was written in** — each chapter a `<script
+type="text/markdown">` block, the collections, glossary and questions as
+indented JSON — at the top of the file, above a line marked ENGINE. It renders
+in the browser when opened. It exists so the user can hand one file to any
+Claude conversation, or open it in a text editor, and change the site without
+the repository, Python or Git. A guide at the top of the file explains it to
+whoever opens it.
+
+Three things keep it honest, and all three run in CI:
+
+- `python build.py --check-portable` renders every chapter with Python-Markdown
+  and with `src/portable-md.js` and fails on any difference. The JS renderer
+  handles exactly the subset the chapters use. **Adding a Markdown construct to a
+  chapter — a table, a numbered list, a link — means adding it to
+  `portable-md.js` too**, or this check fails. That is intended.
+- `python scripts/import_portable.py dist/moon-learning.html --check` exports and
+  re-imports and fails if anything would change, so edits made in the file come
+  back intact.
+- `node scripts/smoke.js dist/moon-learning.html` runs all the browser checks
+  against it, not just the site.
+
+In the page, the build's validator is reproduced: unknown terms, labs or
+figures, a figure in the wrong chapter, a chapter missing its icon or its place
+on the home map. Problems appear as a red bar across the top rather than a
+failed build, because the person editing may have no build. **A JSON section
+that fails to parse is reported on its own and pauses every other check** — one
+missing comma in the glossary otherwise surfaces as hundreds of "term not
+found" lines and buries the fix.
+
+Anything placed in a content block must not contain `</script` or `<!--`, which
+would end or confuse the `<script>` element; the build refuses to write the file
+if it does. JSON blocks escape `</` as `<\/` for the same reason.
+
+When a user returns an edited file: run the import as a dry run first, read what
+it would change, then `--apply`, then build and run the smoke test as for any
+other change. The import writes content only — the ENGINE part of the file is
+ignored, so a code change made there has to be carried into `src/` by hand.
 
 ## Search and heading ids
 
