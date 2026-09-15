@@ -1286,5 +1286,75 @@
     "chapter": "question-to-chart",
     "definition": "Reconciling your total against a figure the business already trusts before you present it.",
     "watchOut": "If it does not match, find out why before the meeting — because someone in the room will."
+  },
+  {
+    "id": "action-and-action-reason",
+    "name": "Action and action reason",
+    "chapter": "model",
+    "definition": "Every change to an assignment is stamped with an action — Hire, Promotion, Transfer, Termination — and a client-defined reason underneath it. The action drives the flow; the reason makes later analysis possible.",
+    "watchOut": "Reasons feel like optional paperwork during implementation and turn out to be the only way to answer 'why did attrition rise'. Configure them or lose the question for ever."
+  },
+  {
+    "id": "assignment-status",
+    "name": "Assignment status",
+    "chapter": "model",
+    "definition": "The status on an assignment controlling whether it is active, suspended or inactive, and separately whether it is eligible for payroll processing.",
+    "watchOut": "'Active in HR but not paid' is a real and valid combination. It is also the usual explanation when somebody who should have been paid was not."
+  },
+  {
+    "id": "employment-model",
+    "name": "Employment model",
+    "chapter": "org",
+    "definition": "The enterprise-level setting that decides whether a worker can hold one assignment or several at once, and whether contracts are tracked separately. Two-tier single assignment covers most implementations.",
+    "watchOut": "It can be overridden per legal employer, but changing it after workers exist is painful. Ask in the first workshop, not the third."
+  },
+  {
+    "id": "enterprise-structures-configurator",
+    "name": "Enterprise Structures Configurator (ESC)",
+    "chapter": "org",
+    "definition": "An interview-style wizard that creates legal entities, classifies them as legal employers and payroll statutory units, and creates a legislative data group per country in one pass, with a technical summary to review before loading.",
+    "watchOut": "Useful for a greenfield build, dangerous as a substitute for understanding — it makes defensible default choices the consultant then has to defend or unpick."
+  },
+  {
+    "id": "last-standard-process-date",
+    "name": "Last standard process date",
+    "chapter": "model",
+    "definition": "The date on a terminated payroll relationship after which ordinary payroll runs no longer pick the person up. A separate final close date stops everything, including corrections.",
+    "watchOut": "Set the final close date too early and a legitimate late payment — a final bonus, a corrected settlement — cannot be made without reopening the record."
+  },
+  {
+    "id": "legal-jurisdiction",
+    "name": "Legal jurisdiction",
+    "chapter": "org",
+    "definition": "A geographic area combined with the law that applies in it — Egypt income tax, Saudi social insurance. Every legal entity is registered against an identifying jurisdiction, and that registration number is what appears on statutory output.",
+    "watchOut": "Jurisdictions and legal authorities must exist before the legal entity does. Discovering that mid-configuration costs an afternoon."
+  },
+  {
+    "id": "organization-tree",
+    "name": "Organization tree",
+    "chapter": "org",
+    "definition": "A versioned parent-child arrangement of departments, organizations or positions. It draws the org chart and, more importantly, gives security profiles something to scope against.",
+    "watchOut": "Trees must be published before they take effect, which is the usual explanation for 'I made the change and nothing happened'."
+  },
+  {
+    "id": "primary-assignment",
+    "name": "Primary assignment",
+    "chapter": "model",
+    "definition": "The flag marking which of a person's concurrent assignments is the main one. Reports, the org chart and most downstream integrations read it.",
+    "watchOut": "Set on the minor of two jobs, it quietly reports the person under the wrong department indefinitely, and nothing in the application complains."
+  },
+  {
+    "id": "reference-data-set",
+    "name": "Reference data set",
+    "chapter": "org",
+    "definition": "A grouping of set-enabled configuration data — jobs, grades, locations, departments — assigned to one or more business units, which controls what can be selected on a transaction in that unit.",
+    "watchOut": "Positions are the exception: they attach to a business unit directly, not through a set. Expecting positions to follow the job rules is a standard surprise."
+  },
+  {
+    "id": "seniority-date",
+    "name": "Seniority date",
+    "chapter": "model",
+    "definition": "A configurable date that records continuous service, separate from the hire date, so that service can bridge a break in employment or carry across legal employers within a group.",
+    "watchOut": "End-of-service gratuity and leave bands are calculated on service. Solving a rehire by back-dating the work relationship instead of setting a seniority date corrupts every headcount and accrual figure for that period."
   }
 ]

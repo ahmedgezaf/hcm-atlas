@@ -124,6 +124,149 @@ FIGS.push({
 
 /* ------------------------------------------------------------------ */
 FIGS.push({
+  id: 'parent-psu',
+  ch: 'org',
+  title: 'When an employer is not the filer',
+  caption: 'A legal entity classified as a legal employer but not as a payroll statutory unit must name a parent PSU. Its reporting units are then created as tax reporting units under that parent — not under the company that actually employs the people. This is the shape a shared-services group takes.',
+  svg: () => `<svg viewBox="0 0 760 306" role="img" aria-label="Company A is both legal employer and payroll statutory unit. Companies B, C and D are legal employers only, each naming Company A as parent PSU. Their tax reporting units are created as children of Company A.">
+    ${FIG_DEFS}
+    ${F.head(30, 22, 'THE ENTITY THAT FILES')}
+    ${F.box(270, 32, 220, 50, 'Company A', 'legal employer + PSU', 'accent')}
+    ${F.elbow(380, 82, 135, 146)}
+    ${F.elbow(380, 82, 380, 146)}
+    ${F.elbow(380, 82, 625, 146)}
+
+    ${F.box(30, 146, 210, 50, 'Company B', 'legal employer, parent PSU = A')}
+    ${F.box(275, 146, 210, 50, 'Company C', 'legal employer, parent PSU = A')}
+    ${F.box(520, 146, 210, 50, 'Company D', 'legal employer, parent PSU = A')}
+
+    ${F.down(135, 196, 226)}
+    ${F.down(380, 196, 226)}
+    ${F.down(625, 196, 226)}
+    ${F.box(30, 226, 210, 40, 'TRU', null, 'ghost')}
+    ${F.box(275, 226, 210, 40, 'TRU', null, 'ghost')}
+    ${F.box(520, 226, 210, 40, 'TRU', null, 'ghost')}
+    ${F.note(380, 290, 'every TRU hangs under the parent PSU, not under its own employer', 'mid')}
+  </svg>`,
+});
+
+/* ------------------------------------------------------------------ */
+FIGS.push({
+  id: 'reference-data-sets',
+  ch: 'org',
+  title: 'What a business unit is allowed to see',
+  caption: 'Jobs, grades, locations and departments are grouped into sets, and sets are assigned to business units. Data in the Common Set is selectable everywhere; data in a specific set is selectable only in the units that set is assigned to. This is what makes business unit design decide how much duplicate configuration a client lives with.',
+  svg: () => `<svg viewBox="0 0 760 300" role="img" aria-label="A Common Set of jobs, grades, locations and departments feeds all three business units. A Sales set feeds only the sales business unit and a Plant set feeds only the manufacturing business unit.">
+    ${FIG_DEFS}
+    ${F.head(230, 22, 'SET-ENABLED DATA')}
+    ${F.box(230, 32, 300, 50, 'Common Set', 'jobs · grades · locations · departments', 'accent')}
+    ${F.down(380, 82, 206)}
+    ${F.elbow(380, 164, 175, 206)}
+    ${F.elbow(380, 164, 585, 206)}
+
+    ${F.box(30, 116, 180, 48, 'Sales Set', 'jobs only Sales uses')}
+    ${F.down(95, 164, 206)}
+    ${F.box(550, 116, 180, 48, 'Plant Set', 'jobs only the plant uses')}
+    ${F.down(665, 164, 206)}
+
+    ${F.box(30, 206, 210, 50, 'BU — Sales', 'sees Common + Sales')}
+    ${F.box(275, 206, 210, 50, 'BU — Shared Services', 'sees Common only')}
+    ${F.box(520, 206, 210, 50, 'BU — Manufacturing', 'sees Common + Plant')}
+    ${F.note(380, 284, 'a transaction can only select data in the sets assigned to its business unit', 'mid')}
+  </svg>`,
+});
+
+/* ------------------------------------------------------------------ */
+FIGS.push({
+  id: 'change-cost',
+  ch: 'org',
+  title: 'What you can undo, and what you cannot',
+  caption: 'Not every decision in this chapter carries the same weight. The bottom row is settled in the first weeks of a project and lived with for years, which is why the country list and the legal employer map deserve an extra workshop rather than an assumption.',
+  svg: () => `<svg viewBox="0 0 760 280" role="img" aria-label="Three bands of reversibility. Cheap: departments, divisions, locations, tree structure, most reference data. Expensive: business unit design and the sets attached to it. Effectively permanent: legislative data group legislation and currency, and the legal employer a worker sits in.">
+    ${FIG_DEFS}
+    ${F.head(30, 22, 'HOW HARD IS IT TO CHANGE LATER?')}
+    ${F.box(30, 32, 700, 62, 'Cheap — ordinary effective-dated updates', 'departments · divisions · locations · tree structure · most reference data', 'ghost')}
+    ${F.box(30, 108, 700, 62, 'Expensive — everything attached has to move with it', 'business unit design · which sets hold which jobs, grades and locations')}
+    ${F.box(30, 184, 700, 62, 'Effectively permanent', 'LDG legislation and currency · the legal employer a worker sits in', 'accent')}
+    ${F.note(380, 268, 'an LDG cannot be re-legislated once payroll data exists inside it', 'mid')}
+  </svg>`,
+});
+
+/* ------------------------------------------------------------------ */
+FIGS.push({
+  id: 'employment-stack',
+  ch: 'model',
+  title: 'Two hierarchies, running in parallel',
+  caption: 'The HR side descends from the person to the work relationship to the assignment. The payroll side hangs off the person and the payroll statutory unit instead, which is why payroll never runs against an assignment and why balances stop at the payroll relationship boundary.',
+  svg: () => `<svg viewBox="0 0 760 300" role="img" aria-label="On the left, a person record leads to a work relationship, which leads to two concurrent assignments. On the right, a payroll relationship sits beside the work relationship and holds the balances and calculation cards.">
+    ${FIG_DEFS}
+    ${F.head(30, 22, 'HR STRUCTURE')}
+    ${F.box(30, 32, 340, 46, 'Person', 'one per human — never duplicated', 'accent')}
+    ${F.down(200, 78, 112)}
+    ${F.box(30, 112, 340, 50, 'Work relationship', 'one legal employer · worker type · dates')}
+    ${F.elbow(200, 162, 110, 200)}
+    ${F.elbow(200, 162, 290, 200)}
+    ${F.box(30, 200, 160, 50, 'Assignment', 'job · grade · dept')}
+    ${F.box(210, 200, 160, 50, 'Assignment', 'a concurrent job')}
+
+    ${F.head(450, 22, 'PAYROLL STRUCTURE')}
+    ${F.box(450, 112, 280, 50, 'Payroll relationship', 'person + payroll statutory unit')}
+    ${F.down(590, 162, 200)}
+    ${F.box(450, 200, 280, 50, 'Balances · calculation cards', 'aggregate here, and stop here', 'ghost')}
+    ${F.across(372, 446, 137)}
+    ${F.across(372, 446, 225)}
+    <path class="f-divide" d="M410 14 V266"/>
+    ${F.note(380, 288, 'payroll runs against the right-hand column, never the left', 'mid')}
+  </svg>`,
+});
+
+/* ------------------------------------------------------------------ */
+FIGS.push({
+  id: 'attribute-home',
+  ch: 'model',
+  title: 'Which object owns which attribute',
+  caption: 'Most of the day-to-day skill in this model is knowing where a field lives before going to look for it. A date of birth is never on an assignment; a grade is never on a person.',
+  svg: () => `<svg viewBox="0 0 760 320" role="img" aria-label="Four rows. Person holds date of birth, national identifier, name, nationality and personal contact details. Work relationship holds legal employer, worker type, hire and termination dates and seniority. Assignment holds job, position, grade, department, location, manager, hours and status. Payroll relationship holds the payroll statutory unit, balances, calculation cards and tax reporting unit.">
+    ${FIG_DEFS}
+    ${F.head(30, 22, 'WHERE DOES THIS FIELD LIVE?')}
+    ${F.box(30, 32, 700, 52, 'Person', 'date of birth · national identifier · name · nationality · personal contact')}
+    ${F.box(30, 96, 700, 52, 'Work relationship', 'legal employer · worker type · hire and termination dates · seniority dates')}
+    ${F.box(30, 160, 700, 52, 'Assignment', 'job · position · grade · department · location · manager · hours · status')}
+    ${F.box(30, 224, 700, 52, 'Payroll relationship', 'payroll statutory unit · balances · calculation cards · tax reporting unit')}
+    ${F.note(380, 300, 'a field on the wrong object is the most common data-migration defect', 'mid')}
+  </svg>`,
+});
+
+/* ------------------------------------------------------------------ */
+FIGS.push({
+  id: 'global-transfer-count',
+  ch: 'model',
+  title: 'A global transfer, counted',
+  caption: 'Legally this is a new employment, not an edit to an old one, so the object counts change in a way that is worth being able to recite. The person record is the only thing that survives untouched, and the year-to-date balances do not travel.',
+  svg: () => `<svg viewBox="0 0 760 300" role="img" aria-label="Before a global transfer: one person record, one work relationship, one payroll relationship, accumulating balances. After: one person record unchanged, two work relationships with the first ended, two payroll relationships with the first ended, and balances restarting from zero.">
+    ${FIG_DEFS}
+    ${F.head(30, 22, 'BEFORE — EMPLOYED IN EGYPT')}
+    ${F.box(30, 32, 320, 44, '1 person record', 'the human')}
+    ${F.box(30, 88, 320, 44, '1 work relationship', 'Egypt legal employer')}
+    ${F.box(30, 144, 320, 44, '1 payroll relationship', 'Egypt PSU · Egypt LDG')}
+    ${F.box(30, 200, 320, 44, 'Year-to-date balances', 'accumulating')}
+
+    ${F.head(410, 22, 'AFTER — TRANSFERRED TO SAUDI ARABIA')}
+    ${F.box(410, 32, 320, 44, '1 person record', 'unchanged', 'accent')}
+    ${F.box(410, 88, 320, 44, '2 work relationships', 'Egypt ended · Saudi open')}
+    ${F.box(410, 144, 320, 44, '2 payroll relationships', 'Egypt ended · Saudi open')}
+    ${F.box(410, 200, 320, 44, 'Balances restart at zero', 'they never span relationships', 'accent')}
+
+    ${F.across(354, 406, 54)}
+    ${F.across(354, 406, 110)}
+    ${F.across(354, 406, 166)}
+    ${F.across(354, 406, 222)}
+    ${F.note(380, 276, 'one person, two work relationships, two payroll relationships — say it in that order', 'mid')}
+  </svg>`,
+});
+
+/* ------------------------------------------------------------------ */
+FIGS.push({
   id: 'gosi-populations',
   ch: 'gulf',
   title: 'GOSI is three rates, not one',

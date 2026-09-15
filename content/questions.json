@@ -593,5 +593,102 @@
       "sanity-check",
       "business-question"
     ]
+  },
+  {
+    "chapter": "org",
+    "question": "A client has five companies on the org chart. How do you work out how many legal entities to create?",
+    "answer": "By the commercial registers, not the org chart. A legal entity is an organization recognized by law — its own register number and tax card. Groups routinely run acquired companies as one business long after the paperwork says otherwise, and the reverse happens too. Ask for the registration certificates and count those. Then decide separately which of them actually employ people, because only those need the legal employer classification.",
+    "terms": [
+      "legal-entity",
+      "legal-employer"
+    ]
+  },
+  {
+    "chapter": "org",
+    "question": "A legal entity is a legal employer but not a payroll statutory unit. What does Oracle require?",
+    "answer": "A parent PSU has to be entered on it. Its legal reporting units are then created as tax reporting units under that parent rather than under the entity itself. That is the shape a shared-services group takes: several legal employers, one entity doing the statutory filing for all of them.",
+    "terms": [
+      "legal-employer",
+      "payroll-statutory-unit-psu",
+      "tax-reporting-unit-tru"
+    ]
+  },
+  {
+    "chapter": "org",
+    "question": "Why does business unit design decide how much duplicate configuration a client lives with?",
+    "answer": "Because set-enabled data — jobs, grades, locations, departments — is grouped into reference data sets and those sets are assigned to business units. Data in the Common Set is available everywhere; data in a specific set is only available to the units it is assigned to. Split the units too finely and the same six jobs get built repeatedly; share too broadly and a hiring manager scrolls four hundred entries to find one.",
+    "terms": [
+      "business-unit-bu",
+      "reference-data-set"
+    ]
+  },
+  {
+    "chapter": "org",
+    "question": "Which decisions in the enterprise structure are effectively permanent?",
+    "answer": "The legislation and currency on a legislative data group, which cannot be altered once payroll data exists inside it; and the legal employer a worker sits in, which changes only by ending one employment and starting another. Business unit design is expensive rather than permanent, because reference data sets attach to it. Departments, divisions, locations and tree structure are cheap — they move with ordinary effective-dated updates.",
+    "terms": [
+      "legislative-data-group-ldg",
+      "legal-employer",
+      "business-unit-bu"
+    ]
+  },
+  {
+    "chapter": "org",
+    "question": "A department-level HR access requirement cannot be delivered no matter how the roles are configured. What is usually missing?",
+    "answer": "The department tree. Security profiles scope data by tree node, so 'everyone in Manufacturing and below' is a statement about a hierarchy. If the departments exist as a flat list and no tree was ever built and published, there is nothing for the security profile to grip.",
+    "terms": [
+      "organization-tree",
+      "department"
+    ]
+  },
+  {
+    "chapter": "model",
+    "question": "A client asks you to add a field for 'highest qualification'. Which object does it belong on, and how do you decide?",
+    "answer": "The person, because it is true of the human regardless of who employs them and does not change when they change job or employer. The test I apply is: does it change when they change employer? Then work relationship. When they change job? Assignment. Does payroll need to accumulate it across the year? Payroll relationship. Otherwise it is a person attribute. Putting it on the assignment would mean re-entering it on every promotion and losing it on a rehire.",
+    "terms": [
+      "person",
+      "assignment",
+      "work-relationship"
+    ]
+  },
+  {
+    "chapter": "model",
+    "question": "An employee is showing as active but was not paid in the last run. Where do you look first?",
+    "answer": "The assignment status. Status controls whether the assignment is active for HR purposes and, separately, whether it is eligible for payroll processing — those are two different things, and a status that is active but payroll-ineligible is a valid combination used for unpaid leave. After that I would check the payroll relationship's last standard process date if the person has been terminated, and then element eligibility.",
+    "terms": [
+      "assignment-status",
+      "last-standard-process-date",
+      "payroll-relationship"
+    ]
+  },
+  {
+    "chapter": "model",
+    "question": "Why does Oracle group assignments under a payroll relationship instead of calculating per assignment?",
+    "answer": "Because statutory arithmetic is per person per statutory unit, not per job. If someone holds two assignments and each were calculated in isolation, the social-insurance ceiling and the tax brackets would apply twice and the deduction would be wrong. The payroll relationship groups the assignments so the ceiling, the bracket and the annual accumulation apply once to the whole person. It is also why balances stop at the payroll relationship and never span two of them.",
+    "terms": [
+      "payroll-relationship",
+      "concurrent-employment"
+    ]
+  },
+  {
+    "chapter": "model",
+    "question": "A worker who left three years ago is being rehired, and the client says their service should count from the original start date. How do you configure that?",
+    "answer": "With a seniority date, not by back-dating the new work relationship. The person record is reused, a new work relationship and a new payroll relationship are created, and balances start fresh. The seniority date is what carries continuous service across the break, which is what gratuity, leave bands and notice periods read. Back-dating the work relationship would assert the person was employed during a period they were not, which corrupts headcount history and absence accruals.",
+    "terms": [
+      "seniority-date",
+      "work-relationship",
+      "person"
+    ]
+  },
+  {
+    "chapter": "model",
+    "question": "Walk me through a global transfer from Egypt to Saudi Arabia and give the object counts at the end.",
+    "answer": "Legally it is a new employment, so the Egyptian work relationship is terminated and a new one is created under the Saudi legal employer. A new payroll relationship is created under the Saudi PSU, which sits in a different legislative data group, so none of the Egyptian configuration applies. The person record is untouched. Counts at the end: one person record, two work relationships with the first ended, two payroll relationships with the first ended. Year-to-date balances restart at zero because balances never span payroll relationships, and whether service bridges the move is a policy decision expressed through seniority dates.",
+    "terms": [
+      "global-transfer",
+      "work-relationship",
+      "payroll-relationship",
+      "seniority-date"
+    ]
   }
 ]
