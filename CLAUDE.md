@@ -115,8 +115,15 @@ Append to `content/glossary.json` and list the id in its chapter's `terms:`.
 ```json
 { "id": "cost-hierarchy", "name": "Cost hierarchy", "chapter": "costing",
   "definition": "One sentence, said the way you would say it out loud.",
-  "watchOut": "The mistake a beginner makes. Optional." }
+  "watchOut": "The mistake a beginner makes. Optional.",
+  "ar": "التسلسل الهرمي للتكلفة", "say": "الـ costing hierarchy" }
 ```
+
+`ar` is the formal Arabic term and `say` is what people actually call it on a
+project — the mixed register ("الـ payroll relationship") is the real one, so
+write what is said rather than a tidier translation. Both are optional, both
+show in the glossary and in a lab's explain panel, and both are searchable. See
+**Arabic** below for where Arabic may and may not go.
 
 ## Adding a drill question
 
@@ -222,6 +229,27 @@ be highlighted, the progress bar means something, and long chapters do not hit
 per-utterance limits. Labs, figures and the Sources list are skipped: they are to
 be looked at. Anything new that should not be read aloud must be excluded in
 `speechChunks` — the smoke test asserts nothing leaks in from those three.
+
+## Arabic
+
+Every HCM term carries the Arabic a consultant in Egypt or the Gulf will
+actually hear, because the vocabulary is half the job on a regional project. It
+is deliberately confined to two places: the **glossary** (`ar` and `say` on a
+term) and the **labs**, where a bilingual line sits beside the English
+explanation. Chapter prose stays English apart from the occasional term in
+parentheses where the Arabic is the point — `speech.js` reads chapters aloud
+with an English voice, and an Arabic run inside a paragraph is read as noise.
+
+The classes are `.ar` for an inline run, `.ar-line` for a right-aligned block,
+`.bi` for a row of English-plus-Arabic chips and `.say` for the tinted "how it
+sounds on the floor" panel. Every Arabic run must be isolated — `.ar` sets
+`direction:rtl; unicode-bidi:isolate` — or the bidi algorithm reorders the
+English around it. The face is IBM Plex Sans Arabic, loaded with the other
+fonts in `build.py`.
+
+What the Arabic is *not*: Oracle's Arabic interface labels, which differ. It is
+the business vocabulary used in workshops, on government forms and by the
+payroll team, and the glossary says so.
 
 ## Glass
 

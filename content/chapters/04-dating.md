@@ -44,5 +44,5 @@ Two things matter for a consultant explaining retro to a client. First, retro af
 
 ## Sources
 
-- Oracle, *Implementing Global Payroll* — "How Retroactive Pay Is Calculated". https://docs.oracle.com/en/cloud/saas/human-resources/22a/faigp/how-retroactive-pay-is-calculated.html
-- Oracle, *Implementing Global Payroll* — "Events, Retroactive Pay and Proration". https://docs.oracle.com/en/cloud/saas/human-resources/21b/faigp/events-retroactive-pay-and-proration.html
+- Oracle, *Implementing Global Payroll* — "How Retroactive Pay Is Calculated". https://docs.oracle.com/en/cloud/saas/human-resources/faigp/how-retroactive-pay-is-calculated.html
+- Oracle, *Implementing Global Payroll* — the "Events, Retroactive Pay and Proration" chapter. https://docs.oracle.com/en/cloud/saas/human-resources/faigp/index.html

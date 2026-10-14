@@ -134,6 +134,10 @@ GUIDE = """
     { "id": "new-term", "name": "New term", "chapter": "chapter-id",
       "definition": "One sentence.", "watchOut": "The usual mistake." }
 
+  Two more fields are optional, and only the HCM terms use them:  "ar"  is the
+  formal Arabic term, and  "say"  is what people actually say on the floor.
+  Both show in the glossary under the definition.
+
   Mind the commas between entries — JSON will not forgive a missing one.
 
 
@@ -331,7 +335,7 @@ LOADER = r"""
   var data = {
     domains: domains,
     chapters: chapters,
-    terms: glossary.map(function (t) { return { id: t.id, name: t.name, what: t.definition, trap: t.watchOut || '', ch: t.chapter }; }),
+    terms: glossary.map(function (t) { return { id: t.id, name: t.name, what: t.definition, trap: t.watchOut || '', ch: t.chapter, ar: t.ar || '', say: t.say || '' }; }),
     questions: questions.map(function (q) { return { ch: q.chapter, q: q.question, a: q.answer, terms: q.terms || [] }; })
   };
   document.getElementById('hcm-data').textContent = JSON.stringify(data);

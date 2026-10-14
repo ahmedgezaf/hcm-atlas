@@ -6,7 +6,7 @@ track: functional
 title: Enterprise & Organizational Structures
 subtitle: The compliance skeleton — legal view versus operational view
 hue: 214
-minutes: 18
+minutes: 36
 labs: org
 terms: enterprise, legal-entity, legal-employer, payroll-statutory-unit-psu, tax-reporting-unit-tru, legislative-data-group-ldg, business-unit-bu, department, division, location, legal-jurisdiction, reference-data-set, organization-tree, employment-model, enterprise-structures-configurator
 ---
@@ -23,7 +23,7 @@ A consultant who holds those two pictures apart can run a requirements workshop.
 
 The **enterprise** is the single top node of the whole structure. There is exactly one per implementation, and it is not a legal concept. It never appears on a government form, never signs a contract, never files a return. It is a container for settings that apply to everybody regardless of which company employs them.
 
-What actually lives on it is worth knowing, because these are decisions a consultant is asked about in the first week. The Manage Enterprise HCM Information task holds person-number generation — whether person numbers are typed by hand, generated automatically on save, or drawn from a sequence — along with worker-number settings, the default enterprise-wide **employment model**, position synchronization defaults, and global behaviours such as how a person's name is displayed.
+What actually lives on it is worth knowing, because these are decisions a consultant is asked about in the first week. The Manage Enterprise HCM Information task holds person-number generation, which has three methods: Manual, where the number is typed in; Automatic prior to submission, the delivered default, which issues the number as the record is created and therefore leaves a gap in the sequence when a transaction is cancelled; and Automatic upon final save, which issues it only once the transaction is approved, so the sequence has no gaps and no number is visible during entry. Both automatic methods draw from the same enterprise sequence, whose starting number is itself a setting. The same task holds worker-number settings, the default enterprise-wide **employment model**, position synchronization defaults, and global behaviours such as how a person's name is displayed.
 
 The employment-model setting deserves a paragraph of its own. It decides whether a worker in this enterprise can hold one assignment or several at the same time, and whether contracts are tracked as separate objects. The two-tier single-assignment model — one work relationship, one assignment — covers the overwhelming majority of implementations and is what to assume unless a client says otherwise. Two-tier multiple-assignment is for organizations where one person genuinely does two jobs concurrently under the same employer: a nurse who also teaches, a plant worker who covers a second line. The setting is made at the enterprise but can be overridden on an individual legal employer, which is how a group runs a simple model everywhere and a multiple-assignment model in the one subsidiary that needs it. Changing it later, after workers exist, is painful. Asking the question early is free.
 
@@ -105,11 +105,11 @@ Positions are the exception worth remembering. They attach to a business unit di
 
 [[fig:reference-data-sets]]
 
-## Departments, divisions and locations
+## Divisions, departments and locations
+
+A **division** is the top of the management hierarchy — above the business unit, not below it — aligned to a product line or a geography and used for management reporting rather than transaction processing. One division can span several business units and several legal entities, which is how a group answers "how did the Middle East business perform" when the Middle East is not a legal entity and never will be. Oracle's own worked example builds divisions for the US, Europe and the Middle East across five countries and several legal entities, a shape that maps neatly onto how regional groups in Cairo and Riyadh describe themselves. Oracle treats division → business unit → department as recommended practice rather than something the application enforces, so it is worth confirming which way a client's existing structure actually runs before assuming it.
 
 Below the business unit, the **department** is the box on the org chart that a worker actually sits in. It is the natural unit for headcount reporting and manager hierarchies, and it exists independently of whoever currently manages it — which is why a manager change never requires a new department. Departments can carry a cost centre, which is the hook payroll costing later uses to send an employee's cost to the right place in the general ledger.
-
-A **division** is a broader management-reporting layer above departments, aligned to a product line or a geography, and used for analytics rather than transaction processing. Divisions are where a group answers "how did the Middle East business perform" when the Middle East is not a legal entity and never will be. Oracle's own worked example builds divisions for the US, Europe and the Middle East across five countries and several legal entities — a shape that maps neatly onto how regional groups in Cairo and Riyadh describe themselves.
 
 A **location** is a physical work site with an address. It matters more than it looks, because statutory jurisdiction, working-time rules, allowance eligibility and public-holiday calendars are frequently driven by where the person physically works rather than by who employs them. In the Gulf especially, location often decides allowance eligibility — a site allowance for a remote plant, a housing differential between cities. Locations are set-enabled like jobs and grades, so the same sharing rules apply.
 
@@ -132,8 +132,8 @@ Stated as a sequence, because the dependencies are real and the application enfo
 - Legal entities, with their registrations.
 - Legal entity HCM information: legal employer, PSU, parent PSU where the entity is an employer only.
 - Tax reporting units, beyond those created automatically with the PSU.
-- Business units, and the reference data sets assigned to them.
-- Divisions, departments and locations.
+- Divisions, then business units and the reference data sets assigned to them.
+- Departments and locations.
 - Trees, then published.
 
 Oracle also ships the **Enterprise Structures Configurator**, an interview-style wizard that asks about the enterprise, its countries and its operating shape, then creates legal entities, classifies them as legal employers and PSUs, and creates a legislative data group for each country in one pass. It produces a technical summary of what it intends to do before committing, and the structure can be reviewed and rolled back before it is loaded. It is genuinely useful for a greenfield build and genuinely dangerous as a substitute for understanding, because it makes defensible default choices that a consultant then has to explain — or unpick — six months later.
@@ -175,8 +175,9 @@ Effectively permanent: the legislative data group's legislation and currency, an
 
 ## Sources
 
-- Oracle, *Implementing Global Human Resources* — "Enterprise Structures: Initial Configuration". https://docs.oracle.com/en/cloud/saas/human-resources/21a/faigh/enterprise-structures-initial-configuration.html
-- Oracle, *Implementing Payroll* — "What's a tax reporting unit?" and related legal-entity classification topics. https://docs.oracle.com/en/cloud/saas/human-resources/fapcd/what-s-a-tax-reporting-unit.html
+- Oracle, *Implementing Global Human Resources* — the "Enterprise Structures: Initial Configuration" chapter. https://docs.oracle.com/en/cloud/saas/human-resources/faigh/index.html
+- Oracle, *Implementing Global Human Resources* — "Person Number Generation Methods". https://docs.oracle.com/en/cloud/saas/human-resources/faigh/person-number-generation-methods.html
+- Oracle, *Implementing Payroll for Canada* — "What's a tax reporting unit?"; the classification topic is written once and applies to every localization. https://docs.oracle.com/en/cloud/saas/human-resources/fapcd/what-s-a-tax-reporting-unit.html
 - Oracle, *Using Common Features* — "How Business Units Work with Reference Data Sets". https://docs.oracle.com/en/cloud/saas/human-resources/faucf/how-business-units-work-with-reference-data-sets.html
 - Maverick Solutions, "Effectively using legislations and legislative data groups in Oracle Cloud HCM Payroll". https://mavericksolutions.com/2021/06/15/legislations-and-legislative-data-groups-in-oracle-cloud-hcm-payroll/
 - Apps2Fusion, "Legal Entity and Legal Employer in Fusion Application". https://apps2fusion.com/old/oracle-fusion-online-training/1519-legal-entity-and-legal-employer-in-fusion-application

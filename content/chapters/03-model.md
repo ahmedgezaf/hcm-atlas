@@ -6,7 +6,7 @@ track: functional
 title: The Employment Data Model
 subtitle: Person → work relationship → assignment. There is no employee table.
 hue: 246
-minutes: 17
+minutes: 32
 labs: model
 terms: person, work-relationship, work-terms, assignment, payroll-relationship, concurrent-employment, global-transfer, worker-types, seniority-date, assignment-status, action-and-action-reason, primary-assignment, last-standard-process-date
 ---
@@ -27,7 +27,7 @@ A person may work for one company, leave, and return years later, or work for tw
 
 That guarantee is only as good as the hire process. Before creating a person, the hire flow looks for someone already in the system with a matching name, date of birth or national identifier. Skipping that check — or bulk-loading people without a reliable key — is how duplicate person records appear, and duplicates are unpleasant to clean up once payroll and absence data hang off both of them. In Egypt and the Gulf the national identifier is the natural key and should be treated as one: the Egyptian national ID, the Saudi national ID or Iqama number. Migration plans that key on employee number instead will merge the wrong people or split the right one.
 
-Person numbers themselves are generated according to the enterprise setting described in Chapter 1 — manual entry, automatic on save, or drawn from a sequence. The number identifies the human, not the employment, which is why it does not change on rehire or transfer.
+Person numbers themselves follow the enterprise setting described in Chapter 1 — Manual, Automatic prior to submission, or Automatic upon final save. The number identifies the human, not the employment, which is why it does not change on rehire or transfer.
 
 ## Which attribute lives where
 
@@ -73,13 +73,13 @@ The **primary assignment** flag matters when a person holds more than one. Repor
 
 Every change to an assignment is recorded with an **action and action reason** — Hire, Promotion, Transfer, Termination as the action, and a client-defined reason underneath it. The action drives which flow runs and which fields appear; the reason is what makes analytics possible later. "Why did attrition rise in Q3" can only be answered if terminations carry reasons, and reasons only exist if someone insisted on configuring them during implementation. That someone is the consultant.
 
-## Two-tier and three-tier
+## The employment model option, and the tier that is no longer a choice
 
-Oracle offers two shapes for the hierarchy. In the **two-tier** model, the default, a work relationship holds assignments directly. In the **three-tier** model an optional layer called **employment terms** — also called work terms — sits between them to group contractual attributes such as working hours, grade, collective agreement and contract details across several assignments.
+The **employment model** is set on the enterprise and can be overridden per legal employer, and it has four values: single assignment, single assignment with contract, multiple assignments, and multiple contracts with single assignment. All four are two-tier — the work relationship holds assignments directly. Where a legislation needs contract detail inside the employment record, Oracle's answer is the contract variants rather than an extra layer.
 
-Two-tier is the more common choice in new implementations, and is what to assume. The three-tier model exists for organizations that genuinely need one set of contractual terms covering multiple assignments, which in practice means European employers with collective agreements more often than employers in Egypt or the Gulf.
+Older material, and a good deal of interview folklore, describes a **three-tier** model in which a layer of **employment terms** — also called work terms — sits between the relationship and the assignment to group contractual attributes across several assignments. It is worth recognizing the term, because it is still said out loud and it still appears in training decks. It is not on the configuration screen.
 
-"What is the difference between employment terms and an assignment?" is a standard interview question. Terms group contractual and compensation attributes; the assignment holds the actual job details. The answer is short, and the follow-up — "which would you recommend?" — is where a candidate shows judgment: two-tier, unless the client has a contractual layer that genuinely spans assignments, because the third tier is an extra object to date-track, migrate and explain for the rest of the system's life.
+What does survive is the object. A work terms record exists under every work relationship whether or not anyone calls the model three-tier, and HCM Data Loader expects it as a component of the Worker file — `PeriodOfServiceId` points a work terms record at its work relationship, and the assignment points at the work terms record (Chapter 11). A consultant meets the layer on the first data migration regardless of what the enterprise option says, which is the real reason to know the word.
 
 ## Payroll relationship: where payroll actually runs
 
@@ -101,9 +101,11 @@ Assignments grouped in one payroll relationship must share the same payroll stat
 
 **Concurrent employment** means one person holding several simultaneous assignments under one work relationship, or several work relationships across different legal employers. A lecturer who also runs a research lab. A doctor employed by a hospital who also works clinic hours. A group finance manager who formally holds a role in two subsidiaries.
 
-The two cases behave differently and the difference is the whole point. Two assignments under one work relationship means one employer, one payroll relationship, one set of balances and one statutory ceiling applied across both jobs. Two work relationships means two employers, two payroll relationships, and each employer calculating independently — which is correct, because each is separately registered and separately liable.
+The two cases behave differently and the difference is the whole point. Two assignments under one work relationship means one employer, one payroll relationship, one set of balances and one statutory ceiling applied across both jobs.
 
-When a client describes somebody who "works for both companies", the useful follow-up is: which company's payroll pays them, and do both of them file for this person? The answer decides the shape.
+Two work relationships means two employers — but not, automatically, two payroll relationships. The relationship is keyed on the payroll statutory unit and the person type, exactly as stated above, so two employers that are separate PSUs produce two relationships calculating independently, while two employers sharing one parent PSU produce a single relationship, with one set of balances and one ceiling across both jobs. The shared-services shape in Chapter 1, where several legal employers name one parent PSU, is precisely that second case. Which of the two happens is also legislation-dependent: under the payroll relationship rules Oracle ships, Lifetime Record and Last Record group a new assignment under an existing relationship for the same PSU and person type, while New Record creates one per assignment regardless.
+
+When a client describes somebody who "works for both companies", the useful follow-up is: which PSU files for this person, and is it the same one for both companies? The answer decides the shape, and it decides whether a statutory ceiling applies once or twice.
 
 ## The canonical worked example: a global transfer
 
@@ -121,7 +123,7 @@ Be able to narrate this end to end and give the counts at the end: one person re
 
 A rehire is a global transfer's quieter cousin and it trips up more projects.
 
-The person record is reused — same human, same person number, same date of birth. A new work relationship is created for the new employment. A new payroll relationship is created, so balances start again. None of that is controversial.
+The person record is reused — same human, same person number, same date of birth — and a new work relationship is created for the new employment. What happens to the payroll relationship is where the easy answer is wrong. It depends on the payroll relationship rule the legislation uses: under the rule Oracle ships for Saudi Arabia, the application compares the new assignment's start date with the last standard earnings date of the existing payroll relationship and reuses that relationship when the start date falls before it, which is what makes back-to-back fixed-term contracts continuous. Only where a new relationship is created do balances start again. Before promising a client either behaviour, find out which rule their legislative data group runs.
 
 What is controversial is service. Whether the earlier employment counts toward gratuity, leave entitlement bands and notice periods is a policy question the client must answer, and the answer is expressed through seniority dates rather than by faking the hire date. Consultants who solve it by back-dating the new work relationship to the original hire date create a record that says the person was employed during a period when they were not, which corrupts headcount history, absence accruals and any report that counts service in a given year.
 
@@ -156,9 +158,10 @@ When something cannot be found, the question to ask is not "where is this field"
 - Believing there is an employee table. There is a person, a work relationship and an assignment.
 - Confusing termination of a work relationship with deletion of the person. The person survives, and should.
 - Keying a data migration on employee number rather than national identifier, and producing duplicate people.
-- Assuming every implementation has employment terms. Two-tier omits that layer entirely.
+- Believing the work terms layer does not exist because the enterprise is two-tier. It is created for every assignment, and HCM Data Loader expects the component in the file.
 - Thinking payroll runs against the assignment. It runs against the payroll relationship.
-- Expecting balances to carry across a global transfer or a rehire. They do not.
+- Expecting balances to carry across a global transfer. They do not — a new legislative data group means a new payroll relationship.
+- Assuming a rehire always restarts balances, or always continues them. It depends on the legislation's payroll relationship rule and on the dates.
 - Treating "years of service" as one number. Ask which date the client means before configuring anything that depends on it.
 - Back-dating a rehire's work relationship to the original hire date instead of using a seniority date.
 - Leaving the primary assignment flag on the minor of two concurrent jobs, then wondering why reporting is wrong.
@@ -167,7 +170,8 @@ When something cannot be found, the question to ask is not "where is this field"
 
 ## Sources
 
-- Oracle, *Implementing Global Human Resources* — "Employment Model". https://docs.oracle.com/en/cloud/saas/human-resources/24a/faigh/employment-model.html
-- Oracle, *Administering Global Payroll* — "Overview of Administering Payroll Relationships". https://docs.oracle.com/en/cloud/saas/human-resources/23d/faapq/overview-of-administering-payroll-relationships.html
-- Oracle, *Implementing Global Human Resources* — "Enterprise Structures: Initial Configuration", for the legal employer relationship the work relationship points at. https://docs.oracle.com/en/cloud/saas/human-resources/21a/faigh/enterprise-structures-initial-configuration.html
+- Oracle, *Implementing Global Human Resources* — "Employment Model", for the four employment model options. https://docs.oracle.com/en/cloud/saas/human-resources/faigh/employment-model.html
+- Oracle, *Implementing Global Payroll* — "Payroll Relationship Rules", for how a new assignment is grouped under an existing payroll relationship. https://docs.oracle.com/en/cloud/saas/human-resources/faigp/payroll-relationship-rules.html
+- Oracle, *Implementing Payroll for Saudi Arabia* — "Continuous Period of Service Payroll Relationship Rule for Saudi Arabia", for what a rehire does to the relationship in the region. https://docs.oracle.com/en/cloud/saas/human-resources/faisa/continuous-period-of-service-payroll-relationship-rule-for-saudi-arabia.html
+- Oracle, *Implementing Global Human Resources* — the "Enterprise Structures: Initial Configuration" chapter, for the legal employer the work relationship points at. https://docs.oracle.com/en/cloud/saas/human-resources/faigh/index.html
 - Future Proof Technologies, "HCM Employment Model in Oracle Fusion HCM Cloud". https://medium.com/@futureprooftrainings/hcm-employment-model-in-oracle-fusion-hcm-cloud-0ec24a4e638a

@@ -369,7 +369,7 @@
   {
     "chapter": "tables",
     "question": "Someone hands you a table and asks for total revenue. What do you establish first?",
-    "answer": "What one row represents — the grain. If one row is one order, summing the order total is right. If the table has been joined to order lines, each order now appears once per line and the same sum is inflated by the average lines per order. Nothing errors; the number just looks plausible and is wrong. I'd confirm the primary key, check row count against distinct key count, and only then sum.",
+    "answer": "What one row represents — the grain. If one row is one order, summing the order total is right. If the table has been joined to order lines, each order now appears once per line and the same sum is inflated by the average number of lines per order weighted by order value. Nothing errors; the number just looks plausible and is wrong. I'd confirm the primary key, check row count against distinct key count, and only then sum.",
     "terms": [
       "grain",
       "primary-key",
@@ -488,7 +488,7 @@
   {
     "chapter": "excel",
     "question": "You inherit a spreadsheet full of VLOOKUPs. What do you check first?",
-    "answer": "The fourth argument. Omitted, it defaults to TRUE — approximate match — which assumes the lookup column is sorted and returns the nearest smaller value if it isn't. On unsorted data that gives confidently wrong answers rather than errors, so nobody notices. Anything new I'd write as XLOOKUP, which defaults to exact match, can look left, and references arrays rather than a column number so inserting a column doesn't break it.",
+    "answer": "The fourth argument. Omitted, it defaults to TRUE — approximate match — which assumes the lookup column is sorted ascending and returns the largest value at or below the one asked for; on unsorted data the result is simply unreliable. On unsorted data that gives confidently wrong answers rather than errors, so nobody notices. Anything new I'd write as XLOOKUP, which defaults to exact match, can look left, and references arrays rather than a column number so inserting a column doesn't break it.",
     "terms": [
       "xlookup",
       "index-match"
@@ -689,6 +689,145 @@
       "work-relationship",
       "payroll-relationship",
       "seniority-date"
+    ]
+  },
+  {
+    "chapter": "hrfunction",
+    "question": "An HR business partner asks for a flat retention bonus for the sales division. What happens before it is built?",
+    "answer": "Compensation and benefits sign it off, because it is a pay element and pay policy is theirs. The HRBP's request is input to the design, not approval of it. Building it on the HRBP's word alone is how a design gets reversed in testing — after the build, and usually in front of the people who did approve it.",
+    "terms": [
+      "hrbp-hr-business-partner",
+      "centers-of-excellence-coe",
+      "ulrich-model"
+    ]
+  },
+  {
+    "chapter": "hrfunction",
+    "question": "Who would you ask how the insurable wage is really calculated today, and why not simply read the policy?",
+    "answer": "Shared services — in Egypt, the personnel and payroll team. The law sets the rule and the policy states the intent, but only the people filing every month know how it is actually applied, including the exceptions the insurance office has pushed back on before. Those exceptions are requirements, and they exist in no document.",
+    "terms": [
+      "shared-services-hr-operations",
+      "insurable-wage"
+    ]
+  },
+  {
+    "chapter": "payroll",
+    "question": "The payroll run completes with no errors and one employee has not been paid at all. Where do you look?",
+    "answer": "First at whether they are assigned to a payroll: the run skips anyone who is not, silently and without an error. If they are, check eligibility and then the element entry — eligible means could, entry means does. The pattern worth carrying is that the expensive payroll failures are the ones that produce no error message.",
+    "terms": [
+      "payroll-run",
+      "element-eligibility-element-link",
+      "element-entry"
+    ]
+  },
+  {
+    "chapter": "payroll",
+    "question": "Everyone in one legal employer is paid twelve times what they should be. What is the first thing to check?",
+    "answer": "The salary basis. If it is set to monthly while the annual figure was loaded against it, the run pays the annual amount every month. Nothing errors, because the calculation did exactly what the data said. It is also why the first question about salary in any workshop is whether the client's offer letters state an annual or a monthly figure.",
+    "terms": [
+      "salary-basis",
+      "payroll-run"
+    ]
+  },
+  {
+    "chapter": "payroll",
+    "question": "In a parallel run, legacy and Oracle agree on a line. Does that prove the line is right?",
+    "answer": "No. It proves the two systems agree, which is what a parallel run is for. It says nothing about whether either matches the client's policy — an allowance both systems pay flat where the policy says a percentage reconciles perfectly and is wrong in both. Where legacy is the one that is wrong, the correct outcome is a difference raised with the client, not a configuration change to match it.",
+    "terms": [
+      "parallel-run",
+      "reconciliation"
+    ]
+  },
+  {
+    "chapter": "gulf",
+    "question": "A worker resigns after seven years with a Saudi employer on a final wage of SAR 12,000. Talk through the end-of-service award.",
+    "answer": "Half a month for each of the first five years is 2.5 months, plus one month for each of the next two is 2, so 4.5 months on the last wage — SAR 54,000 before the resignation rule. Resignation between five and ten years pays two thirds, so SAR 36,000. Figures checked in 2026 against Articles 84 and 85; the contract may be more generous than the statutory floor, and it is worth checking before quoting a number.",
+    "terms": [
+      "end-of-service-benefit-eosb-gratuity",
+      "final-settlement"
+    ]
+  },
+  {
+    "chapter": "gulf",
+    "question": "A rehired employee's end-of-service figure looks too low to the client. What has probably happened?",
+    "answer": "The service clock restarted at the rehire. A rehire creates a new work relationship with a new legal employer start date, and if the client's policy bridges the earlier service that decision has to be carried by a seniority date. The wrong fix is back-dating the new work relationship to the original hire date, which puts the person in the system during a period when they were not employed and corrupts headcount history and accruals.",
+    "terms": [
+      "seniority-date",
+      "end-of-service-benefit-eosb-gratuity",
+      "work-relationship"
+    ]
+  },
+  {
+    "chapter": "reporting",
+    "question": "A headcount analysis returns 4,100 for a company of 3,600 people. What is wrong, and how do you fix it?",
+    "answer": "The subject area is at assignment grain, so a row is one dated version of one assignment: promotions add history rows and second jobs add extra rows. Filter to the row effective today and to the primary assignment and the number comes back to the truth. The habit that prevents it is saying what one row means before trusting any total built on it.",
+    "terms": [
+      "subject-area",
+      "otbi",
+      "primary-assignment"
+    ]
+  },
+  {
+    "chapter": "reporting",
+    "question": "A client asks which report they should use to load 10,000 employees for go-live. What do you say?",
+    "answer": "None of them. The four paths — OTBI, BI Publisher, HCM Extract and REST — are ways of getting data out. Bulk data going in is HCM Data Loader. The same conversation often includes a request to connect a SQL client straight to the database, which has no answer either: there is no database connection to a SaaS pod, and SQL that is genuinely needed goes inside a BI Publisher data model.",
+    "terms": [
+      "hdl-hcm-data-loader",
+      "bi-publisher-bip",
+      "rest-api"
+    ]
+  },
+  {
+    "chapter": "hdl",
+    "question": "A load passed import and failed at load. What does that tell you before you read the error?",
+    "answer": "That the file is well-formed and something it refers to is missing or invalid. Import checks the shape — pipe counts, attribute spelling, date format — and stages good lines; load assembles them into objects and checks meaning, so a failure there is usually a parent that has not been loaded yet or a value invalid on that date. It is nearly always a load-order problem: load the parent, then reload the failures.",
+    "terms": [
+      "hdl-hcm-data-loader"
+    ]
+  },
+  {
+    "chapter": "hdl",
+    "question": "Why keep the legacy employee id on the record after go-live?",
+    "answer": "Because it is what makes reconciliation possible. SourceSystemOwner plus SourceSystemId is stored with the record, so any later load, correction or count can find the same row again and a reload updates rather than duplicates. Matching on names instead breaks the first time two employees share one — which in a population of a thousand is immediately.",
+    "terms": [
+      "source-system-key-vs-person-number",
+      "hdl-hcm-data-loader"
+    ]
+  },
+  {
+    "chapter": "ff",
+    "question": "A Fast Formula compiles, runs without error, and pays the wrong amount. Give three ways that happens.",
+    "answer": "Applying the rate before capping the wage, so the clamp never does its job. Returning the wrong variable, so a calculated allowance is thrown away and something plausible is paid instead. And hard-coding a statutory limit that changes every January, which under-deducts quietly until a statutory return is reconciled. None of the three announce themselves; a QuickPay against a real person, with the expected figure worked out by hand first, is what catches them.",
+    "terms": [
+      "fast-formula",
+      "quickpay"
+    ]
+  },
+  {
+    "chapter": "ff",
+    "question": "A formula fails for exactly the employees who have no overtime that month. Why?",
+    "answer": "There is no DEFAULT FOR line on the input, so when the entry is empty the formula has no value to work with and errors. Inputs that are usually empty need a default, and the fact that it fails for most people most months is what makes this bug so visible in the first live run and so invisible in a test with three prepared employees.",
+    "terms": [
+      "fast-formula",
+      "input-value"
+    ]
+  },
+  {
+    "chapter": "method",
+    "question": "During testing a client says, \"can you just add a field for each employee's car plate number? It's small.\" What is it, and what do you do?",
+    "answer": "A change request. Size is not the test — whether it was agreed is. It gets logged, assessed for impact and accepted by someone with the authority to accept it. The alternative, absorbing it because it is small, is the most common way a project takes on work nobody agreed to and then cannot explain why it is late.",
+    "terms": [
+      "change-request",
+      "fit-gap-analysis"
+    ]
+  },
+  {
+    "chapter": "method",
+    "question": "In a fit-gap, what is the difference between \"work around\" and \"descope\", and who has to agree to each?",
+    "answer": "A work around keeps the requirement and changes how it is met — corrections through retro instead of editing a finalized payslip, for example — so it costs no build and needs the process owner's agreement, because their team's work changes. Descope drops the requirement, which is a decision someone has to sign. Neither is a quiet decision: an undocumented descope comes back in user acceptance testing as a defect.",
+    "terms": [
+      "fit-gap-analysis",
+      "change-request"
     ]
   }
 ]

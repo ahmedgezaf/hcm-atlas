@@ -41,5 +41,5 @@ A **job family** groups related jobs — all finance jobs, all engineering jobs 
 
 ## Sources
 
-- Oracle, *Implementing Global Human Resources* — Jobs and Positions; Grades, Grade Rates and Grade Ladders. https://docs.oracle.com/en/cloud/saas/human-resources/faigh/
-- Oracle, "Employment Model" (positions and assignments in the employment hierarchy). https://docs.oracle.com/en/cloud/saas/human-resources/24a/faigh/employment-model.html
+- Oracle, *Implementing Global Human Resources* — the Jobs and Positions and the Grades, Grade Rates and Grade Ladders chapters. https://docs.oracle.com/en/cloud/saas/human-resources/faigh/index.html
+- Oracle, *Implementing Global Human Resources* — "Employment Model", for positions and assignments in the employment hierarchy. https://docs.oracle.com/en/cloud/saas/human-resources/faigh/employment-model.html

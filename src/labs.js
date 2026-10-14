@@ -57,7 +57,7 @@ LABS.push({id:'dating',ch:'dating',title:'Update vs correction vs retro',lead:'O
 }});
 
 /* Lab 5: social insurance calculator */
-LABS.push({id:'insurance',ch:'egypt-payroll',title:'Egypt social insurance calculator',lead:'Contributions apply to the capped insurable wage, not to gross. Drag the salary and watch the cap bite. 2026 figures from the handbook — they rise 15% every January through 2027.',render(b){
+LABS.push({id:'insurance',ch:'egypt-payroll',title:'Egypt social insurance calculator',lead:'Contributions apply to the capped insurable wage, not to gross. Drag the salary and watch the cap bite. 2026 figures, from the Mercans statutory alert on the Egyptian insurable-wage limits — they rise 15% every January through 2027.',render(b){
   const FLOOR=2700, CEIL=16700, EMP=0.11, ER=0.1875;
   b.innerHTML=`<div class="calc"><div class="in card" style="padding:16px"><label>Monthly gross salary (EGP)</label><input type="number" id="siN" value="25000" min="0" step="500"><input type="range" id="siR" min="1000" max="60000" step="500" value="25000"><div class="small muted">Floor EGP ${fmt(FLOOR)} · Ceiling EGP ${fmt(CEIL)} · Employee 11% · Employer 18.75%</div></div><div class="out card" style="padding:16px" id="siOut"></div></div><div class="callout"><b>Why this matters.</b> “Contributions apply to full gross salary” is the most common calculation error in Egyptian payroll. Also note the mandatory 3% annual increment is calculated on this insurable wage — so it is effectively capped for high earners.</div>`;
   const n=$('#siN'), r=$('#siR');
@@ -69,10 +69,10 @@ LABS.push({id:'insurance',ch:'egypt-payroll',title:'Egypt social insurance calcu
 }});
 
 /* Lab 6: tax brackets */
-LABS.push({id:'tax',ch:'egypt-payroll',title:'Egypt salary tax & bracket elimination',lead:'Tax is annual, progressive, exemption-adjusted — the monthly figure is a slice. Turn on bracket elimination to see why a naive calculator understates tax for senior staff. Figures per the handbook (Law 7/2024); verify before quoting.',render(b){
+LABS.push({id:'tax',ch:'egypt-payroll',title:'Egypt salary tax & bracket elimination',lead:'Tax is annual, progressive, exemption-adjusted — the monthly figure is a slice. Turn on bracket elimination to see why a naive calculator understates tax for senior staff. Figures from the Deloitte summary of Law 7/2024; verify before quoting.',render(b){
   const BR=[[40000,0],[55000,.10],[70000,.15],[200000,.20],[400000,.225],[1200000,.25],[Infinity,.275]];
   const ELIM=[[600000,1],[700000,2],[800000,3],[900000,4],[1200000,5]]; // net income above X → first N brackets eliminated
-  b.innerHTML=`<div class="calc"><div class="in card" style="padding:16px"><label>Monthly gross salary (EGP)</label><input type="number" id="txN" value="30000" step="1000" min="0"><input type="range" id="txR" min="5000" max="150000" step="1000" value="30000"><label class="toggle"><input type="checkbox" id="txE" checked> Apply bracket elimination for high earners</label><div class="small muted">Personal exemption EGP 20,000/yr · employee social insurance deducted before tax</div></div><div class="out card" style="padding:16px" id="txOut"></div></div><div class="callout"><b>Interpolated thresholds.</b> The handbook states the 600k and 700k steps explicitly and says the pattern continues to 1.2M; the 800k/900k steps here follow that pattern. Treat the exact ladder as something to confirm against the Egyptian Tax Authority.</div>`;
+  b.innerHTML=`<div class="calc"><div class="in card" style="padding:16px"><label>Monthly gross salary (EGP)</label><input type="number" id="txN" value="30000" step="1000" min="0"><input type="range" id="txR" min="5000" max="150000" step="1000" value="30000"><label class="toggle"><input type="checkbox" id="txE" checked> Apply bracket elimination for high earners</label><div class="small muted">Personal exemption EGP 20,000/yr · employee social insurance deducted before tax</div></div><div class="out card" style="padding:16px" id="txOut"></div></div><div class="callout"><b>Interpolated thresholds.</b> Deloitte's summary of Law 7/2024 states the 600k and 700k steps explicitly and says the pattern continues to 1.2M; the 800k/900k steps here follow that pattern. Treat the exact ladder as something to confirm against the Egyptian Tax Authority.</div>`;
   const n=$('#txN'), r=$('#txR'), e=$('#txE');
   const calc=()=>{const gm=Math.max(0,+n.value||0); const iw=Math.min(16700,Math.max(2700,gm)); const si=iw*.11*12; const gross=gm*12; const net=Math.max(0,gross-20000-si);
     let elim=0; if(e.checked) ELIM.forEach(([th,k])=>{ if(net>th) elim=k; });
@@ -85,7 +85,7 @@ LABS.push({id:'tax',ch:'egypt-payroll',title:'Egypt salary tax & bracket elimina
 
 /* Lab 7: leave */
 LABS.push({id:'leave',ch:'absence',title:'Leave ladder & plan types',lead:'Every entitlement in the labour law becomes a plan with rules, and every rule becomes a test script. The Egyptian annual-leave ladder is the classic accrual-band exercise; sick leave is the classic qualification plan.',render(b){
-  const rungs=[[15,'1st year of service'],[21,'from 2nd year'],[30,'10+ years or age 50+'],[45,'persons with disabilities'],['+7','hazardous / arduous / remote work']];
+  const rungs=[[15,'1st year of service'],[21,'from 2nd year'],[30,'10+ years or aged over 50'],[45,'persons with disabilities'],['+7','hazardous / arduous / remote work']];
   const plans=[['accrual-plan','Accrual','earned over time — annual leave'],['qualification-plan','Qualification','triggered by an event, paid in bands — sick, maternity'],['no-entitlement-plan','No entitlement','tracked, no balance — unpaid leave'],['compensatory-plan','Compensatory','time off instead of overtime pay'],[null,'Agreement','Know the name — one of the six'],[null,'Donation','Know the name — one of the six']];
   b.innerHTML=`<div class="grid g2"><div class="stage"><div class="eyebrow" style="margin-bottom:6px">Egyptian annual leave · Law 14/2025 · accrual bands</div><div class="ladder">${rungs.map(([d,l],i)=>`<div class="rung" data-i="${i}"><div class="col" style="height:${typeof d==='number'?d*3.4:60}px">${d}</div><div class="lbl">${l}</div></div>`).join('')}</div><div class="small muted" style="margin-top:8px">Days per year. Test the boundary cases: the person who crosses 10 years mid-year, and the one who turns 50 mid-year. Casual leave (max 7/yr, 2 consecutive) is counted <em>within</em> this, not on top.</div></div>
   <div class="stage"><div class="eyebrow" style="margin-bottom:6px">Sick leave · qualification bands · % of insurable wage</div><div class="bands"><div style="flex:90">75% · days 1–90</div><div style="flex:90">85% · days 91–180</div></div><div class="small muted" style="margin-top:8px">Up to 180 days in a calendar year, medical certification required. Employers offset what NOSI already paid.</div>
@@ -97,7 +97,7 @@ LABS.push({id:'leave',ch:'absence',title:'Leave ladder & plan types',lead:'Every
 /* Lab 8: lifecycle */
 LABS.push({id:'lifecycle',ch:'lifecycle',title:'Employment lifecycle & exits',lead:'Every event is a dated transaction against the assignment, with an approver and a payroll consequence. Three exit routes look alike and are not — click each.',render(b){
   b.innerHTML=`<div class="stage"><div class="pipe" style="min-width:680px"><button class="node" data-t="probation">Hire + probation<small>≤3 months, once, in the contract</small></button><button class="node" data-t="assignment">Working life<small>promotions, transfers, hours — dated changes</small></button><button class="node" data-t="notice-period">Notice<small>written, counts as service</small></button><button class="node" data-t="final-settlement">Final settlement<small>off-cycle QuickPay</small></button></div>
-  <div class="eyebrow" style="margin:18px 0 8px">Three exit routes — different downstream calculations</div><div class="objs"><button class="node" data-t="resignation">Resignation<small>employee-initiated · withdrawable within 1 week · leave paid out, no severance</small></button><button class="node" data-t="termination">Termination<small>employer-initiated · with/without cause · burden of proof on employer</small></button><button class="node" data-t="end-of-contract">End of contract<small>fixed term lapses · renewal or continuing = indefinite</small></button></div></div>
+  <div class="eyebrow" style="margin:18px 0 8px">Three exit routes — different downstream calculations</div><div class="objs"><button class="node" data-t="resignation">Resignation<small>employee-initiated · withdrawable within 10 days of acceptance (Law 14/2025) · leave paid out, no severance</small></button><button class="node" data-t="termination">Termination<small>employer-initiated · with/without cause · burden of proof on employer</small></button><button class="node" data-t="end-of-contract">End of contract<small>fixed term lapses · renewal or continuing = indefinite</small></button></div></div>
   ${explainBox('lcEx','<span class="muted">Click a stage. Final settlement = final salary + unused leave payout + any EOSB/severance − outstanding loans. Egypt has no Gulf-style gratuity; do not import EOSB logic.</span>')}`;
   b.querySelectorAll('[data-t]').forEach(x=>x.addEventListener('click',()=>{b.querySelectorAll('.node').forEach(y=>y.classList.remove('active')); x.classList.add('active'); $('#lcEx').innerHTML=termExplain(x.dataset.t);}));
 }});
@@ -252,7 +252,9 @@ LABS.push({id:'joins',ch:'sql-joins',title:'Which rows survive, and which multip
 }});
 
 LABS.push({id:'windows',ch:'sql-windows',title:'The frame nobody writes, and the bug it hides',lead:'A running total over four days, two of which fall on the same date. Switch the frame between ROWS and RANGE — the default — and watch the tied rows disagree.',render(b){
-  const R=[{d:'2026-01-01',amt:100},{d:'2026-01-02',amt:80},{d:'2026-01-02',amt:40},{d:'2026-01-03',amt:60}];
+  /* Two rows share a date, which is what the frame demo turns on, and two share
+     an amount, which is what the ranking functions need in order to differ. */
+  const R=[{d:'2026-01-01',amt:100},{d:'2026-01-02',amt:80},{d:'2026-01-02',amt:40},{d:'2026-01-03',amt:80}];
   let frame='RANGE', rank='ROW_NUMBER';
   const running=()=>R.map((r,i)=>{
     if(frame==='ROWS') return R.slice(0,i+1).reduce((a,x)=>a+x.amt,0);
@@ -275,8 +277,8 @@ LABS.push({id:'windows',ch:'sql-windows',title:'The frame nobody writes, and the
         `<tr class="${tie&&r.d==='2026-01-02'?'tie':''}"><td>${r.d}</td><td class="n">${r.amt}</td><td class="n"><b>${run[i]}</b></td><td class="n">${rk[i]}</td></tr>`).join('')}</tbody></table></div>
       <div class="explain" style="margin-top:12px">${frame==='RANGE'
         ? '<b>RANGE — what you get if you write no frame at all</b><br>RANGE treats every row sharing the ordering value as one unit, so both rows dated 2 January show 220: the total including <em>both</em> of them. Nothing is wrong with the SQL, and on data with no ties this is identical to ROWS — which is exactly why the bug survives testing and turns up in production.'
-        : '<b>ROWS — one row at a time</b><br>The total steps 100, 180, 220, 280 as you would expect. If you mean row-by-row, write <code>ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW</code> and say so.'}
-        <div class="muted" style="margin-top:8px">${rank==='ROW_NUMBER'?'ROW_NUMBER never ties — the two 80/40 rows get distinct numbers, and with no tiebreaker in ORDER BY, which one comes first is not stable between runs.':rank==='RANK'?'RANK ties and then skips: 1, 2, 2, 4.':'DENSE_RANK ties and does not skip: 1, 2, 2, 3.'}</div></div>`;
+        : '<b>ROWS — one row at a time</b><br>The total steps 100, 180, 220, 300 as you would expect. If you mean row-by-row, write <code>ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW</code> and say so.'}
+        <div class="muted" style="margin-top:8px">${rank==='ROW_NUMBER'?'ROW_NUMBER never ties — the two rows of 80 get 2 and 3, and which of them gets 2 is not stable between runs unless the ORDER BY carries a tiebreaker.':rank==='RANK'?'RANK ties and then skips — both 80s are 2, and the 40 below them is 4. Nothing is ever numbered 3.':'DENSE_RANK ties and does not skip — both 80s are 2 and the 40 is 3.'}</div></div>`;
     b.querySelectorAll('[data-f]').forEach(x=>x.addEventListener('click',()=>{ frame=x.dataset.f; draw(); }));
     b.querySelectorAll('[data-r]').forEach(x=>x.addEventListener('click',()=>{ rank=x.dataset.r; draw(); }));
   };
@@ -312,5 +314,587 @@ LABS.push({id:'dax-context',ch:'dax',title:'The same measure, a different answer
     b.querySelectorAll('[data-c]').forEach(x=>x.addEventListener('click',()=>{ cat=x.dataset.c; draw(); }));
     b.querySelectorAll('[data-g]').forEach(x=>x.addEventListener('click',()=>{ reg=x.dataset.g; draw(); }));
   };
+  draw();
+}});
+
+/* Lab 20: the Ulrich model — the three groups, and the shape actually found */
+LABS.push({id:'ulrich',ch:'hrfunction',title:'The three groups, and what each one is for',lead:'Requirements arrive from one group, get approved by another, and are run every month by a third. Click a group to see how it talks to a consultant — then compare the textbook chart with the shapes common in Egypt and the Gulf.',render(b){
+  const P=[
+    {n:'HR business partner',abbr:'HRBP',ar:'شريك أعمال الموارد البشرية',s:'the division’s HR advisor',
+     what:'Sits with one business division — sales, operations, engineering — as its main HR contact, and thinks in business problems: attrition, performance, headcount plans. Requirements arrive framed as problems rather than as system specifications, and turning them into configuration is the consultant’s job.',
+     say:'الـ HRBP قاعد مع الإدارة نفسها. مش هيقول عايز approval workflow بمستويين، هيقول المديرين زهقانين والتعيين بياخد شهرين — والترجمة لـ configuration شغل الاستشاري.',
+     role:'Brings the problem, and has a strong opinion about it. Rarely holds the final sign-off on policy.',
+     miss:'Building exactly what the HRBP asked for without checking with the CoE that owns it. They can ask; they usually cannot approve.',
+     quote:'“Managers complain it takes two months to hire anyone.”'},
+    {n:'Center of excellence',abbr:'CoE',ar:'مركز التميّز',s:'specialists who own the policy',
+     what:'Specialist teams that own policy in one domain and sign off design in it: compensation and benefits, talent acquisition, learning and development, organization development. A grade structure is designed by the consultant and approved by C&amp;B — that approval is a gate, not a courtesy.',
+     say:'الـ CoE هم أصحاب السياسة. أي حاجة ليها علاقة بالأجور والدرجات لازم تتعتمد من الـ C&amp;B قبل ما تتبني، وإلا هترجع تفكّها في الـ UAT.',
+     role:'Owns the decision in its domain and signs off the design. The approval gate.',
+     miss:'Building something the CoE has not signed off because an HRBP said it was fine. It gets reversed later, and the reversal is expensive.',
+     quote:'“Grade G7’s pay range is 18–26k. Car allowance starts at G8. Approved.”',
+     sub:[['Compensation &amp; benefits','التعويضات والمزايا'],['Talent acquisition','استقطاب المواهب'],['Learning &amp; development','التعلم والتطوير'],['Organization development','التطوير التنظيمي']]},
+    {n:'Shared services / HR operations',abbr:'SSC',ar:'شؤون العاملين',s:'runs it every month',
+     what:'The central team doing the transactional work for the whole organization: payroll processing, data entry, first-line employee queries. In Egypt this is the classic Personnel and Payroll team, and its daily work is exactly what the configuration automates.',
+     say:'شؤون العاملين هما اللي بيطلّعوا استمارة ١ و٦ للتأمينات، وبيمسكوا الحضور والانصراف والجزاءات. شغلهم اليومي هو اللي السيستم هيعمله أوتوماتيك.',
+     role:'Runs the process every month, and knows every exception and workaround in it. The best source of real requirements.',
+     miss:'Treating them as data-entry staff. They answer exactly what they are asked and nothing more, and the gaps then surface in the parallel run.',
+     quote:'“Commission is not in the insurable wage. The insurance office rejected it once in 2022.”'}];
+  const ORG={
+    textbook:{t:'Textbook Ulrich',note:'Clear owners, and mostly a routing exercise: each question goes to the group that owns it. Common in multinationals and the larger Gulf groups.',
+      cols:[['HR business partners','شركاء الأعمال',['One per division','Brings business problems','No policy sign-off']],
+            ['Centers of excellence','مراكز التميّز',['C&amp;B · pay and grades','Talent acquisition','Learning · OD']],
+            ['Shared services','الخدمات المشتركة',['Payroll processing','HR data and admin','Employee helpdesk']]]},
+    egypt:{t:'Common in an Egyptian company',note:'The roles are merged rather than absent. One HR manager plays HRBP and CoE at once, and payroll may sit under Finance. The org chart will not say who signs off — that has to be asked, name by name, in the first week.',
+      cols:[['The HR manager’s own desk','مدير الموارد البشرية',['Talks to business heads','Approves pay and grades','A recruiter or two']],
+            ['Personnel &amp; payroll','شؤون العاملين',['Insurance forms 1 and 6','Labour office file','Attendance · leave · penalties','Payroll, usually in Excel']],
+            ['Finance','الإدارة المالية',['Sometimes owns payroll','Owns costing and the GL','Signs off the salary budget']]]},
+    gulf:{t:'Common in a Saudi group',note:'The same three groups, with a fourth force: the government platforms. Whoever files on Qiwa, Mudad and Muqeem is a stakeholder in the design whether or not they appear on the HR org chart.',
+      cols:[['HR business partners','شركاء الأعمال',['Per business line','Often also recruiters','Nationalization targets']],
+            ['Personnel','شؤون الموظفين',['GOSI registration and wages','Qiwa · contracts, Nitaqat','Mudad · wage protection','Muqeem · iqama records']],
+            ['Payroll &amp; finance','الرواتب والمالية',['Monthly payroll run','End-of-service settlements','Bank file and reconciliation']]]}};
+  let cur=0,shape='textbook';
+  const draw=()=>{const p=P[cur],o=ORG[shape];
+    b.innerHTML=`<div class="plans">${P.map((x,i)=>`<button class="plan ${i===cur?'active':''}" data-p="${i}"><b>${x.n}</b><span class="ar" style="display:block;color:var(--p);font-size:14px">${x.ar}</span><small>${x.abbr} · ${x.s}</small></button>`).join('')}</div>
+    <div class="two">
+      <div>
+        <div class="explain"><b>${p.n}</b> <span class="ar">${p.ar}</span><div style="margin-top:6px">${p.what}</div><div class="muted" style="margin-top:8px;font-style:italic">${p.quote}</div></div>
+        ${p.sub?`<div class="bi">${p.sub.map(([e,a])=>`<span>${e}<span class="ar">${a}</span></span>`).join('')}</div>`:''}
+      </div>
+      <div>
+        <div class="say"><span class="lbl">How it sounds on the floor</span><div class="ar-line">${p.say}</div></div>
+        <div class="explain"><b>What they are to the project</b><div style="margin-top:4px">${p.role}</div></div>
+        <div class="msg bad"><b>Common consultant mistake</b><span>${p.miss}</span></div>
+      </div>
+    </div>
+    <div class="stepper">${Object.keys(ORG).map(k=>`<button class="${k===shape?'active':''}" data-o="${k}">${ORG[k].t}</button>`).join('')}</div>
+    <div class="stage"><div class="ocols">${o.cols.map(([h,a,items])=>`<div class="ocol"><div class="oh">${h}<span class="ar">${a}</span></div>${items.map(i=>`<div class="oi">${i}</div>`).join('')}</div>`).join('')}</div></div>
+    <div class="explain"><b>${o.t}.</b> ${o.note}</div>`;
+    b.querySelectorAll('[data-p]').forEach(x=>x.addEventListener('click',()=>{cur=+x.dataset.p;draw();}));
+    b.querySelectorAll('[data-o]').forEach(x=>x.addEventListener('click',()=>{shape=x.dataset.o;draw();}));};
+  draw();
+}});
+
+/* Lab 21: who decides vs who knows — the routing drill */
+LABS.push({id:'who-decides',ch:'hrfunction',title:'Who decides, and who knows',lead:'Real workshop moments. Some of these ask who owns the decision; others ask who holds the answer. They are usually different groups, and sending the question to the wrong one is how a design gets reversed late.',render(b){
+  const OPTS=[['hrbp','HRBP'],['cb','C&amp;B'],['ta','Talent acquisition'],['ld','L&amp;D'],['od','Org development'],['ss','Shared services']];
+  const Q=[
+    {t:'decides',q:'Should grade G7 get a car allowance?',a:'cb',why:'Allowances by grade are pay policy, and pay policy belongs to compensation and benefits. An HRBP may push hard for it; that is still a request, not an approval.',ar:'البدلات حسب الدرجة = سياسة أجور = الـ C&amp;B.'},
+    {t:'knows',q:'How is the insurable wage actually calculated today, with every exception?',a:'ss',why:'The law sets the rule, but only the people who file every month know how it is applied in practice, including what the insurance office has pushed back on before.',ar:'القانون بيحدد، بس اللي عارف التطبيق الفعلي هما شؤون العاملين.'},
+    {t:'decides',q:'How many approval levels should a job requisition need?',a:'ta',why:'Hiring process policy belongs to talent acquisition. Managers will complain about the number of levels either way; TA still owns it.',ar:'سياسة التعيين عند الـ TA.'},
+    {t:'knows',q:'Why is attrition so high in the engineering division?',a:'hrbp',why:'The HRBP sits inside that division and knows its context — the managers, the exit conversations, the local problems that never reach a report.',ar:'الـ HRBP قاعد مع الإدارة وعارف مشاكلها.'},
+    {t:'decides',q:'Approve the pay ranges for the new grade structure.',a:'cb',why:'Grades and ranges are the core of C&amp;B’s remit. No configuration should start before that approval exists in writing.',ar:'سلم الدرجات ونطاقات الأجور = اعتماد الـ C&amp;B.'},
+    {t:'decides',q:'Should sales be restructured into three regions or four?',a:'od',why:'Structure and job design sit with organization development, working with business leadership. The resulting hierarchy is what gets configured.',ar:'الهيكل التنظيمي عند الـ OD.'},
+    {t:'knows',q:'What is the real payroll cut-off, and what happens to changes that arrive late?',a:'ss',why:'Payroll operations run the cycle. The written cut-off and the real one are often different dates, and they know both.',ar:'تاريخ الإقفال الحقيقي — مش المكتوب — عند شؤون العاملين.'},
+    {t:'decides',q:'Mandatory safety training has to be assigned to every new warehouse hire. Who owns that rule?',a:'ld',why:'Mandatory learning and training policy belong to learning and development.',ar:'التدريب الإلزامي عند الـ L&amp;D.'},
+    {t:'knows',q:'Who will key in 200 new hires a month once the system is live, and what slows them down?',a:'ss',why:'They are the future users of that screen. A flow designed without them is a flow that gets worked around.',ar:'هما اللي هيستخدموا الشاشة كل يوم، فالتصميم يتعمل معاهم.'},
+    {t:'decides',q:'An HRBP wants a flat retention bonus for sales. Can it just be built?',a:'cb',why:'No. It is a pay element, so C&amp;B has to approve it first. The request is input to the design, not sign-off on it.',ar:'طلب الـ HRBP مدخل مش اعتماد.'}];
+  let i=0,score=0,picked=null;
+  const draw=()=>{
+    if(i>=Q.length){
+      b.innerHTML=`<div class="counter"><div><div class="big">${score} / ${Q.length}</div><div class="lbl">routed correctly</div></div></div>
+      <div class="explain">${score>=8?'<b>Solid.</b> That is the level of routing a workshop needs: pay questions to C&amp;B, hiring process to talent acquisition, and “how does it really work today” to the people who run it.':'<b>Worth another pass.</b> The pattern underneath: anything about money or grades is C&amp;B, anything about the hiring process is talent acquisition, and anything beginning “how does it actually work today” belongs to shared services.'}</div>
+      <div class="stepper"><button class="active" data-again="1">Start again</button></div>`;
+      b.querySelector('[data-again]').addEventListener('click',()=>{i=0;score=0;picked=null;draw();});
+      return;}
+    const q=Q[i];
+    b.innerHTML=`<div class="kv"><span class="small muted">Question ${i+1} of ${Q.length}</span><b>${score} correct</b></div>
+    <div class="explain"><span class="pill p">${q.t==='decides'?'Who decides?':'Who knows?'}</span><div style="margin-top:8px;font-size:16px">${q.q}</div></div>
+    <div class="opts">${OPTS.map(([v,l])=>`<button class="opt ${picked?(v===q.a?'right':(v===picked?'wrong':'')):''}" data-v="${v}" ${picked?'disabled':''}>${l}</button>`).join('')}</div>
+    ${picked?`<div class="msg ${picked===q.a?'ok':'bad'}" role="status"><b>${picked===q.a?'Right.':'Not this one — it is '+OPTS.find(o=>o[0]===q.a)[1]+'.'}</b><span>${q.why}</span><div class="ar-line">${q.ar}</div></div>
+    <div class="stepper"><button class="active" data-next="1">${i===Q.length-1?'See the score':'Next question'}</button></div>`:''}`;
+    b.querySelectorAll('[data-v]').forEach(x=>x.addEventListener('click',()=>{if(picked)return;picked=x.dataset.v;if(picked===q.a)score++;draw();}));
+    const n=b.querySelector('[data-next]'); if(n) n.addEventListener('click',()=>{i++;picked=null;draw();});};
+  draw();
+}});
+
+/* Lab 22: break a link in the chain and watch one payslip react */
+LABS.push({id:'payslip',ch:'payroll',title:'Break a link, read the payslip',lead:'Mona is a finance analyst in Cairo: EGP 240,000 a year, an EGP 800 transport allowance, an EGP 1,500 loan instalment, net pay split 80/20 across two accounts. Turn a link off and watch which one goes red — and, more usefully, which failures produce no error at all.',render(b){
+  const CHAIN=[['element','Element'],['elig','Eligibility'],['entry','Entry'],['run','Payroll run'],['bal','Balance'],['pre','Prepayments'],['pay','Payment'],['cost','Costing']];
+  const DEF={assigned:true,elig:true,entry:true,basis:'annual',loan:'vol',prepay:true,cost:true};
+  const SW=[
+    ['assigned','cb','Assigned to a payroll','معيّنة على دورة رواتب'],
+    ['elig','cb','Transport eligibility covers her grade','أهلية بدل الانتقال تشملها'],
+    ['entry','cb','Transport entry created (EGP 800)','البدل متضاف ليها'],
+    ['basis','sel','Salary basis','أساس الراتب',[['annual','Annual — as loaded'],['monthly','Monthly, annual figure loaded']]],
+    ['loan','sel','Loan instalment classified as','تصنيف قسط السلفة',[['vol','Voluntary deduction'],['earn','Earnings — wrong']]],
+    ['prepay','cb','Prepayments has run','الـ prepayments اتشغّل'],
+    ['cost','cb','Costing configured','توزيع التكاليف متظبّط']];
+  let s={...DEF};
+  const egp=n=>'EGP '+Math.round(n).toLocaleString('en-US');
+  const draw=()=>{
+    const st={element:'ok'},msg=[];
+    const transport=s.elig&&s.entry;
+    st.elig=s.elig?'ok':'bad';
+    st.entry=transport?'ok':(s.entry?'bad':'warn');
+    if(!s.elig) msg.push(['bad','Eligibility does not cover her, so the entry cannot be created at all. This is the “why can’t I add this allowance to this person?” ticket, and it is answered at the eligibility, not on the person.','الأهلية مش شاملاها، فمش هينفع تضيف البدل أصلًا.']);
+    else if(!s.entry) msg.push(['warn','She is eligible and nobody created the entry, so no allowance is paid. Eligible means could, not does.','مستحقة بس مفيش entry، فالبدل مش نازل.']);
+    const basic=s.basis==='annual'?20000:240000;
+    if(s.basis!=='annual') msg.push(['bad','The salary basis says monthly, but the annual figure was loaded against it, so she is paid twelve times her salary. Nothing errors — the run simply calculates what it was given.','أساس الراتب شهري والرقم المحمّل سنوي، فالمرتب طلع ×12 من غير أي error.']);
+    if(s.loan==='earn') msg.push(['bad','The loan instalment is classified as earnings, so EGP 1,500 is added to gross instead of deducted from it. When a result looks calculated in the wrong direction, classification is the first thing to read.','القسط متصنّف استحقاق، فبيتضاف بدل ما يتخصم.']);
+    let rows=[],gross=0,net=0;
+    if(!s.assigned){
+      Object.assign(st,{run:'bad',bal:'off',pre:'off',pay:'off',cost:'off'});
+      msg.unshift(['bad','She is not assigned to a payroll, so the run skips her silently. There is no error, no result and no payslip — she simply is not paid. This is the failure most worth recognising, because nothing reports it.','مش متعيّنة على payroll، فالـ run عدّاها من غير error — ومش هتقبض.']);
+    } else {
+      st.run='ok';
+      const si=basic*0.11,loan=1500;
+      rows.push(['Basic salary','الراتب الأساسي',basic,'']);
+      rows.push(['Transport allowance','بدل انتقال',transport?800:0,transport?'':'gone']);
+      if(s.loan==='earn') rows.push(['Loan instalment — added, not deducted','قسط السلفة',loan,'wrong']);
+      gross=basic+(transport?800:0)+(s.loan==='earn'?loan:0);
+      rows.push(['Gross pay','الإجمالي',gross,'sum']);
+      rows.push(['Social insurance — illustrative 11%','التأمينات',-si,'']);
+      if(s.loan!=='earn') rows.push(['Loan instalment','قسط السلفة',-loan,'']);
+      net=gross-si-(s.loan==='earn'?0:loan);
+      rows.push(['Net pay','الصافي',net,'net']);
+      st.bal=(s.basis!=='annual'||s.loan==='earn')?'warn':'ok';
+      st.pre=s.prepay?'ok':'bad'; st.pay=s.prepay?'ok':'off';
+      if(!s.prepay) msg.push(['bad','The run finished and prepayments did not, so nothing was distributed to her payment methods: no bank file, no payment. Every figure above is correct and she still is not paid.','الحسبة سليمة بس الـ prepayments ماتشغلش، فمفيش ملف بنك.']);
+      st.cost=s.cost?'ok':'warn';
+      if(!s.cost) msg.push(['warn','She is paid, but the cost lands in a default or suspense account instead of her cost centre. Payroll looks fine; Finance finds it at month-end close.','اتصرفلها، بس التكلفة راحت على حساب معلّق.']);
+    }
+    if(!msg.length) msg.push(['ok','Every link is intact: calculated correctly, distributed correctly, costed correctly.','السلسلة كلها شغالة.']);
+    const paid=s.assigned&&s.prepay;
+    b.innerHTML=`<div class="stage"><div class="pipe">${CHAIN.map(([k,n])=>`<button class="node ${st[k]||''}" tabindex="-1">${n}<small>${st[k]==='bad'?'broken':st[k]==='warn'?'at risk':st[k]==='off'?'never ran':'ok'}</small></button>`).join('')}</div></div>
+    <div class="sim">
+      <div class="switches">${SW.map(([k,t,en,ar,opts])=>`<label class="sw"><span>${en}<span class="ar">${ar}</span></span>${t==='cb'?`<input type="checkbox" data-k="${k}" ${s[k]?'checked':''}>`:`<select data-k="${k}">${opts.map(([v,l])=>`<option value="${v}" ${s[k]===v?'selected':''}>${l}</option>`).join('')}</select>`}</label>`).join('')}
+        <button class="node" data-reset="1">Put every link back</button></div>
+      <div style="display:grid;gap:12px;min-width:0">
+        <div class="slip"><div class="hd"><span>Payslip · Mona · March</span><span class="ar">قسيمة راتب · مارس</span></div>
+          ${s.assigned?`<table class="dt">${rows.map(([e,a,v,c])=>`<tr class="${c}"><td>${e} <span class="ar" style="color:var(--muted);font-weight:400">${a}</span></td><td class="n">${c==='gone'?'—':egp(v)}</td></tr>`).join('')}</table>`
+            :`<table class="dt"><tr class="gone"><td>Not picked up by the run</td><td class="n">—</td></tr></table>`}</div>
+        <div class="accts">${[['Account 1 · 80%',.8],['Account 2 · 20%',.2]].map(([l,p])=>`<div class="acct">${l}<b>${paid?egp(net*p):'—'}</b>${paid?'in the bank file':'not paid'}</div>`).join('')}</div>
+        <div style="display:grid;gap:8px">${msg.map(([c,e,a])=>`<div class="msg ${c}"><span>${e}</span><div class="ar-line">${a}</div></div>`).join('')}</div>
+      </div>
+    </div>
+    <div class="callout"><b>On the 11%.</b> The real Egyptian calculation applies the employee share to the capped insurable wage, not to basic pay — Chapter 9 and its calculator do it properly. It is flattened here so the chain, not the arithmetic, is what moves.</div>`;
+    b.querySelectorAll('[data-k]').forEach(x=>x.addEventListener('change',()=>{s[x.dataset.k]=x.type==='checkbox'?x.checked:x.value;draw();}));
+    b.querySelector('[data-reset]').addEventListener('click',()=>{s={...DEF};draw();});};
+  draw();
+}});
+
+/* Lab 23: balance dimensions */
+LABS.push({id:'balances',ch:'payroll',title:'One result, several running totals',lead:'A balance is the same element results added up over a dimension. Drag the month: the bars are what was paid, and the three figures are the same year read three different ways. Mona receives a EGP 5,000 bonus in June.',render(b){
+  const M=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const G=M.map((_,i)=>20800+(i===5?5000:0));
+  let m=7;
+  const egp=n=>'EGP '+n.toLocaleString('en-US');
+  const paint=()=>{
+    /* Two panels, because the two series are two orders of magnitude apart:
+       what a month paid, and what the year has accumulated. One shared scale
+       would flatten the bars into a line along the axis. */
+    const W=560,H=250,L=46,R=548,bT=18,bB=118,bMax=26000,lT=156,lB=214,lMax=260000;
+    const x=i=>L+(R-L)*(i+.5)/12,bw=(R-L)/12*.55;
+    const y=v=>bB-(bB-bT)*v/bMax,ly=v=>lB-(lB-lT)*v/lMax;
+    const q0=Math.floor((m-1)/3)*3;
+    let sv='',cum=0,pts=[];
+    sv+=`<text x="${L}" y="12" font-size="10.5" font-weight="700" fill="var(--muted)">WHAT EACH MONTH PAID</text>`;
+    [0,26000].forEach(v=>{sv+=`<line x1="${L}" x2="${R}" y1="${y(v)}" y2="${y(v)}" stroke="var(--line-2)"/><text x="${L-6}" y="${y(v)+4}" text-anchor="end" font-size="10" fill="var(--muted)" font-family="var(--mono)">${v?v/1000+'k':'0'}</text>`;});
+    G.forEach((g,i)=>{cum+=g;pts.push([x(i),ly(cum)]);
+      const fill=i===m-1?'var(--p)':(i>=q0&&i<m)?'var(--p-soft)':i<m?'var(--line-2)':'var(--surface-2)';
+      sv+=`<rect x="${x(i)-bw/2}" y="${y(g)}" width="${bw}" height="${bB-y(g)}" rx="2" fill="${fill}" stroke="${i<m?'var(--p)':'var(--line-2)'}" stroke-width="${i<m?1:0}"/>`;
+      sv+=`<text x="${x(i)}" y="${bB+15}" text-anchor="middle" font-size="10" fill="${i===m-1?'var(--ink)':'var(--muted)'}">${M[i]}</text>`;});
+    sv+=`<text x="${L}" y="150" font-size="10.5" font-weight="700" fill="var(--muted)">ADDED UP SINCE JANUARY</text>`;
+    [0,260000].forEach(v=>{sv+=`<line x1="${L}" x2="${R}" y1="${ly(v)}" y2="${ly(v)}" stroke="var(--line-2)"/><text x="${L-6}" y="${ly(v)+4}" text-anchor="end" font-size="10" fill="var(--muted)" font-family="var(--mono)">${v?v/1000+'k':'0'}</text>`;});
+    const shown=pts.slice(0,m),e=shown[shown.length-1];
+    sv+=`<polyline points="${shown.map(p=>p.join(',')).join(' ')}" fill="none" stroke="var(--good)" stroke-width="2"/><circle cx="${e[0]}" cy="${e[1]}" r="4" fill="var(--good)"/>`;
+    sv+=`<text x="${L}" y="${H-6}" font-size="10.5" fill="var(--muted)">two scales, because a month and a year are not the same size — the June bonus is the step in both</text>`;
+    const ptd=G[m-1],qtd=G.slice(q0,m).reduce((a,c)=>a+c,0),ytd=G.slice(0,m).reduce((a,c)=>a+c,0);
+    $('#balSvg').innerHTML=sv;
+    $('#balLbl').textContent='Payroll period · '+M[m-1];
+    $('#balQn').textContent='Q'+(q0/3+1);
+    $('#balPtd').textContent=egp(ptd); $('#balQtd').textContent=egp(qtd); $('#balYtd').textContent=egp(ytd);
+  };
+  /* The shell is written once so the slider survives the drag. */
+  b.innerHTML=`<div class="calc"><div class="in">
+    <label for="balMon" id="balLbl"></label><input id="balMon" type="range" min="1" max="12" value="7">
+    <div class="kv"><span>Period to date <span class="ar">الفترة</span></span><b id="balPtd" style="white-space:nowrap"></b></div>
+    <div class="kv"><span>Quarter to date <span class="ar">الربع</span> · <span id="balQn"></span></span><b id="balQtd" style="white-space:nowrap"></b></div>
+    <div class="kv total"><span>Year to date <span class="ar">من أول السنة</span></span><b id="balYtd" style="white-space:nowrap"></b></div>
+  </div><div class="out"><div class="stage"><svg id="balSvg" viewBox="0 0 560 250" style="display:block;width:100%;min-width:480px;height:auto" role="img" aria-label="Monthly gross pay as bars, with the year-to-date total as a line beneath them"></svg></div>
+  <div class="explain">Three dimensions over one set of results. The bonus enters every total that includes June and none of the others, which is why a statutory report that quotes the wrong dimension is wrong in a way that looks plausible. Balances stop at the payroll relationship: after a global transfer, or a rehire that creates a new one, these figures start again at zero. <span class="ar">الأرصدة مش بتعدّي من payroll relationship لواحدة تانية.</span></div></div></div>`;
+  b.querySelector('#balMon').addEventListener('input',e2=>{ m=+e2.target.value; paint(); });
+  paint();
+}});
+
+/* Lab 24: the parallel run — every difference needs a cause */
+LABS.push({id:'parallel-run',ch:'payroll',title:'Reconciling a parallel run',lead:'Legacy and Oracle have both run March. Five lines differ. A parallel run is not signed off when the differences are listed — it is signed off when every one of them has a cause. Click a line to see what was found.',render(b){
+  const R=[
+    {p:'Mona',e:'Basic salary',l:20000,o:20000,why:'No difference. Most lines look like this, which is why the eye stops reading — the discipline is to reconcile the whole file, not the exceptions someone already noticed.',ok:true},
+    {p:'Karim',e:'Social insurance',l:-2310,o:-2200,why:'Legacy applied last year’s insurable wage ceiling; Oracle applied the current one. Oracle is right, and the difference is evidence that legacy has been under-deducting since January — which the client needs to hear before go-live, not after.',ok:true},
+    {p:'Yasmin',e:'Overtime',l:1450,o:0,why:'The overtime entries in batch 3 never loaded — the file failed validation and nobody read the log. Fix the load, rerun, reconcile again. A missing entry is the most common cause of a zero in this column.',ok:true},
+    {p:'Omar',e:'Net pay',l:18200,o:18350,why:'Still unexplained. Until someone traces it element by element, this parallel run is not finished, no matter how small the number looks. Unexplained differences are the ones that become tickets in hypercare.',ok:false},
+    {p:'Hala',e:'Housing allowance',l:3000,o:3000,why:'Equal, and equally wrong: both systems pay a flat EGP 3,000 where the policy says 25% of basic. A parallel run proves the new system matches the old one — it does not prove either matches the policy.',ok:false}];
+  let open=null,seen=new Set();
+  const draw=()=>{
+    b.innerHTML=`<div class="stage"><table class="dt" style="min-width:560px">
+      <tr><th>Person</th><th>Element</th><th class="n">Legacy</th><th class="n">Oracle</th><th class="n">Difference</th><th>Status</th></tr>
+      ${R.map((r,i)=>{const d=r.o-r.l;return `<tr data-r="${i}" tabindex="0" role="button" aria-label="${esc(r.p)}, ${esc(r.e)} — show what was found" style="cursor:pointer" class="${open===i?'tie':''}"><td>${r.p}</td><td>${r.e}</td><td class="n">${r.l.toLocaleString()}</td><td class="n">${r.o.toLocaleString()}</td><td class="n" style="color:${d?'var(--bad)':'var(--muted)'}">${d?(d>0?'+':'')+d.toLocaleString():'0'}</td><td><span class="pill ${seen.has(i)?(r.ok?'ok':'no'):''}">${seen.has(i)?(r.ok?'explained':'open'):'not looked at'}</span></td></tr>`;}).join('')}
+    </table></div>
+    ${explainBox('prEx',open===null?'<span class="muted">Click any line — including the two that match.</span>':`<b>${R[open].p} · ${R[open].e}.</b> ${R[open].why}`)}
+    <div class="kv total"><span>Lines with a cause</span><b>${R.filter((r,i)=>seen.has(i)&&r.ok).length} of ${R.length}</b></div>
+    <div class="callout"><b>What sign-off means.</b> Two or three consecutive months, every line reconciled, every difference explained in writing, and the explanations reviewed by the people who will run the payroll afterwards.</div>`;
+    b.querySelectorAll('[data-r]').forEach(x=>{ const h=()=>{open=+x.dataset.r;seen.add(open);draw();const f=b.querySelector(`[data-r="${open}"]`);if(f)f.focus();};
+      x.addEventListener('click',h); x.addEventListener('keydown',e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); h(); } }); });};
+  draw();
+}});
+
+/* Lab 25: end-of-service, and the dates that decide it */
+LABS.push({id:'gratuity',ch:'gulf',title:'End-of-service, and the dates that decide it',lead:'Two stints with a break between them, and one question: does the earlier service count? The policy answer is expressed through a seniority date. Move the sliders — the left figure is what the client’s policy owes, the right is what a fresh service clock at rehire would pay.',render(b){
+  let st={s1:4,gap:12,s2:5,wage:10000,policy:'if',lim:24,exit:'term'};
+  const sar=n=>Math.round(n).toLocaleString('en-US')+' SAR';
+  const yr=y=>(Number.isInteger(y)?y:y.toFixed(1))+' yr';
+  const months=y=>Math.min(y,5)*0.5+Math.max(y-5,0);
+  const resign=y=>y<2?0:y<=5?1/3:y<10?2/3:1;
+  const award=y=>{const base=months(y)*st.wage;const f=st.exit==='resign'?resign(y):1;return{amt:base*f,f,m:months(y)};};
+  const calc=()=>{
+    const bridged=st.policy==='always'||(st.policy==='if'&&st.gap<=st.lim);
+    const counted=bridged?st.s1+st.s2:st.s2;
+    const A=award(counted),B=award(st.s2),diff=A.amt-B.amt;
+    const total=st.s1*12+st.gap+st.s2*12;
+    const p1=st.s1*12/total*100,p2=(st.s1*12+st.gap)/total*100;
+    const how=(y,a)=>`${yr(y)} → ${a.m.toFixed(2)} months${st.exit==='resign'?' × '+(a.f===0?'0':a.f===1?'1':a.f<.5?'⅓':'⅔'):''}`;
+    return {bridged,counted,A,B,diff,p1,p2,how};
+  };
+  const LBL={s1:()=>'First stint · '+yr(st.s1),gap:()=>'Break between · '+st.gap+' months',s2:()=>'Second stint · '+yr(st.s2),wage:()=>'Final monthly wage · '+sar(st.wage),lim:()=>'Break limit · '+st.lim+' months'};
+  /* The output column is its own function so one drag can repaint just it. */
+  const outHTML=()=>{ const {bridged,counted,A,B,diff,p1,p2,how}=calc(); return `
+        <div class="stage"><div class="tl"><div class="tl-row"><div class="tl-line">
+          <div class="tl-seg${bridged?'':' old'}" style="left:0;width:${p1}%"></div>
+          <div class="tl-seg" style="left:${p2}%;width:${100-p2}%"></div>
+          ${p2-p1>9?`<div class="tl-lbl" style="left:${(p1+p2)/2}%;color:var(--muted);font-weight:400">${st.gap}-month break</div>`:''}
+          <div class="tl-mark" style="left:0"><i></i>joins</div>
+          <div class="tl-mark" style="left:${p1}%"><i></i>leaves</div>
+          <div class="tl-mark${bridged?'':' warn'}" style="left:${p2}%"><i></i>rehired</div>
+          <div class="tl-lbl" style="left:${p1/2}%">${bridged?'counted':'not counted'}</div>
+          <div class="tl-lbl" style="left:${(100+p2)/2}%;color:var(--p)">counted</div>
+        </div></div></div></div>
+        <div class="vs">
+          <div class="ok"><span class="lbl">What the policy owes</span><span class="amt">${sar(A.amt)}</span><span class="how">${how(counted,A)}</span></div>
+          <div class="no"><span class="lbl">If the clock restarts at rehire</span><span class="amt">${sar(B.amt)}</span><span class="how">${how(st.s2,B)}</span></div>
+        </div>
+        <div class="msg ${bridged&&diff>0.5?'bad':'ok'}">${bridged?(diff>0.5?`<span><b>${sar(diff)} short.</b> The policy bridges the break, so a fresh service clock underpays her by ${(diff/(st.wage||1)).toFixed(1)} months’ wages — and nothing in payroll flags it, because both figures are arithmetically correct. The fix is a seniority date that means what the policy means, never a back-dated hire date.</span><div class="ar-line">التاريخ الجديد بيضيّع الخدمة القديمة، والفرق ده محدش هيلاحظه.</div>`:'<span>The policy bridges the break, but at these numbers both setups pay the same — the resignation scale can zero out short service. Lengthen the first stint to see them diverge.</span>'):`<span>Under this policy the earlier service does not count${st.policy==='if'?`, because the ${st.gap}-month break is longer than the ${st.lim}-month limit`:''}, so a fresh clock is the correct setup. Record the decision anyway: the next consultant will ask why.</span>`}</div>
+        <div class="kv"><span>Enterprise hire date</span><b>unchanged — first day in the group</b></div>
+        <div class="kv"><span>Legal employer start date</span><b>resets at the rehire</b></div>
+        <div class="kv total"><span>Seniority date</span><b>${bridged?'moved back to cover the first stint':'same as the new start'}</b></div>
+  `; };
+  const draw=()=>{
+    b.innerHTML=`<div class="calc">
+      <div class="in">
+        <label>First stint · ${yr(st.s1)}</label><input type="range" data-n="s1" min="0.5" max="15" step="0.5" value="${st.s1}">
+        <label>Break between · ${st.gap} months</label><input type="range" data-n="gap" min="0" max="48" step="1" value="${st.gap}">
+        <label>Second stint · ${yr(st.s2)}</label><input type="range" data-n="s2" min="0.5" max="15" step="0.5" value="${st.s2}">
+        <label>Final monthly wage · ${sar(st.wage)}</label><input type="range" data-n="wage" min="3000" max="40000" step="500" value="${st.wage}">
+        <label>Client policy on the earlier service</label>
+        <select data-s="policy"><option value="fresh" ${st.policy==='fresh'?'selected':''}>Never counts</option><option value="if" ${st.policy==='if'?'selected':''}>Counts if the break is short enough</option><option value="always" ${st.policy==='always'?'selected':''}>Always counts</option></select>
+        ${st.policy==='if'?`<label>Break limit · ${st.lim} months</label><input type="range" data-n="lim" min="0" max="36" step="1" value="${st.lim}">`:''}
+        <label>How the second stint ends</label>
+        <div class="stepper">${[['term','Terminated'],['resign','Resigns']].map(([v,l])=>`<button class="${st.exit===v?'active':''}" data-e="${v}">${l}</button>`).join('')}</div>
+      </div>
+      <div class="out">
+${outHTML()}
+      </div></div>
+    <div class="callout"><b>A teaching model.</b> It follows the Saudi award — half a month’s wage for each of the first five years, one month for each year after, on the last wage — and the resignation scale of nothing under two years, a third from two to five, two thirds from five to ten, and the full award at ten. Check the current law and the client’s own contracts before quoting a real figure.</div>`;
+    b.querySelectorAll('[data-n]').forEach(x=>x.addEventListener('input',()=>{ st[x.dataset.n]=+x.value;
+      /* Repaint the label and the output column in place. Re-rendering the
+         whole lab here would delete the slider the pointer is holding. */
+      const lbl=x.previousElementSibling; if(lbl&&lbl.tagName==='LABEL'&&LBL[x.dataset.n]) lbl.textContent=LBL[x.dataset.n]();
+      const out=b.querySelector('.out'); if(out) out.innerHTML=outHTML(); }));
+    b.querySelectorAll('[data-s]').forEach(x=>x.addEventListener('change',()=>{st[x.dataset.s]=x.value;draw();}));
+    b.querySelectorAll('[data-e]').forEach(x=>x.addEventListener('click',()=>{st.exit=x.dataset.e;draw();}));};
+  draw();
+}});
+
+/* Lab 26: subject-area grain — where wrong OTBI numbers come from */
+LABS.push({id:'grain-trap',ch:'reporting',title:'Why the headcount is too high',lead:'Seven assignment rows, three people. The subject area returns one row per assignment per dated version, so counting rows counts history and second jobs as extra humans. Add the two filters and watch the number come down to the truth.',render(b){
+  const ROWS=[
+    {p:'Mona Adel',d:'Finance',pr:'Y',f:'2024/01/01',t:'2025/06/30',hist:1,why:'History: the version before her July 2025 raise.'},
+    {p:'Mona Adel',d:'Finance',pr:'Y',f:'2025/07/01',t:'4712/12/31',why:'Current row.'},
+    {p:'Karim Samir',d:'Sales',pr:'Y',f:'2023/03/01',t:'4712/12/31',why:'Current row, primary assignment.'},
+    {p:'Karim Samir',d:'Projects',pr:'N',f:'2025/01/01',t:'4712/12/31',sec:1,why:'A second, non-primary assignment — a real job, not a duplicate.'},
+    {p:'Yasmin Fouad',d:'HR',pr:'Y',f:'2022/05/01',t:'2023/12/31',hist:1,why:'History: before a grade change.'},
+    {p:'Yasmin Fouad',d:'HR',pr:'Y',f:'2024/01/01',t:'2025/02/28',hist:1,why:'History: before a manager change.'},
+    {p:'Yasmin Fouad',d:'HR',pr:'Y',f:'2025/03/01',t:'4712/12/31',why:'Current row.'}];
+  let asOf=false,prim=false;
+  const draw=()=>{
+    const keep=ROWS.map(r=>(!asOf||!r.hist)&&(!prim||r.pr==='Y'));
+    const n=keep.filter(Boolean).length;
+    const people=new Set(ROWS.filter((r,i)=>keep[i]).map(r=>r.p)).size;
+    b.innerHTML=`<div class="switches" style="grid-template-columns:repeat(auto-fit,minmax(240px,1fr));display:grid">
+      <label class="sw"><span>Filter to today’s row<span class="ar">السطر السارى النهاردة</span></span><input type="checkbox" data-f="asOf" ${asOf?'checked':''}></label>
+      <label class="sw"><span>Filter to the primary assignment<span class="ar">التعيين الأساسي بس</span></span><input type="checkbox" data-f="prim" ${prim?'checked':''}></label></div>
+    <div class="stage"><table class="dt" style="min-width:600px">
+      <tr><th>Person</th><th>Department</th><th>Primary</th><th>Effective from</th><th>Effective to</th></tr>
+      ${ROWS.map((r,i)=>`<tr class="${keep[i]?'':'gone'}" data-r="${i}" tabindex="0" role="button" aria-label="${esc(r.p)}, ${esc(r.d)} — why this row is here" style="cursor:pointer"><td>${r.p}</td><td>${r.d}</td><td>${r.pr}</td><td>${r.f}</td><td>${r.t}</td></tr>`).join('')}
+    </table></div>
+    <div class="counter"><div><div class="big">${n}</div><div class="lbl">rows returned</div></div><div><div class="big">${people}</div><div class="lbl">distinct people</div></div><div><div class="big">3</div><div class="lbl">actual humans</div></div></div>
+    ${explainBox('grEx',asOf&&prim?'<b>Three rows, three people.</b> Both filters are on, so history is excluded and only the primary assignment counts. This is a headcount. Note what the second filter cost: Karim’s project assignment has disappeared, which is correct for headcount and wrong for anything about workload — that question needs FTE, not a row count.':(asOf||prim?'<span class="muted">Closer. One filter is still missing — click a row to see what it is.</span>':'<span class="muted">Seven rows for three people. Click any row to see why it is there.</span>'))}
+    <div class="callout"><b>The habit.</b> Before trusting a number out of a subject area, say out loud what one row means. If a row is an assignment and the question is about people, the count is wrong before any filter is applied.</div>`;
+    b.querySelectorAll('[data-f]').forEach(x=>x.addEventListener('change',()=>{if(x.dataset.f==='asOf')asOf=x.checked;else prim=x.checked;draw();}));
+    b.querySelectorAll('[data-r]').forEach(x=>{ const h=()=>{const r=ROWS[+x.dataset.r];$('#grEx').innerHTML=`<b>${esc(r.p)} · ${esc(r.d)}.</b> ${esc(r.why)}`;};
+      x.addEventListener('click',h); x.addEventListener('keydown',e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); h(); } }); });};
+  draw();
+}});
+
+/* Lab 27: which door — including the two that are not doors */
+LABS.push({id:'which-door',ch:'reporting',title:'Which door does this need?',lead:'Eight requests as a client would phrase them. Two of them are not reporting questions at all, which is exactly what makes them worth practising.',render(b){
+  const O=[['otbi','OTBI'],['bip','BI Publisher'],['ext','HCM Extract'],['rest','REST API'],['hdl','HDL'],['none','None of these']];
+  const Q=[
+    {q:'Employee turnover by month for the last two years, as a chart.',a:'otbi',why:'Analysis for people to look at, across periods — OTBI, using a Trend subject area rather than a Real Time one. Real Time answers “now”; Trend answers “over time”.',ar:'تحليل على الشاشة عبر فترات → OTBI.'},
+    {q:'Send the medical provider this week’s enrolment changes, every Friday.',a:'ext',why:'Scheduled, outbound, machine-to-machine, and changes only. That combination is what HCM Extract exists for.',ar:'ملف مجدول بالتغييرات بس → Extract.'},
+    {q:'A warning letter in Arabic, printed and signed, for one employee.',a:'bip',why:'A formatted document with exact layout and right-to-left text: BI Publisher, data model plus template.',ar:'خطاب منسّق → BI Publisher.'},
+    {q:'A mobile app shows an employee their leave balance the moment they open it.',a:'rest',why:'Another system asking a question and needing the answer now. Nothing scheduled or formatted about it.',ar:'تطبيق محتاج إجابة لحظية → REST.'},
+    {q:'Before payroll: who is missing a national ID?',a:'otbi',why:'A quick operational list for a human, filtered on an empty field. Reaching for BI Publisher here is the classic over-engineered answer.',ar:'قائمة سريعة → OTBI.'},
+    {q:'Load 10,000 employees into Oracle for go-live.',a:'hdl',why:'Data going in, not out. The four doors are all exits; inbound bulk is HCM Data Loader. Interviewers ask this to see whether the four paths were memorised or understood.',ar:'سؤال فخ: ده إدخال بيانات → HDL.'},
+    {q:'A year-end certificate for every employee, emailed to each one individually.',a:'bip',why:'Per-employee formatted documents, delivered separately: BI Publisher with bursting, which splits one run into many personal outputs.',ar:'مستند لكل موظف بيتبعت لوحده → BIP مع bursting.'},
+    {q:'The payroll lead wants to connect SQL Developer straight to the database.',a:'none',why:'There is no database connection to a SaaS pod, for anyone, ever. If the requirement really needs SQL, the SQL goes inside a BI Publisher data model.',ar:'مفيش اتصال مباشر بالداتابيز. الـ SQL بيتكتب جوّه BIP.'}];
+  let i=0,score=0,picked=null;
+  const draw=()=>{
+    if(i>=Q.length){
+      b.innerHTML=`<div class="counter"><div><div class="big">${score} / ${Q.length}</div><div class="lbl">routed correctly</div></div></div>
+      <div class="explain">${score>=7?'<b>That is the answer an interviewer is listening for</b> — not the list of four tools, but the reason each request lands where it does.':'<b>Worth another pass.</b> Screen and ad-hoc is OTBI, formatted document is BI Publisher, scheduled or bulk outbound is Extract, live question from another system is REST — and anything coming <em>in</em> is not on that list at all.'}</div>
+      <div class="stepper"><button class="active" data-again="1">Start again</button></div>`;
+      b.querySelector('[data-again]').addEventListener('click',()=>{i=0;score=0;picked=null;draw();});return;}
+    const q=Q[i];
+    b.innerHTML=`<div class="kv"><span class="small muted">Request ${i+1} of ${Q.length}</span><b>${score} correct</b></div>
+    <div class="explain" style="font-size:16px">“${q.q}”</div>
+    <div class="opts">${O.map(([v,l])=>`<button class="opt ${picked?(v===q.a?'right':(v===picked?'wrong':'')):''}" data-v="${v}" ${picked?'disabled':''}>${l}</button>`).join('')}</div>
+    ${picked?`<div class="msg ${picked===q.a?'ok':'bad'}" role="status"><b>${picked===q.a?'Right.':'It is '+O.find(o=>o[0]===q.a)[1]+'.'}</b><span>${q.why}</span><div class="ar-line">${q.ar}</div></div>
+    <div class="stepper"><button class="active" data-next="1">${i===Q.length-1?'See the score':'Next request'}</button></div>`:''}`;
+    b.querySelectorAll('[data-v]').forEach(x=>x.addEventListener('click',()=>{if(picked)return;picked=x.dataset.v;if(picked===q.a)score++;draw();}));
+    const n=b.querySelector('[data-next]');if(n){n.addEventListener('click',()=>{i++;picked=null;draw();});n.focus();}};
+  draw();
+}});
+
+/* Lab 28: a Fast Formula that actually runs */
+LABS.push({id:'ff-run',ch:'ff',title:'Run a formula, line by line',lead:'The same language, evaluated in the page. Change an input, run it, and read which lines fired: the green ones executed, the faded ones were skipped by a condition. The last preset is the bug every beginner ships at least once.',render(b){
+  const PRE=[
+    {n:'Special allowance',code:'/* Special allowance for high earners */\nINPUTS ARE BASIC_SALARY\nDEFAULT FOR BASIC_SALARY IS 0\nIF BASIC_SALARY > 35000 THEN\n  SPECIAL_ALLOWANCE = 2500\nELSE\n  SPECIAL_ALLOWANCE = 0\nRETURN SPECIAL_ALLOWANCE',v:{BASIC_SALARY:'40000'}},
+    {n:'Egypt social insurance',code:'/* Egypt social insurance: employee share. Limits checked 2026 — they rise each January */\nINPUTS ARE INSURABLE_WAGE\nDEFAULT FOR INSURABLE_WAGE IS 0\nFLOOR_AMT = 2700\nCEILING_AMT = 16700\nEMP_RATE = 0.11\nCAPPED_WAGE = INSURABLE_WAGE\nIF CAPPED_WAGE > CEILING_AMT THEN\n  CAPPED_WAGE = CEILING_AMT\nIF CAPPED_WAGE < FLOOR_AMT THEN\n  CAPPED_WAGE = FLOOR_AMT\nEMP_CONTRIBUTION = ROUND(CAPPED_WAGE * EMP_RATE, 2)\nRETURN EMP_CONTRIBUTION',v:{INSURABLE_WAGE:'20000'}},
+    {n:'Transport by grade',code:'/* Transport allowance by grade, pro-rated on days worked */\nINPUTS ARE GRADE_LEVEL, DAYS_WORKED\nDEFAULT FOR GRADE_LEVEL IS 1\nDEFAULT FOR DAYS_WORKED IS 30\nIF GRADE_LEVEL >= 5 THEN\n  MONTHLY_AMT = 1200\nELSE\n  MONTHLY_AMT = 800\nTRANSPORT = ROUND(MONTHLY_AMT * DAYS_WORKED / 30, 2)\nRETURN TRANSPORT',v:{GRADE_LEVEL:'6',DAYS_WORKED:'20'}},
+    {n:'No default — the classic failure',code:'/* Overtime pay. Try running it with the input left empty */\nINPUTS ARE OVERTIME_HOURS\nOT_PAY = OVERTIME_HOURS * 150\nRETURN OT_PAY',v:{OVERTIME_HOURS:''}}];
+  let cur=0,vals={...PRE[0].v};
+  /* A deliberately small interpreter: assignments, IF/THEN/ELSE by indentation,
+     arithmetic, ROUND and RETURN — the subset these formulas use. */
+  const parse=code=>code.split('\n').map((raw,i)=>{const t=raw.replace(/\/\*.*?\*\//g,'').replace(/\s+$/,'');return{i,raw,t:t.trim(),ind:t.length-t.replace(/^\s+/,'').length,cmt:!t.trim()};}).filter(l=>l.raw.trim());
+  const toks=s=>s.match(/\d+(?:\.\d+)?|[A-Za-z_][A-Za-z0-9_]*|>=|<=|<>|[()+\-*/,<>=]/g)||[];
+  const run=(code,vin)=>{
+    const lines=parse(code),env={},trace=[],fired=new Set();let result=null,err=null;
+    let F,T,E;
+    E=(ts,k)=>{let[v,i]=T(ts,k);while(ts[i]==='+'||ts[i]==='-'){const o=ts[i];const[r,j]=T(ts,i+1);v=o==='+'?v+r:v-r;i=j;}return[v,i];};
+    T=(ts,k)=>{let[v,i]=F(ts,k);while(ts[i]==='*'||ts[i]==='/'){const o=ts[i];const[r,j]=F(ts,i+1);v=o==='*'?v*r:v/r;i=j;}return[v,i];};
+    F=(ts,k)=>{const t=ts[k];
+      if(t==='(') {const[v,i]=E(ts,k+1);return[v,i+1];}
+      if(t==='-'){const[v,i]=F(ts,k+1);return[-v,i];}
+      if(/^[A-Za-z_]/.test(t)){
+        if(t.toUpperCase()==='ROUND'){const[a,i]=E(ts,k+2);let n=0,j=i;if(ts[j]===','){const r=E(ts,j+1);n=r[0];j=r[1];}return[Math.round(a*Math.pow(10,n))/Math.pow(10,n),j+1];}
+        if(!(t in env)) throw new Error(t);
+        return[env[t],k+1];}
+      return[parseFloat(t),k+1];};
+    const val=s=>E(toks(s),0)[0];
+    const cond=s=>{const m=s.match(/^(.*?)(>=|<=|<>|>|<|=)(.*)$/);const a=val(m[1]),c=val(m[3]),o=m[2];
+      return o==='>'?a>c:o==='<'?a<c:o==='>='?a>=c:o==='<='?a<=c:o==='='?a===c:a!==c;};
+    const block=(a,z)=>{let k=a;
+      while(k<z){const L=lines[k];
+        if(L.cmt){k++;continue;}
+        if(/^INPUTS ARE/i.test(L.t)||/^DEFAULT FOR/i.test(L.t)){fired.add(L.i);k++;continue;}
+        if(/^IF\b/i.test(L.t)){
+          const c=cond(L.t.replace(/^IF\s+/i,'').replace(/\s+THEN$/i,''));
+          fired.add(L.i);trace.push([L.i,'condition is '+(c?'true':'false')]);
+          let te=k+1;while(te<z&&lines[te].ind>L.ind)te++;
+          let es=null,ee=te;
+          if(te<z&&/^ELSE$/i.test(lines[te].t)&&lines[te].ind===L.ind){es=te+1;ee=es;while(ee<z&&lines[ee].ind>L.ind)ee++;fired.add(lines[te].i);}
+          if(c) block(k+1,te); else if(es!==null) block(es,ee);
+          k=ee;continue;}
+        if(/^RETURN\b/i.test(L.t)){const n=L.t.replace(/^RETURN\s+/i,'');result=[n,val(n)];fired.add(L.i);trace.push([L.i,'returns '+result[1]]);return;}
+        const m=L.t.match(/^([A-Za-z_][A-Za-z0-9_]*)\s*=\s*(.+)$/);
+        if(m){env[m[1]]=val(m[2]);fired.add(L.i);trace.push([L.i,m[1]+' = '+env[m[1]]]);k++;continue;}
+        k++;}};
+    const ins=(code.match(/^INPUTS ARE (.+)$/mi)||[,''])[1].split(',').map(s=>s.trim()).filter(Boolean);
+    ins.forEach(n=>{const d=code.match(new RegExp('^DEFAULT FOR '+n+' IS (.+)$','mi'));
+      const given=(vin[n]||'').trim();
+      if(given!=='') env[n]=parseFloat(given);
+      else if(d) env[n]=parseFloat(d[1]);});
+    try{ block(0,lines.length); }
+    catch(e){ err=e.message; }
+    return{lines,trace,fired,result,err,ins};};
+  const draw=()=>{
+    const p=PRE[cur],out=run(p.code,vals);
+    const lit=new Map(out.trace.map(([i,t])=>[i,t]));
+    b.innerHTML=`<div class="stepper">${PRE.map((x,i)=>`<button class="${i===cur?'active':''}" data-p="${i}">${x.n}</button>`).join('')}</div>
+    <div class="sim">
+      <div class="in" style="display:grid;gap:10px;align-content:start">
+        ${out.ins.map(n=>`<label style="font-size:13px;font-weight:700;color:var(--ink-2)">${n}<input type="number" data-in="${n}" value="${vals[n]===undefined?'':vals[n]}" placeholder="leave empty to test the default" style="width:100%;margin-top:4px;padding:7px 9px;border:1px solid var(--line-2);border-radius:6px;background:var(--surface);color:var(--ink);font:inherit"></label>`).join('')}
+        ${out.err?`<div class="msg bad"><b>The formula fails.</b><span>${out.err} has no value, and there is no DEFAULT FOR line to fall back on. In a live run this errors for every employee whose entry is empty — which is most of them, most months.</span><div class="ar-line">من غير DEFAULT، أي قيمة فاضية بتوقّع الفورميولا.</div></div>`
+          :`<div class="kv total"><span>${out.result?out.result[0]:'no RETURN'}</span><b>${out.result?out.result[1]:'—'}</b></div>`}
+        <div class="explain small muted">Inputs come from the element’s input values, and the names must match them exactly. Empty one to see what a missing DEFAULT does.</div>
+      </div>
+      <div style="display:grid;gap:10px;min-width:0">
+        <div class="code">${out.lines.map(l=>`<span class="l ${l.cmt?'cmt':(out.fired.has(l.i)?'ran':'skip')}"><span class="n">${l.i+1}</span>${esc(l.raw)||' '}${lit.has(l.i)?`<span class="note"> → ${esc(lit.get(l.i))}</span>`:''}</span>`).join('')}</div>
+        <div class="legend"><span>green · executed</span><span>faded · skipped by a condition, or never reached</span></div>
+      </div>
+    </div>`;
+    b.querySelectorAll('[data-p]').forEach(x=>x.addEventListener('click',()=>{cur=+x.dataset.p;vals={...PRE[cur].v};draw();}));
+    b.querySelectorAll('[data-in]').forEach(x=>x.addEventListener('input',()=>{vals[x.dataset.in]=x.value;const k=x.dataset.in,pos=x.selectionStart;draw();const n2=b.querySelector(`[data-in="${k}"]`);if(n2){n2.focus();try{n2.setSelectionRange(pos,pos);}catch(e){}}}));};
+  draw();
+}});
+
+/* Lab 29: spot the bug */
+LABS.push({id:'ff-bugs',ch:'ff',title:'Spot the bug',lead:'Six formulas, each with one defect. Four of them compile and run perfectly — they simply pay the wrong amount, which is the kind only testing finds.',render(b){
+  const B=[
+    {code:'INPUTS ARE BASIC SALARY\nDEFAULT FOR BASIC_SALARY IS 0\nIF BASIC_SALARY > 35000 THEN\n  SPECIAL_ALLOWANCE = 2500\nELSE\n  SPECIAL_ALLOWANCE = 0\nRETURN SPECIAL_ALLOWANCE',
+     o:['The input name has a space — it must be BASIC_SALARY, matching the element’s input value exactly','DEFAULT has to come before INPUTS','The amount needs a currency','ELSE is not allowed in Fast Formula'],a:0,
+     why:'Input names carry no spaces and must match the element’s input value character for character. This one fails at compile, which makes it the friendliest bug here.',ar:'اسم الـ input لازم يطابق بالظبط وبالـ underscore.'},
+    {code:'INPUTS ARE INSURABLE_WAGE\nDEFAULT FOR INSURABLE_WAGE IS 0\nEMP_CONTRIBUTION = INSURABLE_WAGE * 0.11\nIF EMP_CONTRIBUTION > 16700 THEN\n  EMP_CONTRIBUTION = 16700\nRETURN EMP_CONTRIBUTION',
+     o:['Nothing — it is correct','The rate is applied before the wage is capped, and the ceiling is compared against the contribution instead of the wage','0.11 should be written as 11%','RETURN must come first'],a:1,
+     why:'Cap and floor the wage first, then apply the rate. On a 20,000 wage this returns 2,200 where the correct figure is 1,837, and the floor never applies at all. It runs without complaint.',ar:'اعمل الـ cap والـ floor على الأجر الأول وبعدين اضرب في النسبة.'},
+    {code:'INPUTS ARE OVERTIME_HOURS\nOT_PAY = OVERTIME_HOURS * 150\nRETURN OT_PAY',
+     o:['150 should be a variable','There is no DEFAULT FOR OVERTIME_HOURS, so anyone without an overtime entry makes it fail','RETURN cannot return a calculated value','INPUTS ARE should be lowercase'],a:1,
+     why:'Most employees have no overtime in a given month, so the input arrives empty and the formula errors for them. The neighbouring lab runs exactly this one — empty the input and watch it break.',ar:'من غير DEFAULT، اللي ماعندوش أوفر تايم هيوقّع الفورميولا.'},
+    {code:'INPUTS ARE BASIC_SALARY\nDEFAULT FOR BASIC_SALARY IS 0\nIF BASIC_SALARY > 35000 THEN\n  SPECIAL_ALLOWANCE = 2500\nELSE\n  SPECIAL_ALLOWANCE = 0\nRETURN BASIC_SALARY',
+     o:['It returns the wrong variable — BASIC_SALARY instead of SPECIAL_ALLOWANCE','IF needs a closing END IF','The DEFAULT is wrong','It is fine'],a:0,
+     why:'The allowance is calculated and then thrown away: the element would pay every employee their whole basic salary a second time, as an allowance. It compiles. Only a QuickPay on a real person catches it.',ar:'بيرجّع الأساسي بدل البدل — مفيش error، الـ QuickPay بس هو اللي بيكشفه.'},
+    {code:'/* Written January 2025, still running today */\nINPUTS ARE INSURABLE_WAGE\nDEFAULT FOR INSURABLE_WAGE IS 0\nCAPPED_WAGE = INSURABLE_WAGE\nIF CAPPED_WAGE > 14500 THEN\n  CAPPED_WAGE = 14500\nEMP_CONTRIBUTION = CAPPED_WAGE * 0.11\nRETURN EMP_CONTRIBUTION',
+     o:['Nothing, the logic is sound','The ceiling is last year’s figure — Egyptian limits rise every January, and a hard-coded one quietly under-deducts','14500 should be 145','The rate should be 0.14'],a:1,
+     why:'The insurable-wage limits rise every January. Hard-coded, the formula under-deducts from every high earner until someone reconciles a statutory return. Keep limits in a global value with dated versions, and the floor is missing here too.',ar:'الحد الأقصى بتاع السنة اللي فاتت. حط الحدود في global value.'},
+    {code:'/* Formula type: Oracle Payroll */\n/* attached to the Annual Leave plan as its accrual formula */\nINPUTS ARE BASIC_SALARY\nACCRUAL = 1.75\nRETURN ACCRUAL',
+     o:['1.75 should be 2','A payroll-type formula is plugged into an absence socket — the type decides the inputs and contexts available, so it cannot work there','A comment cannot span two lines','ACCRUAL is a reserved word'],a:1,
+     why:'Formula type is the socket, not a label. An absence plan expects an absence accrual formula, which receives the accrual period and the plan’s context; a payroll formula receives neither. Start from a delivered formula of the right type.',ar:'نوع الفورميولا غلط: فورميولا payroll متركّبة في خطة إجازات.'}];
+  let i=0,picked=null,score=0;
+  const draw=()=>{
+    if(i>=B.length){
+      b.innerHTML=`<div class="counter"><div><div class="big">${score} / ${B.length}</div><div class="lbl">found</div></div></div>
+      <div class="explain"><b>The pattern worth carrying out of this.</b> A formula that fails to compile costs an hour. A formula that compiles and returns the wrong number costs a payroll run, and sometimes a year of them — which is why every rule gets tested with QuickPay against a real person before it is called done.</div>
+      <div class="stepper"><button class="active" data-again="1">Again</button></div>`;
+      b.querySelector('[data-again]').addEventListener('click',()=>{i=0;score=0;picked=null;draw();});return;}
+    const q=B[i];
+    b.innerHTML=`<div class="kv"><span class="small muted">Formula ${i+1} of ${B.length}</span><b>${score} found</b></div>
+    <div class="code">${q.code.split('\n').map((l,n)=>`<span class="l"><span class="n">${n+1}</span>${esc(l)||' '}</span>`).join('')}</div>
+    <div style="display:grid;gap:8px">${q.o.map((o,n)=>`<button class="opt ${picked!==null?(n===q.a?'right':(n===picked?'wrong':'')):''}" data-o="${n}" ${picked!==null?'disabled':''} style="text-align:left">${o}</button>`).join('')}</div>
+    ${picked!==null?`<div class="msg ${picked===q.a?'ok':'bad'}" role="status"><b>${picked===q.a?'Found it.':'Not that one.'}</b><span>${q.why}</span><div class="ar-line">${q.ar}</div></div>
+    <div class="stepper"><button class="active" data-next="1">${i===B.length-1?'See the score':'Next formula'}</button></div>`:''}`;
+    b.querySelectorAll('[data-o]').forEach(x=>x.addEventListener('click',()=>{if(picked!==null)return;picked=+x.dataset.o;if(picked===q.a)score++;draw();}));
+    const n2=b.querySelector('[data-next]');if(n2){n2.addEventListener('click',()=>{i++;picked=null;draw();});n2.focus();}};
+  draw();
+}});
+
+/* Lab 30: import and load are two different checks */
+LABS.push({id:'import-load',ch:'hdl',title:'Import checks the shape, load checks the meaning',lead:'A load is two inspections with a waiting room between them. Import reads the file and puts well-formed lines in staging; load turns staging into real records. Send a file through and watch where each kind of problem stops it.',render(b){
+  const ST=[['sheet','Client’s spreadsheet','one row per employee'],['dat','.dat files','one per business object'],['zip','Flat zip, uploaded','no folders inside'],['imp','Import','is the format readable?'],['stg','Staging','a waiting room'],['load','Load','is the content valid?'],['db','Live records','in the real tables']];
+  const CASE={
+    clean:{n:'A clean file',stop:null,
+      t:'All the way through.',
+      d:'Import reads every line, staging holds them, load resolves each reference and writes the records. The count that matters is the one at the end: rows in the file against rows in Oracle, reconciled by source key.',
+      ar:'الملف عدّى: الشكل سليم والمحتوى سليم.'},
+    fmt:{n:'A line with a missing pipe',stop:'imp',
+      t:'Stopped at import, before staging.',
+      d:'One MERGE line carries five values where its METADATA declares six. HDL cannot line the values up with their column names, so the line never reaches staging and never becomes a record. Format errors are the cheap kind: the file is wrong, the fix is in the file, and nothing has been written anywhere.',
+      ar:'عدد الـ pipes غلط، فالسطر مادخلش الـ staging أصلًا.'},
+    date:{n:'Dates as 2018-01-01',stop:'imp',
+      t:'Stopped at import.',
+      d:'Dates are YYYY/MM/DD with slashes, always. A spreadsheet that helpfully reformats a column to 2018-01-01 or 01/01/2018 breaks every row it touched — which is why the dates column is the first thing to check when a file that worked last week suddenly does not.',
+      ar:'التاريخ لازم يكون بالـ slash: سنة/شهر/يوم.'},
+    parent:{n:'A job whose family is not loaded yet',stop:'load',
+      t:'Through import, stopped at load.',
+      d:'The file is well-formed, so import passes and the line sits in staging. Load then tries to resolve JobFamilyId(SourceSystemId) and finds nothing to point at, because JobFamily.dat has not been loaded. The record waits in staging with an error; load the parent, then reload the failures. This is what load order is for.',
+      ar:'الشكل سليم بس الأب مش موجود — حمّل JobFamily الأول وبعدين أعد المحاولة.'},
+    case:{n:'jobFamilyCode instead of JobFamilyCode',stop:'imp',
+      t:'Stopped at import.',
+      d:'Attribute names are case-sensitive and must match Oracle’s spelling exactly. There is no fuzzy matching and no warning that a column was nearly right — an unrecognised attribute name is simply not an attribute.',
+      ar:'أسماء الأعمدة حساسة للكابيتال.'}};
+  let cur='clean';
+  const draw=()=>{
+    const c=CASE[cur],at=ST.findIndex(s=>s[0]===c.stop);
+    b.innerHTML=`<div class="stepper">${Object.keys(CASE).map(k=>`<button class="${k===cur?'active':''}" data-c="${k}">${CASE[k].n}</button>`).join('')}</div>
+    <div class="stage"><div class="pipe">${ST.map((s,i)=>`<button class="node ${c.stop===null?'ok':(i<at?'ok':i===at?'bad':'off')}" tabindex="-1">${s[1]}<small>${i===at?'stops here':s[2]}</small></button>`).join('')}</div></div>
+    <div class="msg ${c.stop?'bad':'ok'}"><b>${c.t}</b><span>${c.d}</span><div class="ar-line">${c.ar}</div></div>
+    <div class="two">
+      <div class="explain"><b>Import</b><div style="margin-top:4px">Reads the file and checks its shape: pipes, METADATA before MERGE, one METADATA per component, attribute spelling, date format. Good lines land in staging tables — a holding area that is not yet HR data.</div></div>
+      <div class="explain"><b>Load</b><div style="margin-top:4px">Groups staged lines into whole objects and checks what they mean: does the job exist, is the grade valid on that date, does the parent this record points at exist? Then it writes them into the live tables.</div></div>
+    </div>
+    <div class="callout"><b>Reading an error report.</b> Thirty errors are rarely thirty problems. Group them: one misspelt department name in a source spreadsheet produces an error per employee in it. Fix the source file and reload — never patch the records by hand in Oracle, or the file and the system stop agreeing and the next load undoes the patch.</div>`;
+    b.querySelectorAll('[data-c]').forEach(x=>x.addEventListener('click',()=>{cur=x.dataset.c;draw();}));};
+  draw();
+}});
+
+/* Lab 31: keys — why the legacy id is kept */
+LABS.push({id:'source-keys',ch:'hdl',title:'Match them back: name, or key',lead:'Eight employees came from the old payroll and four records failed the load. To fix them, each failure has to be matched back to its source row. Switch how the match is made — two of these people share a name.',render(b){
+  const L=[['EMP_0411','Sara Mostafa','1041'],['EMP_0412','Mohamed Ahmed','1042'],['EMP_0413','Nour Hassan','1043'],['EMP_0414','Omar Khaled','1044'],['EMP_0415','Mohamed Ahmed','1045'],['EMP_0416','Yasmin Adel','1046'],['EMP_0417','Karim Samir','1047'],['EMP_0418','Hana Fathy','1048']];
+  const FAILED=[1,3,4,6];
+  let by='key';
+  const draw=()=>{
+    const counts={};L.forEach(([,n])=>counts[n]=(counts[n]||0)+1);
+    const amb=r=>by==='name'&&counts[L[r][1]]>1;
+    const bad=FAILED.filter(r=>amb(r)).length;
+    b.innerHTML=`<div class="stepper">${[['key','Match on the source key'],['name','Match on the name']].map(([v,l])=>`<button class="${by===v?'active':''}" data-b="${v}">${l}</button>`).join('')}</div>
+    <div class="stage"><table class="dt" style="min-width:560px">
+      <tr><th>Legacy id</th><th>Name</th><th>Person number in Oracle</th><th>Failed the load</th><th>Matched back</th></tr>
+      ${L.map(([id,n,p],i)=>`<tr class="${amb(i)?'tie':''}"><td>${by==='key'?`<b>${id}</b>`:id}</td><td>${by==='name'?`<b>${n}</b>`:n}</td><td>${p}</td><td>${FAILED.includes(i)?'yes':'—'}</td><td>${FAILED.includes(i)?(amb(i)?'<span class="pill no">two rows match</span>':'<span class="pill ok">one row</span>'):''}</td></tr>`).join('')}
+    </table></div>
+    <div class="msg ${by==='key'?'ok':'bad'}">${by==='key'
+      ?'<b>Every failure resolves to exactly one source row.</b><span>SourceSystemOwner names the old system and SourceSystemId is the record’s id inside it. Together they are the source key: a label Oracle stores alongside the record, so any later load, correction or reconciliation can find the same row again. It is the reason a reload updates records instead of duplicating them.</span><div class="ar-line">المفتاح المصدري بيخلي كل سجل يرجع لأصله بالظبط.</div>'
+      :`<b>${bad} of the four failures are ambiguous.</b><span>Two employees are both called Mohamed Ahmed. Matching on the name gives no way to tell which is which, so the correction is applied to the wrong person, to both, or to neither — and nothing in the load reports that anything went wrong. Names are not keys: they repeat, they get re-spelled, and they change with marriage.</span><div class="ar-line">في اتنين بنفس الاسم، فالتصحيح ممكن يروح على الشخص الغلط.</div>`}</div>
+    <div class="two">
+      <div class="explain"><b>Source key</b><div style="margin-top:4px">SourceSystemOwner plus SourceSystemId — where the record came from. Used for migrated data, and the only practical way to reconcile a load against the file that produced it.</div></div>
+      <div class="explain"><b>User key</b><div style="margin-top:4px">The business code the client already recognises: JobCode, GradeCode, LocationCode. Natural for reference data that has a real code, and readable in the file without a lookup.</div></div>
+    </div>
+    <div class="callout"><b>The migration rule.</b> Key on something that is unique and never changes. In Egypt and the Gulf the national identifier is usually the only field in a legacy system that satisfies both — employee numbers get reissued, and names do not identify anyone.</div>`;
+    b.querySelectorAll('[data-b]').forEach(x=>x.addEventListener('click',()=>{by=x.dataset.b;draw();}));};
+  draw();
+}});
+
+/* Lab 32: fit-gap decisions */
+LABS.push({id:'fit-gap',ch:'method',title:'Fit, configure, work around, extend, descope',lead:'Six requirements from a real-looking workshop. Every gap needs a decision and a name, because the name sets the cost and who has to agree to it.',render(b){
+  const O=[['fit','Fit'],['configure','Configure'],['workaround','Work around'],['extend','Extend'],['descope','Descope']];
+  const Q=[
+    {q:'Employees request annual leave and their manager approves it.',a:'fit',why:'Standard absence functionality, working out of the box once the plan is set up. Writing “fit” next to it is what stops it being re-litigated in month four.',ar:'Oracle بيعملها جاهزة.'},
+    {q:'Transport allowance only for grades G1 to G6.',a:'configure',why:'Element eligibility on grade. No code, no design document, no extra testing beyond the normal script — the cheapest kind of gap.',ar:'مجرد eligibility بالدرجة = configuration.'},
+    {q:'Calculate Egyptian social insurance with this year’s floor and ceiling.',a:'extend',why:'There is no maintained Egyptian localization, so the rule is written as a Fast Formula. That is a build: it needs a design, a test script, and an owner when the limits change next January.',ar:'مفيش localization لمصر، فبتتكتب Fast Formula.'},
+    {q:'A salary certificate in Arabic on the company letterhead.',a:'extend',why:'A custom BI Publisher report — data model plus template. Small in effort, still a build, and still needs someone named to maintain it.',ar:'تقرير BIP مخصوص = extension.'},
+    {q:'Payroll used to edit a finalized payslip directly, and wants to keep doing that.',a:'workaround',why:'Oracle does not allow editing finalized results, and that is the product working as intended: corrections go through retro or an off-cycle QuickPay. The gap is closed by agreeing the new process, not by building anything.',ar:'Oracle مش بيسمح، فبنتفق على طريقة بديلة.'},
+    {q:'A different motivational quote on every payslip each month.',a:'descope',why:'Real cost, negligible value. Descoping is a decision with the client, written down — not a request quietly dropped, which is how it returns in user acceptance testing as a defect.',ar:'قيمة قليلة وتكلفة حقيقية، فبيتشال من النطاق باتفاق.'}];
+  let i=0,score=0,picked=null;
+  const draw=()=>{
+    if(i>=Q.length){
+      b.innerHTML=`<div class="counter"><div><div class="big">${score} / ${Q.length}</div><div class="lbl">named correctly</div></div></div>
+      <div class="explain"><b>Why the label matters more than it looks.</b> Fit and configure sit inside the estimate. Extend adds design, testing and a maintenance owner. Work around changes how people work, so it needs the process owner to agree rather than the project manager. Descope is a decision someone has to sign. A gap with no label is a scope argument scheduled for later.</div>
+      <div class="stepper"><button class="active" data-again="1">Again</button></div>`;
+      b.querySelector('[data-again]').addEventListener('click',()=>{i=0;score=0;picked=null;draw();});return;}
+    const q=Q[i];
+    b.innerHTML=`<div class="kv"><span class="small muted">Requirement ${i+1} of ${Q.length}</span><b>${score} correct</b></div>
+    <div class="explain" style="font-size:16px">“${q.q}”</div>
+    <div class="opts">${O.map(([v,l])=>`<button class="opt ${picked?(v===q.a?'right':(v===picked?'wrong':'')):''}" data-v="${v}" ${picked?'disabled':''}>${l}</button>`).join('')}</div>
+    ${picked?`<div class="msg ${picked===q.a?'ok':'bad'}" role="status"><b>${picked===q.a?'Right.':'This one is “'+O.find(o=>o[0]===q.a)[1]+'”.'}</b><span>${q.why}</span><div class="ar-line">${q.ar}</div></div>
+    <div class="stepper"><button class="active" data-next="1">${i===Q.length-1?'See the score':'Next requirement'}</button></div>`:''}`;
+    b.querySelectorAll('[data-v]').forEach(x=>x.addEventListener('click',()=>{if(picked)return;picked=x.dataset.v;if(picked===q.a)score++;draw();}));
+    const n=b.querySelector('[data-next]');if(n){n.addEventListener('click',()=>{i++;picked=null;draw();});n.focus();}};
+  draw();
+}});
+
+/* Lab 33: change request, defect, or just a question */
+LABS.push({id:'cr-or-defect',ch:'method',title:'Change request, defect, or question',lead:'Six things a client says during testing. The three answers cost very different amounts, and misfiling them is how a project quietly absorbs work nobody agreed to.',render(b){
+  const O=[['cr','Change request'],['defect','Defect'],['question','Just a question']];
+  const Q=[
+    {q:'“Can you just add a field for each employee’s car plate number? It’s small.”',a:'cr',why:'New requirement, not in the fit-gap. Size is not the test — agreement is. It goes through a change request so the impact is assessed and someone with authority accepts it.',ar:'طلب جديد مش في النطاق → change request.'},
+    {q:'“The transport allowance isn’t showing on the test payslip.”',a:'defect',why:'It was agreed, designed and built, and it does not work. Fix it, and trace why testing found it rather than the build — usually eligibility, an entry, or a date.',ar:'حاجة متفق عليها ومش شغالة → defect.'},
+    {q:'“While you’re at it, can we also roll out the performance module?”',a:'cr',why:'An entire module, and almost certainly a new phase rather than a change to this one. The polite version of the answer still goes on the change log.',ar:'موديول جديد كامل → change request كبير.'},
+    {q:'“What happens if an employee’s hire date is in the future?”',a:'question',why:'A question. Answer it, or find out and come back. Treating questions as scope items makes people stop asking, and the questions are where requirements hide.',ar:'سؤال عادي، مفيش تغيير في النطاق.'},
+    {q:'“Can the payslip come in English as well, not just Arabic?”',a:'cr',why:'Check the fit-gap first. If only the Arabic layout was agreed, a second layout is new scope — a small change request, but still one, because it carries its own template, testing and maintenance.',ar:'لو مش متفق عليه، ده scope جديد.'},
+    {q:'“Grade G7’s allowance is 1,000 and we agreed 1,200 in the workbook.”',a:'defect',why:'The build does not match the documented decision, so it is a defect and the workbook is the proof. This is the argument the configuration workbook exists to end.',ar:'البناء مش مطابق للـ workbook → defect.'}];
+  let i=0,score=0,picked=null;
+  const draw=()=>{
+    if(i>=Q.length){
+      b.innerHTML=`<div class="counter"><div><div class="big">${score} / ${Q.length}</div><div class="lbl">filed correctly</div></div></div>
+      <div class="explain"><b>The test, in one line.</b> Was it agreed and written down? If yes and it does not work, it is a defect. If it was never agreed, it is a change request however small it sounds. If nothing is being asked for, it is a question — answer it and move on. Filing change requests as defects is the most common way a project runs out of time without anyone being able to say where it went.</div>
+      <div class="stepper"><button class="active" data-again="1">Again</button></div>`;
+      b.querySelector('[data-again]').addEventListener('click',()=>{i=0;score=0;picked=null;draw();});return;}
+    const q=Q[i];
+    b.innerHTML=`<div class="kv"><span class="small muted">Item ${i+1} of ${Q.length}</span><b>${score} correct</b></div>
+    <div class="explain" style="font-size:16px">${q.q}</div>
+    <div class="opts">${O.map(([v,l])=>`<button class="opt ${picked?(v===q.a?'right':(v===picked?'wrong':'')):''}" data-v="${v}" ${picked?'disabled':''}>${l}</button>`).join('')}</div>
+    ${picked?`<div class="msg ${picked===q.a?'ok':'bad'}" role="status"><b>${picked===q.a?'Right.':'It is a '+O.find(o=>o[0]===q.a)[1].toLowerCase()+'.'}</b><span>${q.why}</span><div class="ar-line">${q.ar}</div></div>
+    <div class="stepper"><button class="active" data-next="1">${i===Q.length-1?'See the score':'Next item'}</button></div>`:''}`;
+    b.querySelectorAll('[data-v]').forEach(x=>x.addEventListener('click',()=>{if(picked)return;picked=x.dataset.v;if(picked===q.a)score++;draw();}));
+    const n=b.querySelector('[data-next]');if(n){n.addEventListener('click',()=>{i++;picked=null;draw();});n.focus();}};
   draw();
 }});

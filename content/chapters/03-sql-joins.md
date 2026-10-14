@@ -47,7 +47,7 @@ Join type is the half everyone learns. The half that breaks reports is **fan-out
 
 Join orders to order lines and every order-level value — the order total, the shipping fee, the customer's name — now appears once per line. `SUM(o.total)` is no longer the sum of order totals; it is the sum of order totals weighted by line count. The result looks like a plausible revenue figure and is inflated by a factor nobody can see.
 
-The defences, in order of preference: aggregate the many side to the grain you want *before* joining, usually in a subquery or CTE; or join and then aggregate with `SUM(DISTINCT …)` only if the values are genuinely distinct, which they often are not; or count rows before and after the join and notice when the number changes. That last one is a habit worth building — if a join changed your row count and you did not expect it to, stop.
+The defences, in order of preference: aggregate the many side to the grain you want *before* joining, usually in a subquery or CTE; or, if you must aggregate after the join, collapse back to one row per key first — a subquery that selects the key and one value per key, then sum that — rather than reaching for `SUM(DISTINCT …)`, which deduplicates by *value* and will quietly merge two different orders that happen to share a total; or count rows before and after the join and notice when the number changes. That last one is a habit worth building — if a join changed your row count and you did not expect it to, stop.
 
 ## When keys do not match
 

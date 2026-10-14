@@ -13,6 +13,8 @@ terms: probation, notice-period, resignation, termination, end-of-contract, fina
 
 Every event in an employee's working life is, in Oracle, a dated transaction against the assignment, with an approver and a downstream payroll consequence. Thinking in those terms is the consultant's default mental mode. This chapter follows a worker from hire to exit and, because the rules are statutory, uses Egypt's Labour Law No. 14 of 2025 (in force since 1 September 2025) as the worked example; Chapter 10 has the fuller statutory detail and Chapter 17 the Gulf equivalents.
 
+> **Every period in this chapter is statutory, and they move.** The figures are Law 14/2025 as summarised by EY, Andersen and Amereller, checked in 2026, and the executive regulations implementing the law are still appearing. Verify against the current statute or the client's legal counsel before configuring probation, notice or settlement rules.
+
 ## Probation
 
 **Probation** is an initial period during which either party may end the employment with lighter obligations than after confirmation. Under Law 14/2025 it is capped at three months, cannot be extended, and a worker may be placed on probation only once with the same employer; the clause must be written into the contract or it has no legal effect. In the system, probation end dates drive alerts and confirmation workflows. Where a client's contracts specify a longer probation, flag it — the clause may be invalid.
@@ -23,7 +25,7 @@ A **notice period** is the advance written warning either party must give before
 
 ## Three exit routes that are not the same
 
-**Resignation** is employee-initiated. Under the 2025 law the resignation must be validated at the competent labour office, the employer must respond within a set period, and the employee may withdraw the resignation within a short window after acceptance. Resignation carries no severance, but unused annual leave is paid out. A process design that makes reversal impossible fails the withdrawal requirement.
+**Resignation** is employee-initiated. Under the 2025 law the resignation must be validated at the competent labour office, the employer must respond within a set period, and the employee may withdraw the resignation within ten days of being notified that the employer accepted it — seven days under the superseded 2003 law, which is the figure still quoted in a good deal of older material. Resignation carries no severance, but unused annual leave is paid out. A process design that makes reversal impossible fails the withdrawal requirement.
 
 **Termination** is employer-initiated, with or without cause. The distinction determines severance exposure. Egyptian law lists specific grounds permitting immediate dismissal, places the burden of proving misconduct on the employer, and imposes strict procedural requirements. Termination is a heavily approval-gated transaction in any implementation.
 

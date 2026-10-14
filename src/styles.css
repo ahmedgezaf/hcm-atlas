@@ -9,6 +9,7 @@
   --body:"Source Serif 4",Georgia,"Times New Roman",serif;
   --ui:"Plus Jakarta Sans",ui-sans-serif,system-ui,sans-serif;
   --mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  --arabic:"IBM Plex Sans Arabic","Noto Sans Arabic",Tahoma,sans-serif;
   --shadow:0 1px 2px rgba(11,31,58,.06),0 10px 30px -14px rgba(11,31,58,.22);
   --scrim:rgba(11,31,58,.42); --pop:0 24px 70px -18px rgba(11,31,58,.45); --edge:rgba(11,31,58,.16);
   --glass:rgba(247,249,252,.78); --glass-2:rgba(255,255,255,.66); --glass-edge:rgba(11,31,58,.10); --glass-hi:rgba(255,255,255,.85);
@@ -428,6 +429,11 @@ pre.code{background:var(--navy);color:var(--navy-ink);border-radius:8px;padding:
 .pipe .node:first-child{clip-path:polygon(0 0,calc(100% - 12px) 0,100% 50%,calc(100% - 12px) 100%,0 100%);border-radius:6px 0 0 6px}
 .pipe .node:last-child{clip-path:polygon(0 0,100% 0,100% 100%,0 100%,12px 50%);border-radius:0 6px 6px 0}
 .pipe .node.active{background:var(--p);color:#fff}
+.pipe .node.ok{background:var(--good-soft);color:var(--good)}
+.pipe .node.warn{background:var(--gold-soft);color:var(--gold)}
+.pipe .node.bad{background:var(--bad-soft);color:var(--bad)}
+.pipe .node.off{opacity:.4}
+.pipe .node.ok small,.pipe .node.warn small,.pipe .node.bad small{color:inherit;opacity:.8}
 .pipe .node.active small{color:#fff;opacity:.85}
 .pipe .node:hover{box-shadow:none}
 .stepper{display:flex;gap:6px;flex-wrap:wrap}
@@ -457,10 +463,14 @@ pre.code{background:var(--navy);color:var(--navy-ink);border-radius:8px;padding:
 .tl-lbl{position:absolute;top:14px;transform:translateX(-50%);font-size:12.5px;font-weight:600;white-space:nowrap}
 .tl-row{position:relative;height:56px}
 .calc{display:grid;grid-template-columns:minmax(220px,300px) 1fr;gap:22px;align-items:start}
+/* Grid items default to min-width:auto, so without these a long figure pushes
+   its row — and then its card — past the column instead of wrapping inside it. */
+.calc>*,.calc .in>*,.calc .out>*{min-width:0}
+.kv span,.kv b{overflow-wrap:anywhere}
 .calc .in{display:grid;gap:10px}
 .calc .in label{font-size:13px;font-weight:700;color:var(--ink-2)}
 .calc .out{display:grid;gap:10px}
-.kv{display:flex;justify-content:space-between;gap:12px;padding:8px 0;border-bottom:1px solid var(--line);font-size:15px}
+.kv{display:flex;flex-wrap:wrap;justify-content:space-between;gap:4px 12px;padding:8px 0;border-bottom:1px solid var(--line);font-size:15px}
 .kv:last-child{border-bottom:0}
 .kv b{font-family:var(--display);font-variant-numeric:tabular-nums}
 .kv.total{font-size:17px}
@@ -537,6 +547,87 @@ pre.code{background:var(--navy);color:var(--navy-ink);border-radius:8px;padding:
 .person.half::after{transform:translateY(50%)}
 .person:hover{opacity:1}
 
+/* ---- BILINGUAL: the Arabic a consultant in Egypt or the Gulf actually hears.
+   It lives in the labs and the glossary, never in chapter prose — the read-aloud
+   voice is an English one, and an Arabic run inside a paragraph reads as noise.
+   Every Arabic run is isolated so the bidi algorithm cannot reorder the English
+   around it. */
+.ar{font-family:var(--arabic);direction:rtl;unicode-bidi:isolate;font-weight:600}
+.ar-line{font-family:var(--arabic);direction:rtl;text-align:right;line-height:1.95;font-size:14.5px;unicode-bidi:isolate}
+.bi{display:flex;flex-wrap:wrap;gap:6px}
+.bi span{display:inline-flex;align-items:baseline;gap:9px;border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:3px 12px;font-size:13px;color:var(--ink-2)}
+.bi .ar{color:var(--p);font-size:13.5px}
+.say{background:var(--p-soft);border-radius:8px;padding:11px 14px;display:grid;gap:5px}
+.say .lbl{font-size:10.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--p)}
+.gterm .ar-row{display:flex;flex-wrap:wrap;gap:6px 14px;margin-top:5px;font-size:13.5px;color:var(--ink-2)}
+.gterm .ar-row .ar{color:var(--p)}
+
+/* ---- lab widgets shared by the simulators */
+.msg{border-radius:8px;padding:10px 14px;display:grid;gap:5px;font-size:14px;border:1px solid var(--line);background:var(--surface)}
+.msg.bad{background:var(--bad-soft);border-color:var(--bad)}
+.msg.warn{background:var(--gold-soft);border-color:var(--gold)}
+.msg.ok{background:var(--good-soft);border-color:var(--good)}
+.msg .ar-line{font-size:13.5px}
+.sim{display:grid;grid-template-columns:minmax(230px,290px) 1fr;gap:20px;align-items:start}
+.sim>*{min-width:0}
+@media (max-width:760px){.sim{grid-template-columns:1fr}}
+.switches{display:grid;gap:8px}
+.sw{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;padding:9px 12px;border:1px solid var(--line);border-radius:8px;background:var(--surface);font-size:13.5px;font-weight:600}
+.sw .ar{display:block;font-weight:400;font-size:12.5px;color:var(--muted);text-align:left}
+.sw input[type=checkbox]{width:18px;height:18px;accent-color:var(--p)}
+.sw select{font:inherit;font-size:12.5px;max-width:150px;padding:4px 6px;border:1px solid var(--line-2);border-radius:6px;background:var(--surface-2);color:var(--ink)}
+/* The amount column is rightmost, so overflow:hidden here would crop every
+   figure on a phone — and the page's own scrollWidth would stay at 360, which
+   is why a sideways-scroll check cannot see it. Scroll inside the card. */
+.slip{background:var(--surface);border:1px solid var(--line);border-radius:8px;overflow-x:auto;min-width:0}
+.slip .dt td:first-child{white-space:normal}
+.slip .hd{background:var(--navy);color:var(--navy-ink);padding:9px 14px;display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;font-size:13px;font-weight:700;font-family:var(--display)}
+.slip .hd .ar{color:var(--navy-ink);font-weight:600}
+.slip table{width:100%}
+.slip .dt td{padding:7px 14px}
+.slip .dt tr.sum td{font-weight:700;background:var(--surface-2)}
+.slip .dt tr.net td{font-weight:800;background:var(--good-soft);font-size:15px}
+.slip .dt tr.wrong td{color:var(--bad);font-weight:700}
+.accts{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media (max-width:520px){.accts{grid-template-columns:1fr}}
+.acct{border:1px dashed var(--line-2);border-radius:8px;padding:9px 12px;display:grid;gap:2px;font-size:13px;color:var(--muted)}
+.acct b{font-family:var(--display);font-size:16px;color:var(--ink);font-variant-numeric:tabular-nums}
+.opts{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px}
+.opt{padding:9px 10px;border:1.5px solid var(--line-2);border-radius:8px;background:var(--surface);font-size:13.5px;font-weight:700;color:var(--ink);cursor:pointer}
+.opt:hover:not(:disabled){border-color:var(--p)}
+.opt.right{border-color:var(--good);background:var(--good-soft);color:var(--good)}
+.opt.wrong{border-color:var(--bad);background:var(--bad-soft);color:var(--bad)}
+.opt:disabled{cursor:default}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media (max-width:560px){.vs{grid-template-columns:1fr}}
+.vs div{border:1.5px solid var(--line-2);border-radius:8px;padding:12px 14px;display:grid;gap:4px;background:var(--surface)}
+.vs .amt{font-family:var(--display);font-size:24px;font-weight:800;font-variant-numeric:tabular-nums;line-height:1.1}
+.vs .lbl{font-size:10.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase}
+.vs .how{font-size:12.5px;color:var(--muted);font-family:var(--mono)}
+.vs .ok{border-color:var(--good);background:var(--good-soft)}
+.vs div.ok .lbl{color:var(--good)}
+.vs div.no{border-color:var(--bad);background:var(--bad-soft)}
+.vs div.no .lbl{color:var(--bad)}
+.ocols{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;min-width:560px}
+.ocol{display:grid;gap:6px;align-content:start}
+.ocol .oh{border-top:3px solid var(--p);background:var(--surface);border-radius:0 0 6px 6px;padding:8px 10px;font-weight:800;font-family:var(--display);font-size:13.5px}
+.ocol .oh .ar{display:block;font-weight:600;font-size:13px;color:var(--p);text-align:left}
+.ocol .oi{border:1px solid var(--line);border-radius:6px;padding:7px 10px;font-size:13px;background:var(--surface);color:var(--ink-2)}
+.code{font-family:var(--mono);font-size:12.5px;line-height:1.8;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:10px 4px;overflow-x:auto;display:grid}
+.code .l{padding:0 8px;border-radius:4px;white-space:pre}
+.code .l.ran{background:var(--good-soft)}
+.code .l.skip{opacity:.4}
+.code .l.cmt{color:var(--muted);font-style:italic}
+.code .n{color:var(--muted);display:inline-block;width:2ch;text-align:right;margin-right:12px}
+.code .note{color:var(--p);font-weight:600}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.two>*{min-width:0;display:grid;gap:10px;align-content:start}
+@media (max-width:700px){.two{grid-template-columns:1fr}}
+.pill{display:inline-block;font-size:11px;font-weight:800;letter-spacing:.04em;padding:2px 9px;border-radius:999px;background:var(--surface-2);color:var(--ink-2)}
+.pill.p{background:var(--p-soft);color:var(--p)}
+.pill.ok{background:var(--good-soft);color:var(--good)}
+.pill.no{background:var(--bad-soft);color:var(--bad)}
+
 /* ---- DRILL */
 .drill-top{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:18px}
 .seg{display:inline-flex;border:1px solid var(--line-2);border-radius:8px;overflow:hidden}
@@ -607,6 +698,8 @@ pre.code{background:var(--navy);color:var(--navy-ink);border-radius:8px;padding:
 .dt tr.gone td{opacity:.3;text-decoration:line-through}
 .dt td.nul{color:var(--muted);font-style:italic}
 .dt tr.tie td{background:var(--p-soft)}
+.dt tr[tabindex]:focus-visible{outline:2px solid var(--sky);outline-offset:-2px}
+.dt tr[tabindex]:hover td{background:var(--surface-2)}
 .qline{display:flex;flex-direction:column;gap:3px;margin-bottom:13px;font-family:var(--mono);font-size:12.5px;color:var(--ink-2)}
 .qline b{color:var(--p);font-weight:600;margin-right:6px}
 .qcount{margin-top:11px;font-size:11.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
@@ -714,6 +807,10 @@ pre.code{background:var(--navy);color:var(--navy-ink);border-radius:8px;padding:
   .dtab span{display:none}
   .dtab{padding:8px 11px}
   .over-hero h1{font-size:28px}
+  /* The bracket rows are four fixed columns; at phone width they have to give
+     up some of each, or the amount column lands outside the card. */
+  .brk{grid-template-columns:74px 1fr 40px 74px;gap:6px;font-size:11.5px;padding:5px 4px}
+  .hbar .row{grid-template-columns:104px 1fr 76px;gap:7px;font-size:12.5px}
 }
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 
@@ -721,9 +818,19 @@ pre.code{background:var(--navy);color:var(--navy-ink);border-radius:8px;padding:
    Tokens are forced back to the light set so a reader in dark mode does not
    print a black page. */
 @media print{
-  :root{
+  /* The two dark blocks are selected with an attribute, so a bare :root here
+     loses to them on specificity and a dark-mode reader prints near-white text
+     on white paper. Match their specificity and win on order instead, and
+     reset every token the page paints with, not just the greys. */
+  :root,:root[data-theme="dark"],:root:not([data-theme="light"]){
     --bg:#FFFFFF; --surface:#FFFFFF; --surface-2:#F2F4F8; --ink:#0B1F3A; --ink-2:#28374F;
     --muted:#4A5A72; --line:#C8D0DE; --line-2:#A9B4C8; --gold:#8A6412; --gold-soft:#F8F1DF;
+    --navy:#0B1F3A; --navy-2:#14325C; --navy-ink:#EAF0F9; --navy-muted:#5F6F88; --navy-line:#C8D0DE;
+    --primary:#14325C; --primary-ink:#FFFFFF; --primary-soft:#DCE6F5;
+    --sky:#2E6FB7; --sky-soft:#DCE8F7; --good:#237A57; --good-soft:#DCEFE5; --bad:#B03A3A; --bad-soft:#F6DFDF;
+    --pl:38%; --ps:48%; --pl-soft:93%; --ps-soft:55%;
+    --glass:#FFFFFF; --glass-2:#FFFFFF; --glass-edge:#C8D0DE; --glass-hi:#FFFFFF;
+    --scrim:rgba(11,31,58,.42); --edge:rgba(11,31,58,.16);
     --shadow:none; --pop:none; color-scheme:light;
   }
   @page{margin:16mm 14mm}
@@ -743,6 +850,6 @@ pre.code{background:var(--navy);color:var(--navy-ink);border-radius:8px;padding:
   .stage,.sysmap,.sysmap-inner,.fig-scroll,.fig-embed svg{overflow:visible!important;min-width:0!important}
   .sysmap-inner{grid-template-columns:1fr 1fr}
   /* Sources already print their URL as the link text; everywhere else, reveal it */
-  .prose a[href^="http"]:not(.sources a):after{content:" 9" attr(href) "A";font-size:8.5pt;color:#4A5A72;word-break:break-all}
+  .prose a[href^="http"]:not(.sources a):after{content:" \2039" attr(href) "\203A";font-size:8.5pt;color:#4A5A72;word-break:break-all}
   .ch-head{border-bottom:1px solid #C8D0DE;padding-bottom:8px}
 }

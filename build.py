@@ -47,7 +47,8 @@ DESCRIPTION = ("A personal learning atlas: Oracle Fusion HCM Cloud for consultan
                "a glossary and a drill deck.")
 FONTS = ("https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800"
          "&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400"
-         "&family=JetBrains+Mono:wght@400;600&display=swap")
+         "&family=JetBrains+Mono:wght@400;600"
+         "&family=IBM+Plex+Sans+Arabic:wght@400;600;700&display=swap")
 FAVICON = ("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'>"
            "<rect width='32' height='32' rx='7' fill='%230B1F3A'/>"
            "<text x='16' y='23' font-family='system-ui,sans-serif' font-size='19' font-weight='800'"
@@ -140,7 +141,8 @@ def load_content():
     glossary = json.loads((CONTENT / "glossary.json").read_text(encoding="utf-8"))
     questions = json.loads((CONTENT / "questions.json").read_text(encoding="utf-8"))
     terms = [{"id": t["id"], "name": t["name"], "what": t["definition"],
-              "trap": t.get("watchOut", ""), "ch": t["chapter"]} for t in glossary]
+              "trap": t.get("watchOut", ""), "ch": t["chapter"],
+              "ar": t.get("ar", ""), "say": t.get("say", "")} for t in glossary]
     qs = [{"ch": q["chapter"], "q": q["question"], "a": q["answer"],
            "terms": q.get("terms", [])} for q in questions]
     return {"domains": domains, "chapters": chapters, "terms": terms, "questions": qs}

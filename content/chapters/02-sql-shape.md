@@ -50,7 +50,7 @@ Aggregates ignore NULLs. `AVG(discount)` over ten rows where four are NULL divid
 
 SQL does not have true and false. It has true, false and **unknown**, and NULL is what produces unknown. `NULL = NULL` is not true — it is unknown, because two unrecorded values cannot be shown to be equal. That is why you write `IS NULL`, never `= NULL`.
 
-The trap this creates is `NOT IN` against a list containing a NULL. `x NOT IN (1, 2, NULL)` evaluates to unknown for every `x`, so the condition is never true and the query returns nothing at all. Nothing errors; the result set is simply empty, and people rewrite the query three times before spotting it. `NOT EXISTS` does not have this behaviour and is the safer habit.
+The trap this creates is `NOT IN` against a list containing a NULL. `x NOT IN (1, 2, NULL)` is never *true*: for an `x` of 1 or 2 it is false, and for every other `x` it is unknown, because `x <> NULL` cannot be shown to hold. Either way `WHERE` keeps nothing and the query returns no rows at all. Nothing errors; the result set is simply empty, and people rewrite the query three times before spotting it. `NOT EXISTS` does not have this behaviour and is the safer habit.
 
 ## Writing it so someone can read it
 

@@ -6,8 +6,8 @@ track: technical
 title: Loading Data: HCM Data Loader
 subtitle: The highest-value technical skill a functional consultant can arrive with
 hue: 198
-minutes: 9
-labs: hdl
+minutes: 10
+labs: hdl, import-load, source-keys
 terms: hdl-hcm-data-loader, hsdl-hcm-spreadsheet-data-loader, source-system-key-vs-person-number
 ---
 
@@ -26,6 +26,10 @@ MERGE|JobFamily|SALES|Sales|2000/01/01|4712/12/31
 
 That creates a job family coded SALES, effective from 1 January 2000. The end date `4712/12/31` is Oracle's conventional "end of time"; it appears everywhere. Dates use `YYYY/MM/DD`. A `Worker.dat` continues with further METADATA and MERGE pairs for PersonName, PersonNationalIdentifier, PersonEmail, WorkRelationship and Assignment — all components of the same worker hierarchy, in one file.
 
+Those are two separate inspections, and knowing which one rejected a file tells you where to look. **Import** reads the file and checks its shape — pipe counts, attribute spelling, date format — and puts well-formed lines into staging tables, which are a holding area rather than HR data. **Load** then assembles staged lines into whole business objects and checks what they mean: does the job exist, is the grade valid on that date, does the parent this record points at exist? A file that fails import has a formatting problem and has written nothing anywhere. A file that passes import and fails load is well-formed and refers to something that is not there yet, which is almost always a load-order problem.
+
+[[lab:import-load]]
+
 ## The rules that get files rejected
 
 The METADATA line must appear before the MERGE or DELETE lines it relates to. A file may contain several METADATA lines, but each must be for a different component — two Job METADATA lines in one file is invalid. Each MERGE line must contain the same attributes as its METADATA line, in the same order, so a pipe-count mismatch fails the line. Attribute names are case-sensitive. Files should be UTF-8 without a byte-order mark.
@@ -35,6 +39,10 @@ The METADATA line must appear before the MERGE or DELETE lines it relates to. A 
 HDL identifies records three ways. **Source keys** use `SourceSystemOwner` plus `SourceSystemId` to identify a record by its origin in the legacy system; if used, both must appear in the METADATA line. **User keys** identify by natural business keys such as `JobFamilyCode`. Oracle also generates its own surrogate IDs internally. A person's Oracle identifier is the **person number**; the source system key is what links that record back to the legacy one.
 
 The choice matters after the load, not during it. Source keys are what let a team trace every Oracle record to its legacy origin and explain every variance in reconciliation. Getting them right makes reconciliation possible; getting them wrong makes it nearly impossible, and data conversion is routinely the thing that delays a go-live.
+
+The cost of having no stable key shows up the first time a load partially fails. Forty records rejected out of twelve hundred is an ordinary morning; matching those forty back to the rows that produced them is only trivial if every record carries an identifier that is unique in the source and unchanged by the load. Names are not that identifier — two employees share one often enough to break a reconciliation, and names get re-spelled and change with marriage. Employee numbers are not reliably that identifier either, because legacy systems reissue them.
+
+[[lab:source-keys]]
 
 ## Referencing other objects and ordering the load
 
@@ -56,6 +64,6 @@ To point at a foreign object, the attribute is named with the key type in bracke
 
 ## Sources
 
-- Oracle, *HCM Data Loading Business Objects* — "Data File Instructions and Delivery". https://docs.oracle.com/en/cloud/saas/human-resources/21b/faihm/data-file-instructions-and-delivery.html
+- Oracle, *HCM Integrations* — the "Data File Instructions and Delivery" chapter. https://docs.oracle.com/en/cloud/saas/human-resources/faihm/index.html
 - Oracle tutorial, "Create and Maintain Data with HCM Data Loader". https://docs.oracle.com/en/cloud/saas/tutorial-hdl-load-files/
 - HCM Tables, "HCM Data Loader (HDL) Complete Guide — .dat File Format, Templates & Troubleshooting". https://hcm-tables.com/blog/hdl-data-loader-guide

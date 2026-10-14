@@ -3,12 +3,21 @@
 **A personal study atlas — one collection per subject, each written to teach.**
 
 Two collections so far. **Oracle HCM** is Fusion HCM Cloud for functional
-consultants in Egypt and the Gulf: seventeen chapters, fifteen interactive labs,
-seven diagrams, a 122-term glossary and a drill deck, covering the three modules
-juniors are hired for plus the Egyptian and Saudi statutory knowledge Oracle does
-not ship. **Data & Analytics** covers SQL, Power BI and Excel in eight chapters, with four
+consultants in Egypt and the Gulf: seventeen chapters, twenty-nine interactive
+labs, thirteen diagrams, a 132-term bilingual glossary and a drill deck, covering
+the three modules juniors are hired for plus the Egyptian and Saudi statutory
+knowledge Oracle does not ship. Every HCM term carries the Arabic a consultant
+will actually hear — the formal term, and what people say on the floor.
+**Data & Analytics** covers SQL, Power BI and Excel in eight chapters, with four
 labs of its own — a join visualiser, a query-execution stepper, a window-frame
 demo and a DAX filter-context explorer.
+
+The labs are the point of it: a payroll chain you break link by link and watch a
+payslip react, a Fast Formula that runs in the page and shows which lines fired,
+an end-of-service calculator where a rehire policy moves the money, a subject-area
+grain trap that explains an inflated headcount, and routing drills for the
+questions a consultant is actually asked — who decides, which door, change
+request or defect.
 
 Every chapter can be read or listened to — the browser's own speech engine reads
 it aloud, highlighting where it is, with no account and no network.
@@ -54,11 +63,11 @@ python scripts/import_portable.py path/to/moon-learning.html --apply  # write it
 | --- | --- |
 | **Overview** | Every collection with its size and how far through it you are. |
 | **Home** | Per collection: progress dashboard, a per-chapter progress chart, then the whole subject on one screen — every block opens a chapter, split Functional / Technical. |
-| **Chapters** | 25 chapters, ~18,100 words across both collections, grouped into two tracks each. Every chapter has its own colour, mark and cover band, and ends in common mistakes and sources. |
-| **Figures** | 9 inline SVG diagrams drawn where the prose explains a shape — the legal/operational split, what an LDG seals off, GOSI's three populations, the WPS chain, the Egyptian leave ladder, the extension decision. |
-| **Labs** | 19 interactive pieces: org tree, global-transfer stepper, payroll chain, effective-dating timelines, Egyptian social-insurance and tax calculators, leave ladder, HDL file anatomy, Fast Formula, security, methodology, headcount vs FTE. Most are embedded in their chapter too. |
-| **Glossary** | 184 terms — one definition each, the trap that comes with it, and a link to the chapter. |
-| **Drill** | 65 questions with model answers plus a card for every term. Grade yourself; missed cards come back first. |
+| **Chapters** | 25 chapters, ~25,800 words |
+| **Figures** | 15 inline SVG diagrams |
+| **Labs** | 33 interactive pieces |
+| **Glossary** | 194 terms |
+| **Drill** | 90 questions |
 | **Search** | <kbd>Ctrl</kbd>/<kbd>⌘</kbd>+<kbd>K</kbd>, or just <kbd>/</kbd>, across **every** collection at once — chapters, individual sections, terms, labs, figures and questions, with snippets and a jump straight to the heading that answers it. |
 | **Listen** | Any chapter read aloud by the browser's speech engine, paragraph by paragraph with the current one highlighted. Offline, free, no key. |
 

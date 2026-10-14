@@ -36,4 +36,4 @@ An **area of responsibility (AOR)** assigns responsibility for a defined populat
 ## Sources
 
 - Oracle, *Securing HCM* — "Which are the role types in HCM Cloud?". https://docs.oracle.com/en/cloud/saas/human-resources/faqas/which-are-the-role-types-in-hcm-cloud.html
-- Oracle, *Securing HCM* — "HCM Data Roles and Security Profiles". https://docs.oracle.com/en/cloud/saas/human-resources/21c/ochus/hcm-data-roles-and-security-profiles.html
+- Oracle, *Securing HCM* — the "HCM Data Roles and Security Profiles" chapter. https://docs.oracle.com/en/cloud/saas/human-resources/ochus/index.html

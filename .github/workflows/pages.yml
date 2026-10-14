@@ -1,7 +1,13 @@
 name: Build and deploy to GitHub Pages
 
+# Deploys only after CI has gone green on the same commit. Triggering on push
+# instead would race CI and publish a build nothing had checked — and build.py
+# never parses the JavaScript it inlines, so a syntax error in a lab would ship
+# as a blank page.
 on:
-  push:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
     branches: [main, master]
   workflow_dispatch:
 
@@ -16,9 +22,13 @@ concurrency:
 
 jobs:
   build:
+    # A failed or cancelled CI run must not reach the public site.
+    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.ref }}
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"

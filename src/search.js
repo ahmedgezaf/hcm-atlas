@@ -74,7 +74,7 @@ function buildIndex() {
 
   allTerms().forEach(t => {
     const c = chById(t.ch);
-    add('term', t.name, c ? c.title : '', [t.what, t.trap].filter(Boolean).join(' '),
+    add('term', t.name, c ? c.title : '', [t.what, t.trap, t.ar, t.say].filter(Boolean).join(' '),
       { term: t.name, ch: t.ch, hue: c ? c.hue : 210 });
   });
 
@@ -114,9 +114,13 @@ function tokenize(q) {
   }));
 }
 
-/* 2 = whole word, 1 = starts a word, 0 = only mid-word, -1 = absent. */
+/* 2 = whole word, 1 = starts a word, 0 = only mid-word, -1 = absent.
+   JavaScript's \b is defined against [A-Za-z0-9_], so an Arabic token can never
+   satisfy the whole-word or word-start patterns and would score below every
+   incidental English substring. Grade it as a whole word when it is present. */
 function tier(hay, tk) {
   if (!hay) return -1;
+  if (!/[a-z0-9]/i.test(tk.t)) return hay.includes(tk.t) ? 2 : -1;
   if (tk.whole.test(hay)) return 2;
   tk.start.lastIndex = 0;
   if (tk.start.test(hay)) return 1;

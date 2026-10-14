@@ -13,6 +13,8 @@ terms: egyptian-annual-leave-entitlement, casual-leave, sick-leave, maternity-le
 
 Labour Law No. 14 of 2025 replaced the 2003 law and took effect on 1 September 2025. Its leave provisions are the direct input to absence-plan design (Chapter 6). This chapter states the entitlements and the design implications; the exit and probation rules live in Chapter 8.
 
+> **Every figure in this chapter moves.** The entitlements were checked in 2026 against the EY, Andersen and Amereller summaries below, and the executive regulations and ministerial decisions implementing the law continue to appear. Re-verify against the Arabic text of the statute, or the client's legal counsel, before configuring an entitlement.
+
 ## Annual leave: a ladder by service and age
 
 The statutory ladder is 15 days during the first year of service (pro-rated where service exceeds six months but is under a year); 21 days from the second year; 30 days for workers with ten years of service or aged over 50; 45 days for persons with disabilities; plus 7 additional days for hazardous, arduous or remote-area work. Annual leave excludes official and weekly holidays.

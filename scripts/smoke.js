@@ -22,10 +22,15 @@ const check = (name, pass, detail = '') => results.push({ name, pass, detail });
   const browser = await chromium.launch();
   const page = await browser.newPage({ viewport: { width: 1360, height: 900 } });
   const errors = [];
-  page.on('pageerror', e => errors.push(e.message));
-  page.on('console', m => {
-    if (m.type() === 'error' && !/fonts\.googleapis|ERR_|net::/.test(m.text())) errors.push(m.text());
-  });
+  // Every page this test opens reports into the same list: the narrow pass is
+  // the one that mounts all 33 labs, so an exception there must not be lost.
+  const watch = pg => {
+    pg.on('pageerror', e => errors.push(e.message));
+    pg.on('console', m => {
+      if (m.type() === 'error' && !/fonts\.googleapis|ERR_|net::/.test(m.text())) errors.push(m.text());
+    });
+  };
+  watch(page);
 
   await page.goto(FILE, { waitUntil: 'load' });
   await page.waitForTimeout(400);
@@ -183,19 +188,50 @@ const check = (name, pass, detail = '') => results.push({ name, pass, detail });
   // meant to scroll inside their own .stage, which only works while every
   // grid ancestor is allowed to shrink (min-width:0).
   const narrow = await browser.newPage({ viewport: { width: 360, height: 740 } });
+  watch(narrow);
   await narrow.goto(FILE, { waitUntil: 'load' });
   await narrow.waitForTimeout(300);
   const targets = await narrow.evaluate(() =>
     [...CH.map(c => 'chapters/' + c.id), ...LABS.map(l => 'labs/' + l.id), 'home', 'glossary', 'drill', 'about']);
-  const overflowing = [];
+  const overflowing = [], empty = [], offscreen = [];
   for (const t of targets) {
     await narrow.evaluate(h => { location.hash = h; }, t);
     await narrow.waitForTimeout(120);
     const w = await narrow.evaluate(() => document.documentElement.scrollWidth);
     if (w > 360) overflowing.push(`${t} (${w}px)`);
+    if (t.startsWith('labs/')) {
+      // A lab whose render() throws leaves an empty body and scrolls nothing.
+      const body = await narrow.evaluate(() => {
+        const el = document.querySelector('.lab-body');
+        return el ? el.childElementCount : -1;
+      });
+      if (body <= 0) empty.push(t);
+      // Numbers pushed outside their own scroll box are invisible on a phone,
+      // and overflow:hidden would keep the page width at 360 regardless.
+      const past = await narrow.evaluate(() => {
+        // A figure may sit outside the visible part of a box that scrolls —
+        // that is what scrolling is for. It may not sit outside a box that
+        // clips, because then nothing reaches it.
+        const bad = [];
+        document.querySelectorAll('.lab-body td.n, .lab-body .amt, .lab-body .kv b').forEach(c => {
+          let box = c.parentElement;
+          while (box && box !== document.body && box.scrollWidth <= box.clientWidth + 1) box = box.parentElement;
+          if (!box || box === document.body) return;
+          const ox = getComputedStyle(box).overflowX;
+          if (ox === 'auto' || ox === 'scroll') return;
+          if (c.getBoundingClientRect().right > box.getBoundingClientRect().right + 1) bad.push(c.textContent.trim().slice(0, 12));
+        });
+        return bad.length;
+      });
+      if (past) offscreen.push(`${t} (${past})`);
+    }
   }
   check('no sideways scroll at 360px', overflowing.length === 0,
     overflowing.length ? overflowing.slice(0, 3).join(', ') : `${targets.length} views`);
+  check('every lab mounts at 360px', empty.length === 0,
+    empty.length ? empty.slice(0, 3).join(', ') : `${targets.filter(t => t.startsWith('labs/')).length} labs`);
+  check('no lab clips its figures off-screen at 360px', offscreen.length === 0,
+    offscreen.length ? offscreen.slice(0, 3).join(', ') : 'amounts inside their scroll box');
   await narrow.evaluate(() => { location.hash = 'home'; });
   await narrow.waitForTimeout(250);
   const clipped = await narrow.evaluate(() => {
@@ -239,6 +275,41 @@ const check = (name, pass, detail = '') => results.push({ name, pass, detail });
   check('listen control builds readable chunks',
     speech.ok && speech.chunks > 5 && speech.leaked === 0 && speech.bar,
     JSON.stringify(speech));
+
+  // ---- printing from dark mode must not produce white-on-white
+  const printer = await browser.newPage({ viewport: { width: 1360, height: 900 } });
+  watch(printer);
+  await printer.goto(FILE, { waitUntil: 'load' });
+  await printer.evaluate(() => {
+    document.documentElement.setAttribute('data-theme', 'dark');
+    location.hash = 'chapters/org';
+  });
+  await printer.waitForTimeout(250);
+  await printer.emulateMedia({ media: 'print' });
+  const ink = await printer.evaluate(() => {
+    const el = document.querySelector('.prose p') || document.querySelector('.prose');
+    const rgb = getComputedStyle(el).color.match(/\d+/g).map(Number);
+    const lum = (0.2126 * rgb[0] + 0.7152 * rgb[1] + 0.0722 * rgb[2]) / 255;
+    return { colour: getComputedStyle(el).color, lum };
+  });
+  check('a dark-mode reader prints dark text', ink.lum < 0.5, ink.colour);
+  await printer.close();
+
+  // ---- the Arabic on every HCM term is reachable from the palette
+  const arTerm = await page.evaluate(() => {
+    const t = DATA.terms.find(x => x.ar && x.ar.length > 6);
+    return t ? { name: t.name, ar: t.ar } : null;
+  });
+  await page.keyboard.press('Control+KeyK');
+  await page.waitForTimeout(150);
+  await page.fill('#palQ', arTerm ? arTerm.ar : 'x');
+  await page.waitForTimeout(250);
+  const arHit = await page.evaluate(() => {
+    const r = document.querySelector('.pal-row');
+    return r ? r.querySelector('.pal-t').textContent : '';
+  });
+  check('searching the Arabic finds its term', !!arTerm && arHit === arTerm.name,
+    arTerm ? `${arTerm.ar} -> ${arHit || 'nothing'}` : 'no term carries Arabic');
 
   check('no runtime errors', errors.length === 0, errors.join(' | '));
   await browser.close();

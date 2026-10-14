@@ -13,6 +13,8 @@ terms: absence-type, absence-plan, accrual-plan, qualification-plan, no-entitlem
 
 Absence is the module where a country's labour law turns into configuration. Every leave entitlement in the statute becomes an absence plan with rules, and every rule becomes a test script. The Egyptian annual-leave ladder is the classic accrual exercise; Egyptian sick leave is the classic qualification plan.
 
+> **The Egyptian figures quoted here are statutory.** They are the entitlements under Labour Law No. 14 of 2025, stated in full with their sources in Chapter 10, and checked in 2026. Re-verify against the current text of the statute before configuring any of them.
+
 ## Types are what people see; plans are the rules
 
 An **absence type** is what the worker actually selects when requesting leave — "Annual Leave", "Sick Leave", "Maternity Leave". It controls display and entry behaviour: whether half days are allowed, whether an end date is required, what documentation is needed. Every type must be associated with at least one plan. Clients describe requirements in terms of types ("we need a Hajj leave"); the consultant translates that into a type plus the plan behind it.
@@ -28,7 +30,7 @@ An **absence plan** is the rules engine behind the type: who is eligible, how en
 
 ## Accrual plans and bands
 
-An **accrual plan** accumulates leave over time, with rules for accrual rate, ceilings and carryover. Oracle supports front-loaded accrual (the whole year's entitlement granted at the start of the plan term) and incremental accrual (earned period by period). **Accrual bands** grant different rates to different populations, usually by length of service, because almost every real leave policy is tiered. Egyptian annual leave — 15 days in the first year, 21 from the second, 30 after ten years of service or at age 50 — is implemented directly as accrual bands. The boundary cases are the test cases: the person who crosses ten years mid-year and the person who turns fifty mid-year.
+An **accrual plan** accumulates leave over time, with rules for accrual rate, ceilings and carryover. Oracle supports front-loaded accrual (the whole year's entitlement granted at the start of the plan term) and incremental accrual (earned period by period). **Accrual bands** grant different rates to different populations, usually by length of service, because almost every real leave policy is tiered. Egyptian annual leave — 15 days in the first year, 21 from the second, 30 for workers with ten years of service or aged over 50, with higher entitlements again for persons with disabilities and for hazardous or remote work (Chapter 10) — is implemented directly as accrual bands. The boundary cases are the test cases: the person who crosses ten years mid-year and the person who turns fifty mid-year.
 
 **Carryover** rules govern how much unused leave transfers into the next plan term and when it expires. Employers cap carryover to control liability and to encourage people to take leave, and carryover and expiry rules are a frequent source of client disagreement — pin them down in writing early. Egyptian law also imposes its own constraints (Chapter 10).
 
@@ -56,5 +58,5 @@ An **eligibility profile** is a reusable set of criteria — grade, job, departm
 ## Sources
 
 - Oracle, *Implementing Absence Management* — "Types of Absence Plans". https://docs.oracle.com/en/cloud/saas/human-resources/faiam/types-of-absence-plans.html
-- Oracle, *Implementing Absence Management* — "Accrual Absence Plans". https://docs.oracle.com/en/cloud/saas/human-resources/20b/faiam/accrual-absence-plans.html
+- Oracle, *Implementing Absence Management* — the "Accrual Absence Plans" chapter. https://docs.oracle.com/en/cloud/saas/human-resources/faiam/index.html
 - Oracle, *Absence Management* datasheet. https://www.oracle.com/a/ocom/docs/applications/human-capital-management/absence-management-ds.pdf

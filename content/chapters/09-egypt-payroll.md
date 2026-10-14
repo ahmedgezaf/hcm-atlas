@@ -37,7 +37,7 @@ The **progressive brackets** on annual net taxable income are: 0% to EGP 40,000;
 
 ## Bracket elimination for high earners
 
-Egypt adds a rule most payroll calculators ignore. As net taxable income rises past defined thresholds, access to the lower bands is progressively removed, so that the income which would have been taxed at 0% or 10% is taxed at the next surviving rate instead. Above EGP 600,000 the zero band disappears; above 700,000 the 10% band also goes; the pattern continues through 800,000 and 900,000 until, above EGP 1,200,000, only the 25% and 27.5% bands remain. Deloitte's summary of Law 7/2024 presents exactly this as a table of bracket applications by total-income level.
+Egypt adds a rule most payroll calculators ignore. As net taxable income rises past defined thresholds, access to the lower bands is progressively removed, so that the income which would have been taxed at 0% or 10% is taxed at the next surviving rate instead. Above EGP 600,000 the zero band disappears; above 700,000 the 10% band also goes; the pattern continues through 800,000 and 900,000 until, above EGP 1,200,000, only the 25% and 27.5% bands remain. Deloitte's summary of Law 7/2024 presents this as a table of bracket applications by total-income level, stating the 600,000 and 700,000 steps explicitly and that the pattern continues to 1,200,000. The 800,000 and 900,000 steps above follow that stated pattern rather than a separately cited figure, so confirm the exact ladder against the Egyptian Tax Authority before building it.
 
 A naive progressive calculation that applies every band to every employee is wrong for senior staff — precisely the people who notice. If a consultant builds or validates an Egyptian tax formula, this rule is a correctness requirement.
 

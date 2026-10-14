@@ -17,7 +17,7 @@ Analysts are quietly embarrassed about Excel and should not be. It is the fastes
 
 **XLOOKUP** replaced VLOOKUP and should be the default in any version that has it. It takes a lookup value, the array to search, and the array to return, and it fixes three things that made VLOOKUP dangerous: it defaults to **exact match** rather than approximate; it can look left as well as right; and it references arrays rather than a column *number*, so inserting a column does not silently break it.
 
-VLOOKUP's fourth argument is the one to know about even if you never write another. Omitted, it defaults to `TRUE` — approximate match — which assumes the lookup column is sorted and returns the nearest smaller value if it is not. On unsorted data that produces confidently wrong answers rather than errors. Every legacy VLOOKUP you inherit should be checked for a missing `FALSE`.
+VLOOKUP's fourth argument is the one to know about even if you never write another. Omitted, it defaults to `TRUE` — approximate match — which assumes the lookup column is sorted ascending and returns the largest value less than or equal to the one asked for. On unsorted data Microsoft's own documentation promises nothing: the value returned may simply be wrong. Either way it is a confidently wrong answer rather than an error, which is why nobody notices. Every legacy VLOOKUP you inherit should be checked for a missing `FALSE`.
 
 **INDEX/MATCH** is the older pairing that did what XLOOKUP does — `INDEX` returns the value at a position, `MATCH` finds the position. It is still worth reading fluently, because the spreadsheets you inherit are full of it.
 

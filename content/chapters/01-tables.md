@@ -17,7 +17,7 @@ Before any tool, one habit. When a table lands in front of you, ask what a singl
 
 The **grain** of a table is what one row is. "One row is one order." "One row is one order line." "One row is one product, per store, per day." Those are three different tables, and the same column called `revenue` means something different in each.
 
-The grain is the first thing to establish and the last thing to lose track of. A table at order grain can be summed safely for total revenue. The same query joined to order *lines* is no longer at order grain — each order now appears once per line — and summing the order-level revenue column will overstate the total, silently, by exactly the average number of lines per order. Nothing errors. The number is simply wrong, and it looks plausible, which is worse.
+The grain is the first thing to establish and the last thing to lose track of. A table at order grain can be summed safely for total revenue. The same query joined to order *lines* is no longer at order grain — each order now appears once per line — and summing the order-level revenue column will overstate the total, silently, by the average number of lines per order weighted by order value — which is more than the plain average whenever the larger orders carry more lines, as they usually do. Nothing errors. The number is simply wrong, and it looks plausible, which is worse.
 
 State the grain out loud in a handover or an interview and you sound like someone who has been burned. That is the point.
 

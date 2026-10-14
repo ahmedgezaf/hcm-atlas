@@ -1,4 +1,4 @@
-# Running HCM Atlas on Oracle Cloud Infrastructure
+# Running Moon Learning on Oracle Cloud Infrastructure
 
 > **New to this?** There is a plain-language, tick-as-you-go walkthrough that
 > covers Netlify, GitHub Pages and Oracle Cloud, with the jargon explained:
@@ -6,7 +6,7 @@
 >
 > This file is the reference version: terser, and OCI only.
 
-The site is one static file — `dist/index.html`, about 270 KB, no server-side
+The site is one static file — `dist/index.html`, about 595 KB, no server-side
 anything. That makes every OCI route straightforward; the only real decision is
 whether you want a custom domain and HTTPS.
 

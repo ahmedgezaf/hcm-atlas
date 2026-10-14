@@ -4,14 +4,14 @@ num: 17
 domain: hcm
 track: functional
 title: Saudi Arabia & the Gulf
-subtitle: The systems named in every Saudi job posting
+subtitle: The government platforms a Saudi implementation runs on
 hue: 130
-minutes: 8
-labs: 
+minutes: 9
+labs: gratuity
 terms: gosi, qiwa, mudad, nitaqat-saudization, wps-and-sif-file, iqama-and-visa-linked-employment-data, end-of-service-benefit-eosb-gratuity
 ---
 
-Saudi job postings name specific government platforms, and knowing them separates a candidate from those who only know Oracle's generic Gulf localization. This chapter covers the systems, the numbers that matter, and the ways a Saudi implementation differs structurally from an Egyptian one.
+A Saudi implementation runs on government platforms that have no Egyptian equivalent, and Oracle's generic Gulf localization does not reach them. This chapter covers the systems, the numbers that matter, and the ways a Saudi implementation differs structurally from an Egyptian one.
 
 > **Figures move here too.** Saudi social-insurance rates are being phased up under the 2024 reform, and platform rules change by ministerial decision. Verify against GOSI and the Ministry of Human Resources and Social Development before configuring.
 
@@ -45,6 +45,12 @@ Employment legality in the Gulf is document-dependent in a way it is not in Egyp
 
 Gulf labour law provides an **end-of-service benefit (EOSB)** in place of a state pension for expatriates: a statutory lump sum on departure, calculated on length of service and final wage, with country-specific formulas and reductions for resignation before a service threshold. It is a central component of the final settlement in any Gulf payroll and has no Egyptian equivalent.
 
+The Saudi award under Articles 84 and 85 of the Labour Law is the pattern to know: half a month's wage for each of the first five years and a full month for each year after that, calculated on the last wage and pro-rated for part years, then reduced where the worker resigns — nothing below two years of service, a third from two to five, two thirds from five to ten, and the full award at ten years or more. Figures checked in 2026; Saudi labour law has been amended repeatedly in recent years, so verify against the current text and the client's own contracts, which may be more generous than the statutory floor.
+
+What decides the money is not the formula but the service length fed into it, and that is a configuration question. A worker who left and returned, or who moved between group companies, has a new work relationship and a new legal employer start date; whether the earlier service still counts is a policy decision the client has to state, and it is expressed through a seniority date rather than by back-dating the new employment (Chapter 3). A rehire configured with a fresh service clock under a policy that bridges the break under-pays every affected leaver, and no payroll report flags it, because both figures are arithmetically correct.
+
+[[lab:gratuity]]
+
 ## Common mistakes
 
 - Treating GOSI as one rate. Nationals and expatriates differ, and the 2024 reform split nationals into two schedules.
@@ -58,4 +64,6 @@ Gulf labour law provides an **end-of-service benefit (EOSB)** in place of a stat
 - Mercans, "GOSI Contributions in Saudi Arabia: 2026 Rates, Rules & Compliance Guide". https://mercans.com/glossary/gosi-contributions/
 - Mercans statutory alert, "Saudi Arabia: GOSI Contribution Rates & Saned Unemployment Fund 2026". https://mercans.com/resources/statutory-alerts/saudi-arabia-gosi-contribution-rates-saned-unemployment-fund-2026/
 - Snad, "Mudad and the Wage Protection System (WPS): 2026 Employer Guide". https://www.snad.io/en/blog/mudad-wps-hamayat-ujur-saudi
-- Qiwa (Ministry of Human Resources and Social Development). https://qiwa.sa
+- Ministry of Human Resources and Social Development (Saudi Arabia), *Labor Law* (Royal Decree M/51), official English translation — Articles 84 and 85. https://www.hrsd.gov.sa/sites/default/files/2023-02/Labor.pdf
+- Ministry of Human Resources and Social Development, "Calculating End-of-Service Award" and "End-of-Service Award Regulations", for the pro-rating of part years and what counts as wage. https://www.hrsd.gov.sa/en/knowledge-centre/articles/316
+- Qiwa (Ministry of Human Resources and Social Development) — the platform itself, for what employers file. https://qiwa.sa

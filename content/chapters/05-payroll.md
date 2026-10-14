@@ -6,8 +6,8 @@ track: functional
 title: The Payroll Object Chain
 subtitle: Element → eligibility → entry → run → balance → prepayment → payment → costing
 hue: 152
-minutes: 11
-labs: payroll
+minutes: 13
+labs: payroll, payslip, balances, parallel-run
 terms: element, element-classification, element-eligibility-element-link, element-entry, input-value, balance, salary-basis, payroll-definition, payroll-run, quickpay, prepayments, payment-process-bank-file, costing, parallel-run
 ---
 
@@ -45,9 +45,19 @@ Calculation and payment are separate steps. **Prepayments** takes the run result
 
 [[lab:payroll]]
 
+The failures worth rehearsing are the quiet ones. A person not assigned to a payroll is skipped by the run without an error. A salary basis that says monthly while the annual figure was loaded against it pays twelve times the intended salary, and the run reports nothing, because it calculated exactly what it was given. A deduction classified as an earning is added to gross instead of taken off it. None of these produce a failure message; all of them produce a payslip.
+
+[[lab:payslip]]
+
+[[lab:balances]]
+
 ## Proving it works: the parallel run
 
 A **parallel run** executes the new system's payroll alongside the legacy payroll for the same period and reconciles the two line by line. It is the only reliable proof that the new payroll is correct before the old one is switched off, and it typically runs for two or three consecutive months before go-live. Differences must be explained, not just noted. It is also the highest-stakes activity before go-live, and the point where a consultant with analytical instincts is visibly useful.
+
+Two habits separate a reconciliation that proves something from one that merely documents. The first is reading every line rather than the exceptions someone has already flagged, because a difference nobody noticed is exactly the one that reaches hypercare. The second is remembering what the exercise can and cannot prove: a matching line proves the new system agrees with the old one, not that either agrees with the client's policy. Where legacy is wrong — an out-of-date insurable-wage ceiling, an allowance paid flat that policy says is a percentage — the correct outcome is a difference, raised with the client rather than configured away.
+
+[[lab:parallel-run]]
 
 ## Common mistakes
 
@@ -59,6 +69,6 @@ A **parallel run** executes the new system's payroll alongside the legacy payrol
 
 ## Sources
 
-- Oracle, *Administering Payroll* — "Payroll Processes" (calculate, prepayments, archive, payments). https://docs.oracle.com/en/cloud/saas/human-resources/21a/faaus/payroll-processes.html
+- Oracle, *Administering Payroll for the United States* — the "Payroll Processes" chapter, for the calculate, prepayments, archive and payment sequence, which is the same in every localization. https://docs.oracle.com/en/cloud/saas/human-resources/faaus/index.html
 - Oracle, *Implementing Global Payroll* — "Overview of Payroll Costing". https://docs.oracle.com/en/cloud/saas/human-resources/faigp/overview-of-payroll-costing.html
-- Oracle, *Administering Global Payroll* — "Overview of Administering Payroll Relationships". https://docs.oracle.com/en/cloud/saas/human-resources/23d/faapq/overview-of-administering-payroll-relationships.html
+- Oracle, *Implementing Global Payroll* — "Payroll Relationship Rules". https://docs.oracle.com/en/cloud/saas/human-resources/faigp/payroll-relationship-rules.html

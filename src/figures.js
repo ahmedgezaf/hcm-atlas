@@ -67,7 +67,7 @@ FIGS.push({
   ch: 'org',
   title: 'The same company, two pictures',
   caption: 'Oracle keeps the legal registration and the operating structure apart on purpose, because in real companies they do not line up. A worker sits in exactly one branch of each.',
-  svg: () => `<svg viewBox="0 0 760 372" role="img" aria-label="The enterprise splits into a legal view — legal entity, legal employer, payroll statutory unit, tax reporting unit — and an operational view — business unit, division, department, location.">
+  svg: () => `<svg viewBox="0 0 760 372" role="img" aria-label="The enterprise splits into a legal view — legal entity, legal employer, payroll statutory unit, tax reporting unit — and an operational view — division, business unit, department, location.">
     ${FIG_DEFS}
     ${F.box(290, 8, 180, 38, 'Enterprise', null, 'accent')}
     ${F.note(300, 62, 'one per implementation · not a legal concept')}
@@ -84,9 +84,9 @@ FIGS.push({
     ${F.box(30, 312, 290, 44, 'Tax reporting unit (TRU)', 'the face shown to the authorities')}
 
     ${F.head(440, 88, 'OPERATIONAL VIEW — what a manager asks')}
-    ${F.box(440, 96, 290, 50, 'Business unit', 'processing, shared reference data, access')}
+    ${F.box(440, 96, 290, 50, 'Division', 'management reporting — spans legal entities')}
     ${F.down(585, 146, 168)}
-    ${F.box(440, 168, 290, 50, 'Division', 'management reporting — analytics, not txns')}
+    ${F.box(440, 168, 290, 50, 'Business unit', 'processing, shared reference data, access')}
     ${F.down(585, 218, 240)}
     ${F.box(440, 240, 290, 50, 'Department', 'the box on the org chart a worker sits in')}
     ${F.down(585, 290, 312)}
