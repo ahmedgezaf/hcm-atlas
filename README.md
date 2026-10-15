@@ -3,8 +3,8 @@
 **A personal study atlas — one collection per subject, each written to teach.**
 
 Two collections so far. **Oracle HCM** is Fusion HCM Cloud for functional
-consultants in Egypt and the Gulf: nineteen chapters, twenty-nine interactive
-labs, thirteen diagrams, a 152-term bilingual glossary and a drill deck, covering
+consultants in Egypt and the Gulf: twenty chapters, twenty-nine interactive
+labs, sixteen diagrams, a 161-term bilingual glossary and a drill deck, covering
 the three modules juniors are hired for plus the Egyptian and Saudi statutory
 knowledge Oracle does not ship. Every HCM term carries the Arabic a consultant
 will actually hear — the formal term, and what people say on the floor.
@@ -63,11 +63,11 @@ python scripts/import_portable.py path/to/moon-learning.html --apply  # write it
 | --- | --- |
 | **Overview** | Every collection with its size and how far through it you are. |
 | **Home** | Per collection: progress dashboard, a per-chapter progress chart, then the whole subject on one screen — every block opens a chapter, split Functional / Technical. |
-| **Chapters** | 28 chapters, ~30,200 words |
-| **Figures** | 15 inline SVG diagrams |
+| **Chapters** | 29 chapters, ~32,000 words |
+| **Figures** | 19 inline SVG diagrams |
 | **Labs** | 33 interactive pieces |
-| **Glossary** | 214 terms |
-| **Drill** | 111 questions |
+| **Glossary** | 223 terms |
+| **Drill** | 121 questions |
 | **Search** | <kbd>Ctrl</kbd>/<kbd>⌘</kbd>+<kbd>K</kbd>, or just <kbd>/</kbd>, across **every** collection at once — chapters, individual sections, terms, labs, figures and questions, with snippets and a jump straight to the heading that answers it. |
 | **Listen** | Any chapter read aloud by the browser's speech engine, paragraph by paragraph with the current one highlighted. Offline, free, no key. |
 

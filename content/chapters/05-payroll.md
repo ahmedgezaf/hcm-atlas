@@ -67,6 +67,8 @@ When something is wrong, three corrections do different things. **Mark for retry
 
 Where the cost lands is the other half of finishing a cycle. Costing allocates results to accounting segments through the cost allocation flexfield, with values held at several levels — the payroll, the department, the element eligibility — and the most specific one winning. The results then move to the general ledger through Transfer to Subledger Accounting and Create Accounting, which is the point at which Finance sees payroll at all. A costing design that is merely plausible produces a month-end reconciliation that nobody can explain, which is why the finance consultant belongs in that conversation from the start rather than at the end.
 
+[[fig:payroll-chain]]
+
 [[lab:payroll]]
 
 The failures worth rehearsing are the quiet ones. A person not assigned to a payroll is skipped by the run without an error. A salary basis that says monthly while the annual figure was loaded against it pays twelve times the intended salary, and the run reports nothing, because it calculated exactly what it was given. A deduction classified as an earning is added to gross instead of taken off it. None of these produce a failure message; all of them produce a payslip.

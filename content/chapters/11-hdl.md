@@ -28,6 +28,8 @@ That creates a job family coded SALES, effective from 1 January 2000. The end da
 
 Those are two separate inspections, and knowing which one rejected a file tells you where to look. **Import** reads the file and checks its shape — pipe counts, attribute spelling, date format — and puts well-formed lines into staging tables, which are a holding area rather than HR data. **Load** then assembles staged lines into whole business objects and checks what they mean: does the job exist, is the grade valid on that date, does the parent this record points at exist? A file that fails import has a formatting problem and has written nothing anywhere. A file that passes import and fails load is well-formed and refers to something that is not there yet, which is almost always a load-order problem.
 
+[[fig:import-vs-load]]
+
 [[lab:import-load]]
 
 ## The rules that get files rejected

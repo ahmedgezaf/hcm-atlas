@@ -539,26 +539,41 @@ LABS.push({id:'parallel-run',ch:'payroll',title:'Reconciling a parallel run',lea
   draw();
 }});
 
-/* Lab 25: end-of-service, and the dates that decide it */
-LABS.push({id:'gratuity',ch:'gulf',title:'End-of-service, and the dates that decide it',lead:'Two stints with a break between them, and one question: does the earlier service count? The policy answer is expressed through a seniority date. Move the sliders — the left figure is what the client’s policy owes, the right is what a fresh service clock at rehire would pay.',render(b){
-  let st={s1:4,gap:12,s2:5,wage:10000,policy:'if',lim:24,exit:'term'};
-  const sar=n=>Math.round(n).toLocaleString('en-US')+' SAR';
+/* Lab 25: end-of-service across the three countries */
+LABS.push({id:'gratuity',ch:'gulf',title:'End-of-service, and the dates that decide it',lead:'The same worker, the same two stints with a break between them, under three statutory regimes. Switch the country to see how much of the answer is the formula and how much is the service the configuration decided to count.',render(b){
+  let st={country:'sa',s1:4,gap:12,s2:5,wage:10000,policy:'if',lim:24,exit:'term'};
+  /* Each country's award in months of wage, its qualifying service and its cap.
+     Figures checked 2026 — Saudi Articles 84 and 85, UAE Article 51, and Egypt,
+     which has no statutory end-of-service award at all. */
+  const CT={
+    sa:{n:'Saudi Arabia',cur:'SAR',months:y=>Math.min(y,5)*0.5+Math.max(y-5,0),min:0,cap:0,
+        resign:y=>y<2?0:y<=5?1/3:y<10?2/3:1,
+        base:'Half a month of the last wage for each of the first five years, a full month for each year after, with no cap. Resignation reduces it: nothing under two years, a third to five, two thirds to ten, the full award beyond.'},
+    ae:{n:'UAE',cur:'AED',months:y=>Math.min(y,5)*0.7+Math.max(y-5,0),min:1,cap:24,
+        resign:()=>1,
+        base:'Twenty-one days of basic wage for each of the first five years and thirty days for each year after — 0.7 and 1.0 months — payable in full from one year of service and capped at two years of wage. Resignation does not reduce it.'},
+    eg:{n:'Egypt',cur:'EGP',months:()=>0,min:0,cap:0,resign:()=>1,
+        base:'There is no statutory end-of-service award in Egypt. The provision is the state social-insurance pension, and the final settlement is unused annual leave, any notice paid in lieu, and whatever the contract or company policy adds — which is a configuration question with no statutory floor to fall back on.'}};
+  const money=n=>Math.round(n).toLocaleString('en-US')+' '+CT[st.country].cur;
   const yr=y=>(Number.isInteger(y)?y:y.toFixed(1))+' yr';
-  const months=y=>Math.min(y,5)*0.5+Math.max(y-5,0);
-  const resign=y=>y<2?0:y<=5?1/3:y<10?2/3:1;
-  const award=y=>{const base=months(y)*st.wage;const f=st.exit==='resign'?resign(y):1;return{amt:base*f,f,m:months(y)};};
+  const award=y=>{const c=CT[st.country];
+    if(y<c.min) return {amt:0,f:1,m:0,short:true};
+    const m=c.months(y),f=st.exit==='resign'?c.resign(y):1;
+    let amt=m*st.wage*f;
+    const capped=c.cap&&amt>c.cap*st.wage;
+    if(capped) amt=c.cap*st.wage;
+    return {amt,f,m,capped};};
   const calc=()=>{
     const bridged=st.policy==='always'||(st.policy==='if'&&st.gap<=st.lim);
     const counted=bridged?st.s1+st.s2:st.s2;
     const A=award(counted),B=award(st.s2),diff=A.amt-B.amt;
     const total=st.s1*12+st.gap+st.s2*12;
     const p1=st.s1*12/total*100,p2=(st.s1*12+st.gap)/total*100;
-    const how=(y,a)=>`${yr(y)} → ${a.m.toFixed(2)} months${st.exit==='resign'?' × '+(a.f===0?'0':a.f===1?'1':a.f<.5?'⅓':'⅔'):''}`;
+    const how=(y,a)=>a.short?`under ${CT[st.country].min} yr — no entitlement`:`${yr(y)} → ${a.m.toFixed(2)} months${st.exit==='resign'&&a.f!==1?' × '+(a.f===0?'0':a.f<.5?'⅓':'⅔'):''}${a.capped?' · capped':''}`;
     return {bridged,counted,A,B,diff,p1,p2,how};
   };
-  const LBL={s1:()=>'First stint · '+yr(st.s1),gap:()=>'Break between · '+st.gap+' months',s2:()=>'Second stint · '+yr(st.s2),wage:()=>'Final monthly wage · '+sar(st.wage),lim:()=>'Break limit · '+st.lim+' months'};
-  /* The output column is its own function so one drag can repaint just it. */
-  const outHTML=()=>{ const {bridged,counted,A,B,diff,p1,p2,how}=calc(); return `
+  const LBL={s1:()=>'First stint · '+yr(st.s1),gap:()=>'Break between · '+st.gap+' months',s2:()=>'Second stint · '+yr(st.s2),wage:()=>'Final monthly wage · '+money(st.wage),lim:()=>'Break limit · '+st.lim+' months'};
+  const outHTML=()=>{ const {bridged,counted,A,B,diff,p1,p2,how}=calc(); const c=CT[st.country]; return `
         <div class="stage"><div class="tl"><div class="tl-row"><div class="tl-line">
           <div class="tl-seg${bridged?'':' old'}" style="left:0;width:${p1}%"></div>
           <div class="tl-seg" style="left:${p2}%;width:${100-p2}%"></div>
@@ -570,38 +585,43 @@ LABS.push({id:'gratuity',ch:'gulf',title:'End-of-service, and the dates that dec
           <div class="tl-lbl" style="left:${(100+p2)/2}%;color:var(--p)">counted</div>
         </div></div></div></div>
         <div class="vs">
-          <div class="ok"><span class="lbl">What the policy owes</span><span class="amt">${sar(A.amt)}</span><span class="how">${how(counted,A)}</span></div>
-          <div class="no"><span class="lbl">If the clock restarts at rehire</span><span class="amt">${sar(B.amt)}</span><span class="how">${how(st.s2,B)}</span></div>
+          <div class="ok"><span class="lbl">What the policy owes</span><span class="amt">${money(A.amt)}</span><span class="how">${how(counted,A)}</span></div>
+          <div class="no"><span class="lbl">If the clock restarts at rehire</span><span class="amt">${money(B.amt)}</span><span class="how">${how(st.s2,B)}</span></div>
         </div>
-        <div class="msg ${bridged&&diff>0.5?'bad':'ok'}">${bridged?(diff>0.5?`<span><b>${sar(diff)} short.</b> The policy bridges the break, so a fresh service clock underpays her by ${(diff/(st.wage||1)).toFixed(1)} months’ wages — and nothing in payroll flags it, because both figures are arithmetically correct. The fix is a seniority date that means what the policy means, never a back-dated hire date.</span><div class="ar-line">التاريخ الجديد بيضيّع الخدمة القديمة، والفرق ده محدش هيلاحظه.</div>`:'<span>The policy bridges the break, but at these numbers both setups pay the same — the resignation scale can zero out short service. Lengthen the first stint to see them diverge.</span>'):`<span>Under this policy the earlier service does not count${st.policy==='if'?`, because the ${st.gap}-month break is longer than the ${st.lim}-month limit`:''}, so a fresh clock is the correct setup. Record the decision anyway: the next consultant will ask why.</span>`}</div>
+        <div class="msg ${st.country==='eg'?'warn':(bridged&&diff>0.5?'bad':'ok')}">${st.country==='eg'
+          ?`<span><b>Egypt pays no statutory gratuity.</b> ${c.base}</span><div class="ar-line">مفيش مكافأة نهاية خدمة قانونية في مصر — المعاش من التأمينات، والمخالصة فيها رصيد الإجازات وأي حاجة في العقد.</div>`
+          :(bridged?(diff>0.5?`<span><b>${money(diff)} short.</b> The policy bridges the break, so a fresh service clock underpays by ${(diff/(st.wage||1)).toFixed(1)} months of wage — and nothing in payroll flags it, because both figures are arithmetically correct. The fix is a seniority date that means what the policy means, never a back-dated hire date.</span><div class="ar-line">التاريخ الجديد بيضيّع الخدمة القديمة، والفرق ده محدش هيلاحظه.</div>`
+            :'<span>The policy bridges the break, but at these numbers both setups pay the same. Lengthen the first stint, or switch the exit to a resignation, to see them diverge.</span>')
+            :`<span>Under this policy the earlier service does not count${st.policy==='if'?`, because the ${st.gap}-month break is longer than the ${st.lim}-month limit`:''}, so a fresh clock is the correct setup. Record the decision anyway: the next consultant will ask why.</span>`)}</div>
+        <div class="explain small"><b>${c.n}.</b> ${c.base}</div>
         <div class="kv"><span>Enterprise hire date</span><b>unchanged — first day in the group</b></div>
         <div class="kv"><span>Legal employer start date</span><b>resets at the rehire</b></div>
         <div class="kv total"><span>Seniority date</span><b>${bridged?'moved back to cover the first stint':'same as the new start'}</b></div>
   `; };
   const draw=()=>{
-    b.innerHTML=`<div class="calc">
+    b.innerHTML=`<div class="stepper" style="margin-bottom:14px">${Object.keys(CT).map(k=>`<button class="${st.country===k?'active':''}" data-c="${k}">${CT[k].n}</button>`).join('')}</div>
+    <div class="calc">
       <div class="in">
-        <label>First stint · ${yr(st.s1)}</label><input type="range" data-n="s1" min="0.5" max="15" step="0.5" value="${st.s1}">
-        <label>Break between · ${st.gap} months</label><input type="range" data-n="gap" min="0" max="48" step="1" value="${st.gap}">
-        <label>Second stint · ${yr(st.s2)}</label><input type="range" data-n="s2" min="0.5" max="15" step="0.5" value="${st.s2}">
-        <label>Final monthly wage · ${sar(st.wage)}</label><input type="range" data-n="wage" min="3000" max="40000" step="500" value="${st.wage}">
+        <label>${LBL.s1()}</label><input type="range" data-n="s1" min="0.5" max="15" step="0.5" value="${st.s1}">
+        <label>${LBL.gap()}</label><input type="range" data-n="gap" min="0" max="48" step="1" value="${st.gap}">
+        <label>${LBL.s2()}</label><input type="range" data-n="s2" min="0.5" max="15" step="0.5" value="${st.s2}">
+        <label>${LBL.wage()}</label><input type="range" data-n="wage" min="3000" max="40000" step="500" value="${st.wage}">
         <label>Client policy on the earlier service</label>
         <select data-s="policy"><option value="fresh" ${st.policy==='fresh'?'selected':''}>Never counts</option><option value="if" ${st.policy==='if'?'selected':''}>Counts if the break is short enough</option><option value="always" ${st.policy==='always'?'selected':''}>Always counts</option></select>
-        ${st.policy==='if'?`<label>Break limit · ${st.lim} months</label><input type="range" data-n="lim" min="0" max="36" step="1" value="${st.lim}">`:''}
+        ${st.policy==='if'?`<label>${LBL.lim()}</label><input type="range" data-n="lim" min="0" max="36" step="1" value="${st.lim}">`:''}
         <label>How the second stint ends</label>
         <div class="stepper">${[['term','Terminated'],['resign','Resigns']].map(([v,l])=>`<button class="${st.exit===v?'active':''}" data-e="${v}">${l}</button>`).join('')}</div>
       </div>
-      <div class="out">
-${outHTML()}
-      </div></div>
-    <div class="callout"><b>A teaching model.</b> It follows the Saudi award — half a month’s wage for each of the first five years, one month for each year after, on the last wage — and the resignation scale of nothing under two years, a third from two to five, two thirds from five to ten, and the full award at ten. Check the current law and the client’s own contracts before quoting a real figure.</div>`;
+      <div class="out">${outHTML()}</div></div>
+    <div class="callout"><b>A teaching model.</b> Saudi figures follow Articles 84 and 85, the UAE follows Article 51, and Egypt has no statutory award — all checked in 2026 and all subject to the contract, which may be more generous than the statutory floor. Confirm against the current law before quoting a real number.</div>`;
     b.querySelectorAll('[data-n]').forEach(x=>x.addEventListener('input',()=>{ st[x.dataset.n]=+x.value;
       /* Repaint the label and the output column in place. Re-rendering the
          whole lab here would delete the slider the pointer is holding. */
       const lbl=x.previousElementSibling; if(lbl&&lbl.tagName==='LABEL'&&LBL[x.dataset.n]) lbl.textContent=LBL[x.dataset.n]();
       const out=b.querySelector('.out'); if(out) out.innerHTML=outHTML(); }));
     b.querySelectorAll('[data-s]').forEach(x=>x.addEventListener('change',()=>{st[x.dataset.s]=x.value;draw();}));
-    b.querySelectorAll('[data-e]').forEach(x=>x.addEventListener('click',()=>{st.exit=x.dataset.e;draw();}));};
+    b.querySelectorAll('[data-e]').forEach(x=>x.addEventListener('click',()=>{st.exit=x.dataset.e;draw();}));
+    b.querySelectorAll('[data-c]').forEach(x=>x.addEventListener('click',()=>{st.country=x.dataset.c;draw();}));};
   draw();
 }});
 

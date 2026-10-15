@@ -143,6 +143,7 @@ const MAPS = {
       ${node('dating','wide')}
       <div class="layer-lbl">Money &amp; time — what the model feeds</div>${node('payroll')}${node('absence')}${node('lifecycle')}
       <div class="layer-lbl">Law — the rules configured per country</div>${node('egypt-payroll')}${node('egypt-leave')}${node('gulf')}${node('uae','full')}
+      <div class="layer-lbl">The rest of the suite — enough to follow the conversation</div>${node('modules','full')}
       <div class="layer-lbl">Delivery — how the project is run</div>${node('method','full')}
     </div></div>
     ${sec('technical','Technical','What the consultant builds with: loading data in bulk, writing the calculation logic, getting information back out, extending without customizing, and controlling who sees what.')}

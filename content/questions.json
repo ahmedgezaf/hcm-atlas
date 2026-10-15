@@ -1035,5 +1035,102 @@
       "point-in-time-snapshot",
       "as-of-date-join"
     ]
+  },
+  {
+    "chapter": "security",
+    "question": "An HR specialist can open the person search and it returns nobody. Walk me through what you check.",
+    "answer": "Separate function from data first: the page opened, so the role is fine and this is scope. Then four things in order — does the user actually hold the data role or AOR you think they do, not just the job role; does its security profile cover that population, remembering a department-scoped profile misses anyone whose department just changed; is the underlying hierarchy true, because a line manager sees nothing when the manager relationship is missing; and has LDAP synchronization run since the change. Nine times out of ten it is one of those, and none of them needs a technical colleague.",
+    "terms": [
+      "data-role-and-security-profile",
+      "area-of-responsibility-aor",
+      "ldap-synchronization"
+    ]
+  },
+  {
+    "chapter": "security",
+    "question": "A client wants a custom role based on a delivered one. How do you do it, and what must you not do?",
+    "answer": "Copy it in the Security Console and edit the copy. Delivered roles must not be edited: Oracle owns them and a quarterly update overwrites the change, so the customisation disappears without anyone connecting the two events. While there, the role hierarchy view answers why a user can do something, and the simulation view confirms the result against a named user before you tell the client it is done.",
+    "terms": [
+      "security-console",
+      "job-role",
+      "quarterly-update-26a-26d"
+    ]
+  },
+  {
+    "chapter": "security",
+    "question": "How does a role actually get to a new hire?",
+    "answer": "Through a role provisioning rule, in the normal case: a condition on the record — legal employer, business unit, job, worker type — grants the role when the record is created and removes it when the condition stops being true. Manual provisioning exists for exceptions and becomes a problem as a habit, because manually assigned roles are invisible to the rules and survive transfers. After changing a rule, run Autoprovision Roles for All Users rather than waiting for each person's next transaction.",
+    "terms": [
+      "role-provisioning-rule",
+      "abstract-role",
+      "ldap-synchronization"
+    ]
+  },
+  {
+    "chapter": "modules",
+    "question": "An interviewer asks which Oracle HCM modules you have worked with. How do you answer?",
+    "answer": "Name the ones you have configured — core HR, absence, payroll — and then show you know where they touch the rest: that Recruiting's accepted offer creates the work relationship, that Benefits enrolments become element entries payroll deducts, that Compensation writes the salary record payroll reads, and that succession depends on positions. Claiming module experience from vocabulary is the one thing that ends the conversation, because the second question settles it.",
+    "terms": [
+      "requisition-and-job-offer",
+      "benefits-enrolment",
+      "compensation-plan"
+    ]
+  },
+  {
+    "chapter": "modules",
+    "question": "What does core HR owe Recruiting, and what does Recruiting write back?",
+    "answer": "Core HR owes it the structures to choose from — legal employers, business units, jobs, grades, departments, locations — so a requisition can only be raised against things that exist. Recruiting writes back the person and the first version of nearly every attribute on them, at the moment an accepted offer becomes a pending worker or an employee. That is why data quality in a requisition is data quality in your employment record, and why the national identifier belongs in the recruiting process in Egypt rather than in a chase afterwards.",
+    "terms": [
+      "requisition-and-job-offer",
+      "worker-types",
+      "person"
+    ]
+  },
+  {
+    "chapter": "method",
+    "question": "What is a conference room pilot for, and what makes one useful rather than theatre?",
+    "answer": "It shows the configured system to the client with their own data and their own scenarios, because nobody can validate a design from a document. What makes it useful is that the data is real: a payslip for someone they recognise, a leave request against their own policy. Demonstrating with fabricated data produces nodding in the room and a flood of changes in user acceptance testing, which is the expensive place to discover that the design was never understood.",
+    "terms": [
+      "crp-conference-room-pilot",
+      "uat-user-acceptance-testing"
+    ]
+  },
+  {
+    "chapter": "method",
+    "question": "What belongs in a RAID log, and why does it matter to a functional consultant?",
+    "answer": "Risks, assumptions, issues and dependencies — the things that are not work items but will decide whether the work lands. It matters because a consultant's unspoken assumptions are usually the project's real risk: that the client will supply clean national identifiers, that Finance will finish the cost centres before payroll testing, that legal will confirm the notice period. Written down, those become somebody's action with a date. Unwritten, they become the reason a go-live slips.",
+    "terms": [
+      "raid-log",
+      "reconciliation"
+    ]
+  },
+  {
+    "chapter": "dating",
+    "question": "A salary correction was entered as an update and it should have been a correction. What actually went wrong, and what do you do?",
+    "answer": "An update creates a new dated record and keeps the old one, so the system now believes the wrong salary was genuinely true for that period — and anything that reads history, including retroactive payroll, will act on it. A correction overwrites, as though the wrong value was never true. The fix is to correct the erroneous record rather than add another update on top, and then check whether a payroll run already picked up the bad period, because the retro process may need to re-state it.",
+    "terms": [
+      "update-vs-correction",
+      "retroactive-change-retro",
+      "effective-date"
+    ]
+  },
+  {
+    "chapter": "gulf",
+    "question": "A Saudi client asks why their GOSI file and their payroll disagree on basic salary.",
+    "answer": "Because the same figure is held in three places that must match: the Qiwa contract, the GOSI registration and the payroll record. When someone updates one — a raise entered in payroll, a contract reissued on Qiwa — and not the others, the filings disagree and the mismatch surfaces as a rejection or an audit finding rather than as a payroll error. The design answer is to decide which system is the source of truth for basic salary and to make the others follow it deliberately.",
+    "terms": [
+      "gosi",
+      "qiwa",
+      "salary-record"
+    ]
+  },
+  {
+    "chapter": "uae",
+    "question": "How does the UAE gratuity differ from the Saudi award, in a sentence a client would understand?",
+    "answer": "Four ways. The UAE accrues 21 days of basic wage a year for the first five years and 30 after, where Saudi accrues half a month and then a full month of the last wage. The UAE caps the total at two years of wage; Saudi does not. The UAE pays in full from one year of service; Saudi reduces it on resignation below ten years. And the UAE base is basic wage, so the salary component split decides the liability. An element built for one country is wrong in the other in at least three places.",
+    "terms": [
+      "end-of-service-benefit-eosb-gratuity",
+      "salary-component"
+    ]
   }
 ]

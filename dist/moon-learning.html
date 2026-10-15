@@ -1074,6 +1074,8 @@ When something is wrong, three corrections do different things. **Mark for retry
 
 Where the cost lands is the other half of finishing a cycle. Costing allocates results to accounting segments through the cost allocation flexfield, with values held at several levels — the payroll, the department, the element eligibility — and the most specific one winning. The results then move to the general ledger through Transfer to Subledger Accounting and Create Accounting, which is the point at which Finance sees payroll at all. A costing design that is merely plausible produces a month-end reconciliation that nobody can explain, which is why the finance consultant belongs in that conversation from the start rather than at the end.
 
+[[fig:payroll-chain]]
+
 [[lab:payroll]]
 
 The failures worth rehearsing are the quiet ones. A person not assigned to a payroll is skipped by the run without an error. A salary basis that says monthly while the annual figure was loaded against it pays twelve times the intended salary, and the run reports nothing, because it calculated exactly what it was given. A deduction classified as an earning is added to gross instead of taken off it. None of these produce a failure message; all of them produce a payslip.
@@ -1729,6 +1731,8 @@ That creates a job family coded SALES, effective from 1 January 2000. The end da
 
 Those are two separate inspections, and knowing which one rejected a file tells you where to look. **Import** reads the file and checks its shape — pipe counts, attribute spelling, date format — and puts well-formed lines into staging tables, which are a holding area rather than HR data. **Load** then assembles staged lines into whole business objects and checks what they mean: does the job exist, is the grade valid on that date, does the parent this record points at exist? A file that fails import has a formatting problem and has written nothing anywhere. A file that passes import and fails load is well-formed and refers to something that is not there yet, which is almost always a load-order problem.
 
+[[fig:import-vs-load]]
+
 [[lab:import-load]]
 
 ## The rules that get files rejected
@@ -1992,12 +1996,12 @@ track: technical
 title: The Security Model
 subtitle: What you can do versus whose data you can see
 hue: 300
-minutes: 6
+minutes: 11
 labs: security
-terms: job-role, abstract-role, duty-role, data-role-and-security-profile, area-of-responsibility-aor
+terms: job-role, abstract-role, duty-role, data-role-and-security-profile, area-of-responsibility-aor, role-provisioning-rule, security-console, ldap-synchronization
 ---
 
-Security determines who can see and do what. A consultant needs conceptual fluency rather than deep architecture skill, but the vocabulary appears in almost every requirements workshop, and one distinction carries most of it: function versus data scope.
+Security determines who can see and do what. A consultant needs conceptual fluency rather than deep architecture skill, but the vocabulary appears in almost every requirements workshop, and one distinction carries most of it: function versus data scope. The second half of this chapter is the part that earns its keep on a live project — how a role actually reaches a user, and what to check when someone opens a page and finds it empty.
 
 ## Role types
 
@@ -2007,22 +2011,54 @@ Oracle's documentation defines five role types. A **job role** represents the sp
 
 Where a job role says what a user can do, a **security profile** says which records they can do it to. Profiles scope data by person, organization, position, legislative data group, payroll and other criteria. A **data role** combines a job role with the security profiles that define its scope — Oracle's example is "Country Human Resource Specialist": the HR specialist job plus a country's data. An HR specialist in Egypt and one in Saudi Arabia hold the same job role and see the same screens; their security profiles differ, so neither sees the other country's records. Same function, different scope.
 
+[[fig:function-vs-data]]
+
 ## Areas of responsibility
 
-An **area of responsibility (AOR)** assigns responsibility for a defined population — "this HR representative is responsible for the Alexandria plant" — and is used to drive both access and routing without building a custom role for every combination. It is increasingly the preferred mechanism for scoping HR representative access.
+An **area of responsibility (AOR)** assigns responsibility for a defined population — "this HR representative is responsible for the Alexandria plant" — and is used to drive both access and routing without building a custom role for every combination. It is increasingly the preferred mechanism for scoping HR representative access, and it is what stops a client with thirty departments acquiring thirty data roles that each have to be maintained separately.
 
 [[lab:security]]
+
+## How a role actually reaches a user
+
+None of the above matters until a role is provisioned, and that happens in one of three ways. Knowing which one a client uses is the difference between a five-minute fix and an afternoon.
+
+**Automatic provisioning** is the normal path. A **role provisioning rule** maps a role to a condition on the worker's record — legal employer, business unit, job, grade, department, worker type, assignment status — so a new hire in that population receives the role when the record is created and loses it when the condition stops being true. A rule is why the Employee abstract role appears on every hire without anyone doing anything.
+
+**Manual provisioning** assigns a role to one named person. It is right for genuine exceptions and corrosive as a habit: manually assigned roles are invisible to the rules, survive transfers, and accumulate until an audit finds them.
+
+**Role delegation** lets a user hand their access to someone else for a defined period — the HR manager covering for a colleague on leave. It is time-bound by design, which is the whole point of it.
+
+Two scheduled processes sit underneath all of this. *Autoprovision Roles for All Users* re-evaluates the rules across the population, which is what to run after changing a rule rather than waiting for each person's next transaction. And **LDAP synchronization** — *Retrieve Latest LDAP Changes* and *Send Pending LDAP Requests* — moves account and role changes between HCM and the identity store. A role that is configured correctly and still has not appeared is very often waiting on one of those two jobs.
+
+## The Security Console
+
+The **Security Console** is where roles are built, copied and inspected, and three things in it are worth knowing by name. Copying a delivered role is the supported way to create a custom one, because Oracle's own roles must not be edited and an edit is overwritten by a quarterly update (Chapter 14). The role hierarchy view shows what a role actually contains, several levels down, which answers "why can this user do that?" without guessing. And the simulation view shows what a named user can see and do, which is the fastest way to confirm a change before telling a client it is done.
+
+## When somebody cannot see what they should
+
+This is the most common security ticket on a live system, and it has an order worth working through rather than jumping around in.
+
+Start by separating the two questions. If the page does not open at all, it is a function problem: the user lacks the role, or the role lacks the privilege. If the page opens and is empty, it is a data problem, and the role is almost certainly fine.
+
+For a data problem, check four things in this order. Does the user hold the data role or AOR you think they do — the data role, not the job role. Does its security profile actually cover that population: a profile scoped by department does not cover someone whose department changed last week. Is the underlying hierarchy true: a line manager sees nothing when the manager relationship on the assignment is missing, which is a data error wearing a security costume. And has LDAP synchronization run since the change.
+
+Nine times out of ten the answer is in that list, and all four are things a functional consultant can check without a technical colleague — which is exactly why the chapter is worth knowing at this depth.
 
 ## Common mistakes
 
 - Answering a data-visibility question with a job role.
 - Assigning duty roles to users. They are components, not assignments.
 - Building one custom role per department when an AOR would do.
+- Editing a delivered role instead of copying it, and losing the change in a quarterly update.
+- Provisioning roles by hand until nobody can say why a user holds what they hold.
+- Reporting a security change as done before LDAP synchronization has run.
 
 ## Sources
 
-- Oracle, *Securing HCM* — "Which are the role types in HCM Cloud?". https://docs.oracle.com/en/cloud/saas/human-resources/faqas/which-are-the-role-types-in-hcm-cloud.html
-- Oracle, *Securing HCM* — the "HCM Data Roles and Security Profiles" chapter. https://docs.oracle.com/en/cloud/saas/human-resources/ochus/index.html
+- Oracle, *Securing HCM* — the role types, security profiles, data roles and the role-provisioning chapters. https://docs.oracle.com/en/cloud/saas/human-resources/ochus/index.html
+- Oracle, *Securing HCM Questions and Answers* — "Which are the role types in HCM Cloud?". https://docs.oracle.com/en/cloud/saas/human-resources/faqas/which-are-the-role-types-in-hcm-cloud.html
+- Oracle, *Using Common Features for HCM* — the Security Console, copying a delivered role, and the simulation view. https://docs.oracle.com/en/cloud/saas/human-resources/faucf/index.html
 </script>
 
 <script type="text/markdown" class="src-chapter">
@@ -2169,7 +2205,7 @@ title: The UAE
 subtitle: A second Gulf country that configures nothing like the first
 hue: 118
 minutes: 10
-labs: 
+labs: gratuity
 terms: mohre, uae-fixed-term-contract, gpssa, alternative-end-of-service-savings-scheme, emiratisation-and-nafis
 ---
 
@@ -2188,6 +2224,8 @@ That is a configuration statement, not a legal footnote. Contract end dates beco
 The end-of-service gratuity under Article 51 is **21 days of basic wage for each of the first five years of service, and 30 days for each year after that**, payable to anyone with at least one year of continuous service and capped at two years' total wage. Unpaid absence does not count toward service, and the settlement falls due within fourteen days of the contract ending.
 
 Three of those details differ from Saudi Arabia in ways that change the calculation, not just the number. The UAE accrues on **basic wage**, where the Saudi award in Chapter 17 is computed on the last wage as defined by that law — so the component split of the salary (Chapter 5) decides the UAE liability directly. The UAE applies a **cap** of two years' pay, which Saudi Arabia does not. And the UAE pays the full award on resignation after one year, where the Saudi scale reduces it below ten years of service. An EOSB element built for one country and reused in the other is wrong in at least three places.
+
+[[lab:gratuity]]
 
 Since 2023 employers may also join a voluntary **alternative end-of-service savings scheme**, paying monthly contributions into a regulated fund instead of accruing a lump sum on their own books. Where a client has joined it, the payroll design changes shape entirely: a monthly contribution element replaces an accrual and liability calculation, and the final settlement no longer carries the gratuity at all. Ask which model the client is on before designing either.
 
@@ -2302,6 +2340,87 @@ An approval path cannot be tested by the person who configured it, because the o
 
 - Oracle, *Implementing Global Human Resources* — the approvals chapters, covering the Manage Approval Transactions for HCM task, approver types and rule conditions. https://docs.oracle.com/en/cloud/saas/human-resources/faigh/index.html
 - Oracle, *Using Common Features for HCM* — the Transaction Console, and what withdrawing or forcing a transaction does. https://docs.oracle.com/en/cloud/saas/human-resources/faucf/index.html
+</script>
+
+<script type="text/markdown" class="src-chapter">
+---
+id: modules
+num: 20
+domain: hcm
+track: functional
+title: The Modules Next Door
+subtitle: Enough of the rest of the suite to follow the conversation
+hue: 170
+minutes: 8
+labs: 
+terms: requisition-and-job-offer, onboarding-journey, compensation-plan, benefits-enrolment, goal-and-performance-document, talent-review-and-succession
+---
+
+This atlas teaches three modules: core HR, absence and payroll. They are what a junior functional consultant in Egypt is hired to do, and depth in them is worth more than breadth across the suite. But a client's HR director will list Recruiting, Benefits and Goals in the same sentence as payroll, a screening call will ask which modules you have worked with, and a workshop will reach a point where somebody says "that comes from Recruiting" and the room moves on.
+
+This chapter is vocabulary and seams, not depth. The aim is to follow the conversation, know what to ask, and know where the handover sits — and to say plainly, when asked, that you have not configured these. Claiming otherwise is the one thing that ends an interview badly.
+
+## Recruiting
+
+Oracle Recruiting Cloud handles hiring up to the point someone becomes an employee. The words in the room are **requisition** (the approved vacancy), candidate, and **job offer** — and offers have their own approval rules, separate from the HR approvals in Chapter 19, because an offer is a commercial commitment rather than a record change.
+
+The seam matters more than the module. When an offer is accepted, the candidate becomes a **pending worker** or an employee, and that act creates the work relationship and assignment of Chapter 3 — so the data quality in a requisition becomes the data quality in your core HR record. Job, grade, department, legal employer and start date are all chosen in Recruiting by people who are not thinking about payroll. In Egypt this is where the national identifier should be captured, because the alternative is chasing it after the hire.
+
+What Core HR owes Recruiting: the structures to pick from. What Recruiting writes back: the person, and the first version of almost every attribute.
+
+## Onboarding
+
+Onboarding is the checklist between offer and first day, delivered as a **journey** — the task-list feature introduced in Chapter 14. Tasks can be assigned to the new hire, the manager, IT and HR, with due dates relative to the start date.
+
+The seam is the pending worker: the record exists before day one so documents can be collected, equipment ordered and accounts created, and it converts to an employee on the start date. Egyptian onboarding usually has a statutory tail — the social-insurance registration and the labour-office file of Chapter 9 — which is a good use of a journey precisely because it is a checklist somebody currently keeps on paper.
+
+## Compensation
+
+Oracle Compensation covers how pay changes, as distinct from how it is paid. The vocabulary: **compensation plan**, the annual cycle or off-cycle event; budgets pushed down a management hierarchy; eligibility; worksheets that managers complete; and approvals before anything reaches the record.
+
+The seam is the salary record of Chapter 5. A compensation cycle writes salary, and payroll reads it — which is why a client who runs annual increases in a spreadsheet and loads the results is doing with HDL what this module exists to do. Worth knowing when the question is whether to buy it.
+
+## Benefits
+
+Benefits manages plans people enrol in: medical cover, life insurance, allowances structured as plans. The vocabulary: plan, option, **enrolment**, life events — the triggers (new hire, marriage, a new child) that open an enrolment window.
+
+The seam is payroll. An enrolment produces an element entry for the employee contribution and often an employer cost, so the plan design decides what appears on the payslip. In Egypt private medical cover sits alongside the statutory universal health insurance of Chapter 9 rather than replacing it, and clients routinely conflate the two in a workshop.
+
+## Performance and goals
+
+Performance manages the review cycle through a **performance document** — a template, a period, a set of competencies and ratings, and a workflow between worker and manager. Goals manages objectives, aligned up a hierarchy and often cascaded.
+
+The seam into core HR is thinner than people expect: ratings mostly stay in the module, feeding compensation and talent rather than the employment record. The connection worth naming is the review period against the probation period of Chapter 8 — clients frequently want the probation decision to come out of a performance document.
+
+## Talent review and succession
+
+Talent management covers the review meeting itself — the nine-box grid of performance against potential — and **succession plans** that name candidates for critical positions.
+
+The seam is positions, from Chapter 2. Succession is one of the few genuine arguments for managing by position rather than by job, because a succession plan is a plan for a seat. A client who wants succession and has no positions is asking for two things.
+
+## Learning
+
+Oracle Learning delivers and tracks courses: catalogue, learning item, assignment, completion. The seam is compliance — mandatory training with a completion deadline, which in practice means a report that proves it, and sometimes a journey task that will not close until the course is done.
+
+## What a junior is most likely to be put on next
+
+In Egypt and the Gulf, after core HR, absence and payroll, the usual next step is Recruiting or Benefits — Recruiting because almost every client buys it and it touches the hire, Benefits because medical cover is close to payroll and the questions arrive through the payroll team anyway. Compensation tends to follow once the core is stable, and Learning and Talent are often a later phase or never.
+
+The honest version of this chapter in an interview is one sentence: these are the modules, this is where each one touches what I have built, and I have not configured them.
+
+## Common mistakes
+
+- Claiming module experience from vocabulary. An interviewer's second question settles it.
+- Treating offer approvals as the same rule set as HR approvals.
+- Designing core HR without asking what Recruiting will write into it.
+- Letting a benefits plan be designed without payroll in the room, then discovering the element.
+- Promising succession planning to a client who manages by job and has no positions.
+- Assuming private medical cover replaces Egypt's statutory health insurance.
+
+## Sources
+
+- Oracle, *Oracle Fusion Cloud HCM* documentation library — the module guides named in this chapter. https://docs.oracle.com/en/cloud/saas/human-resources/index.html
+- Oracle, *Implementing Global Human Resources* — pending workers, and the point at which a candidate becomes a worker. https://docs.oracle.com/en/cloud/saas/human-resources/faigh/index.html
 </script>
 
 <!-- ========================================================================
@@ -4076,6 +4195,87 @@ An approval path cannot be tested by the person who configured it, because the o
     "chapter": "people-data",
     "definition": "What one row means in a people dataset: which person, in which version, valid on which date — and whether the question counts humans or workload.",
     "watchOut": "A person with two concurrent assignments is one human and two current rows; no date filter collapses that."
+  },
+  {
+    "id": "role-provisioning-rule",
+    "name": "Role provisioning rule",
+    "chapter": "security",
+    "definition": "A rule that grants a role automatically to everyone matching a condition on the worker's record — legal employer, business unit, job, grade, worker type — and removes it when the condition stops being true.",
+    "watchOut": "After changing a rule, run Autoprovision Roles for All Users; otherwise each person picks it up only at their next transaction.",
+    "ar": "قواعد منح الأدوار",
+    "say": "الـ role provisioning"
+  },
+  {
+    "id": "security-console",
+    "name": "Security Console",
+    "chapter": "security",
+    "definition": "Where roles are built, copied and inspected: the role hierarchy view shows what a role contains, and the simulation view shows what a named user can see and do.",
+    "watchOut": "Copy a delivered role rather than editing it — an edited Oracle role is overwritten by a quarterly update.",
+    "ar": "وحدة إدارة الصلاحيات",
+    "say": "الـ security console"
+  },
+  {
+    "id": "ldap-synchronization",
+    "name": "LDAP synchronization",
+    "chapter": "security",
+    "definition": "The scheduled processes that move account and role changes between HCM and the identity store — Retrieve Latest LDAP Changes and Send Pending LDAP Requests.",
+    "watchOut": "A role that is configured correctly and still has not appeared is usually waiting on one of these.",
+    "ar": "مزامنة الحسابات",
+    "say": "الـ LDAP sync"
+  },
+  {
+    "id": "requisition-and-job-offer",
+    "name": "Requisition and job offer",
+    "chapter": "modules",
+    "definition": "The approved vacancy a candidate applies to, and the offer that, once accepted, creates the work relationship and assignment in core HR.",
+    "watchOut": "Offer approvals are a separate rule set from HR approvals, and the data chosen in Recruiting becomes your core HR data.",
+    "ar": "طلب التوظيف وعرض العمل",
+    "say": "الـ requisition والـ offer"
+  },
+  {
+    "id": "onboarding-journey",
+    "name": "Onboarding journey",
+    "chapter": "modules",
+    "definition": "The task list between offer and first day, assigned across the new hire, the manager, IT and HR with dates relative to the start date.",
+    "watchOut": "In Egypt the statutory tail — insurance registration and the labour-office file — is exactly what belongs in it.",
+    "ar": "رحلة الانضمام",
+    "say": "إجراءات التعيين"
+  },
+  {
+    "id": "compensation-plan",
+    "name": "Compensation plan",
+    "chapter": "modules",
+    "definition": "The cycle or off-cycle event through which pay changes are budgeted, worked by managers and approved, writing the result to the salary record payroll reads.",
+    "watchOut": "A client running increases in a spreadsheet and loading them is doing by hand what this module exists to do.",
+    "ar": "خطة التعويضات",
+    "say": "دورة الزيادات"
+  },
+  {
+    "id": "benefits-enrolment",
+    "name": "Benefits enrolment",
+    "chapter": "modules",
+    "definition": "A worker's election into a plan — medical cover, life insurance — opened by a life event and producing the element entries payroll deducts and costs.",
+    "watchOut": "Private medical cover sits alongside Egypt's statutory health insurance rather than replacing it.",
+    "ar": "الاشتراك في المزايا",
+    "say": "التأمين الطبي"
+  },
+  {
+    "id": "goal-and-performance-document",
+    "name": "Goal and performance document",
+    "chapter": "modules",
+    "definition": "The objects behind the review cycle: aligned objectives, and a document carrying the period, competencies, ratings and the workflow between worker and manager.",
+    "watchOut": "Ratings mostly stay in the module; the connection worth naming is the review period against probation.",
+    "ar": "الأهداف وتقييم الأداء",
+    "say": "التقييم"
+  },
+  {
+    "id": "talent-review-and-succession",
+    "name": "Talent review and succession",
+    "chapter": "modules",
+    "definition": "The review meeting — performance against potential — and plans naming candidates for critical positions.",
+    "watchOut": "A succession plan is a plan for a seat, so a client who wants succession and manages by job is asking for two things.",
+    "ar": "مراجعة المواهب والإحلال",
+    "say": "الإحلال الوظيفي"
   }
 ]
 </script>
@@ -5121,6 +5321,103 @@ An approval path cannot be tested by the person who configured it, because the o
     "terms": [
       "point-in-time-snapshot",
       "as-of-date-join"
+    ]
+  },
+  {
+    "chapter": "security",
+    "question": "An HR specialist can open the person search and it returns nobody. Walk me through what you check.",
+    "answer": "Separate function from data first: the page opened, so the role is fine and this is scope. Then four things in order — does the user actually hold the data role or AOR you think they do, not just the job role; does its security profile cover that population, remembering a department-scoped profile misses anyone whose department just changed; is the underlying hierarchy true, because a line manager sees nothing when the manager relationship is missing; and has LDAP synchronization run since the change. Nine times out of ten it is one of those, and none of them needs a technical colleague.",
+    "terms": [
+      "data-role-and-security-profile",
+      "area-of-responsibility-aor",
+      "ldap-synchronization"
+    ]
+  },
+  {
+    "chapter": "security",
+    "question": "A client wants a custom role based on a delivered one. How do you do it, and what must you not do?",
+    "answer": "Copy it in the Security Console and edit the copy. Delivered roles must not be edited: Oracle owns them and a quarterly update overwrites the change, so the customisation disappears without anyone connecting the two events. While there, the role hierarchy view answers why a user can do something, and the simulation view confirms the result against a named user before you tell the client it is done.",
+    "terms": [
+      "security-console",
+      "job-role",
+      "quarterly-update-26a-26d"
+    ]
+  },
+  {
+    "chapter": "security",
+    "question": "How does a role actually get to a new hire?",
+    "answer": "Through a role provisioning rule, in the normal case: a condition on the record — legal employer, business unit, job, worker type — grants the role when the record is created and removes it when the condition stops being true. Manual provisioning exists for exceptions and becomes a problem as a habit, because manually assigned roles are invisible to the rules and survive transfers. After changing a rule, run Autoprovision Roles for All Users rather than waiting for each person's next transaction.",
+    "terms": [
+      "role-provisioning-rule",
+      "abstract-role",
+      "ldap-synchronization"
+    ]
+  },
+  {
+    "chapter": "modules",
+    "question": "An interviewer asks which Oracle HCM modules you have worked with. How do you answer?",
+    "answer": "Name the ones you have configured — core HR, absence, payroll — and then show you know where they touch the rest: that Recruiting's accepted offer creates the work relationship, that Benefits enrolments become element entries payroll deducts, that Compensation writes the salary record payroll reads, and that succession depends on positions. Claiming module experience from vocabulary is the one thing that ends the conversation, because the second question settles it.",
+    "terms": [
+      "requisition-and-job-offer",
+      "benefits-enrolment",
+      "compensation-plan"
+    ]
+  },
+  {
+    "chapter": "modules",
+    "question": "What does core HR owe Recruiting, and what does Recruiting write back?",
+    "answer": "Core HR owes it the structures to choose from — legal employers, business units, jobs, grades, departments, locations — so a requisition can only be raised against things that exist. Recruiting writes back the person and the first version of nearly every attribute on them, at the moment an accepted offer becomes a pending worker or an employee. That is why data quality in a requisition is data quality in your employment record, and why the national identifier belongs in the recruiting process in Egypt rather than in a chase afterwards.",
+    "terms": [
+      "requisition-and-job-offer",
+      "worker-types",
+      "person"
+    ]
+  },
+  {
+    "chapter": "method",
+    "question": "What is a conference room pilot for, and what makes one useful rather than theatre?",
+    "answer": "It shows the configured system to the client with their own data and their own scenarios, because nobody can validate a design from a document. What makes it useful is that the data is real: a payslip for someone they recognise, a leave request against their own policy. Demonstrating with fabricated data produces nodding in the room and a flood of changes in user acceptance testing, which is the expensive place to discover that the design was never understood.",
+    "terms": [
+      "crp-conference-room-pilot",
+      "uat-user-acceptance-testing"
+    ]
+  },
+  {
+    "chapter": "method",
+    "question": "What belongs in a RAID log, and why does it matter to a functional consultant?",
+    "answer": "Risks, assumptions, issues and dependencies — the things that are not work items but will decide whether the work lands. It matters because a consultant's unspoken assumptions are usually the project's real risk: that the client will supply clean national identifiers, that Finance will finish the cost centres before payroll testing, that legal will confirm the notice period. Written down, those become somebody's action with a date. Unwritten, they become the reason a go-live slips.",
+    "terms": [
+      "raid-log",
+      "reconciliation"
+    ]
+  },
+  {
+    "chapter": "dating",
+    "question": "A salary correction was entered as an update and it should have been a correction. What actually went wrong, and what do you do?",
+    "answer": "An update creates a new dated record and keeps the old one, so the system now believes the wrong salary was genuinely true for that period — and anything that reads history, including retroactive payroll, will act on it. A correction overwrites, as though the wrong value was never true. The fix is to correct the erroneous record rather than add another update on top, and then check whether a payroll run already picked up the bad period, because the retro process may need to re-state it.",
+    "terms": [
+      "update-vs-correction",
+      "retroactive-change-retro",
+      "effective-date"
+    ]
+  },
+  {
+    "chapter": "gulf",
+    "question": "A Saudi client asks why their GOSI file and their payroll disagree on basic salary.",
+    "answer": "Because the same figure is held in three places that must match: the Qiwa contract, the GOSI registration and the payroll record. When someone updates one — a raise entered in payroll, a contract reissued on Qiwa — and not the others, the filings disagree and the mismatch surfaces as a rejection or an audit finding rather than as a payroll error. The design answer is to decide which system is the source of truth for basic salary and to make the others follow it deliberately.",
+    "terms": [
+      "gosi",
+      "qiwa",
+      "salary-record"
+    ]
+  },
+  {
+    "chapter": "uae",
+    "question": "How does the UAE gratuity differ from the Saudi award, in a sentence a client would understand?",
+    "answer": "Four ways. The UAE accrues 21 days of basic wage a year for the first five years and 30 after, where Saudi accrues half a month and then a full month of the last wage. The UAE caps the total at two years of wage; Saudi does not. The UAE pays in full from one year of service; Saudi reduces it on resignation below ten years. And the UAE base is basic wage, so the salary component split decides the liability. An element built for one country is wrong in the other in at least three places.",
+    "terms": [
+      "end-of-service-benefit-eosb-gratuity",
+      "salary-component"
     ]
   }
 ]
@@ -6359,6 +6656,7 @@ const MAPS = {
       ${node('dating','wide')}
       <div class="layer-lbl">Money &amp; time — what the model feeds</div>${node('payroll')}${node('absence')}${node('lifecycle')}
       <div class="layer-lbl">Law — the rules configured per country</div>${node('egypt-payroll')}${node('egypt-leave')}${node('gulf')}${node('uae','full')}
+      <div class="layer-lbl">The rest of the suite — enough to follow the conversation</div>${node('modules','full')}
       <div class="layer-lbl">Delivery — how the project is run</div>${node('method','full')}
     </div></div>
     ${sec('technical','Technical','What the consultant builds with: loading data in bulk, writing the calculation logic, getting information back out, extending without customizing, and controlling who sees what.')}
@@ -7054,26 +7352,41 @@ LABS.push({id:'parallel-run',ch:'payroll',title:'Reconciling a parallel run',lea
   draw();
 }});
 
-/* Lab 25: end-of-service, and the dates that decide it */
-LABS.push({id:'gratuity',ch:'gulf',title:'End-of-service, and the dates that decide it',lead:'Two stints with a break between them, and one question: does the earlier service count? The policy answer is expressed through a seniority date. Move the sliders — the left figure is what the client’s policy owes, the right is what a fresh service clock at rehire would pay.',render(b){
-  let st={s1:4,gap:12,s2:5,wage:10000,policy:'if',lim:24,exit:'term'};
-  const sar=n=>Math.round(n).toLocaleString('en-US')+' SAR';
+/* Lab 25: end-of-service across the three countries */
+LABS.push({id:'gratuity',ch:'gulf',title:'End-of-service, and the dates that decide it',lead:'The same worker, the same two stints with a break between them, under three statutory regimes. Switch the country to see how much of the answer is the formula and how much is the service the configuration decided to count.',render(b){
+  let st={country:'sa',s1:4,gap:12,s2:5,wage:10000,policy:'if',lim:24,exit:'term'};
+  /* Each country's award in months of wage, its qualifying service and its cap.
+     Figures checked 2026 — Saudi Articles 84 and 85, UAE Article 51, and Egypt,
+     which has no statutory end-of-service award at all. */
+  const CT={
+    sa:{n:'Saudi Arabia',cur:'SAR',months:y=>Math.min(y,5)*0.5+Math.max(y-5,0),min:0,cap:0,
+        resign:y=>y<2?0:y<=5?1/3:y<10?2/3:1,
+        base:'Half a month of the last wage for each of the first five years, a full month for each year after, with no cap. Resignation reduces it: nothing under two years, a third to five, two thirds to ten, the full award beyond.'},
+    ae:{n:'UAE',cur:'AED',months:y=>Math.min(y,5)*0.7+Math.max(y-5,0),min:1,cap:24,
+        resign:()=>1,
+        base:'Twenty-one days of basic wage for each of the first five years and thirty days for each year after — 0.7 and 1.0 months — payable in full from one year of service and capped at two years of wage. Resignation does not reduce it.'},
+    eg:{n:'Egypt',cur:'EGP',months:()=>0,min:0,cap:0,resign:()=>1,
+        base:'There is no statutory end-of-service award in Egypt. The provision is the state social-insurance pension, and the final settlement is unused annual leave, any notice paid in lieu, and whatever the contract or company policy adds — which is a configuration question with no statutory floor to fall back on.'}};
+  const money=n=>Math.round(n).toLocaleString('en-US')+' '+CT[st.country].cur;
   const yr=y=>(Number.isInteger(y)?y:y.toFixed(1))+' yr';
-  const months=y=>Math.min(y,5)*0.5+Math.max(y-5,0);
-  const resign=y=>y<2?0:y<=5?1/3:y<10?2/3:1;
-  const award=y=>{const base=months(y)*st.wage;const f=st.exit==='resign'?resign(y):1;return{amt:base*f,f,m:months(y)};};
+  const award=y=>{const c=CT[st.country];
+    if(y<c.min) return {amt:0,f:1,m:0,short:true};
+    const m=c.months(y),f=st.exit==='resign'?c.resign(y):1;
+    let amt=m*st.wage*f;
+    const capped=c.cap&&amt>c.cap*st.wage;
+    if(capped) amt=c.cap*st.wage;
+    return {amt,f,m,capped};};
   const calc=()=>{
     const bridged=st.policy==='always'||(st.policy==='if'&&st.gap<=st.lim);
     const counted=bridged?st.s1+st.s2:st.s2;
     const A=award(counted),B=award(st.s2),diff=A.amt-B.amt;
     const total=st.s1*12+st.gap+st.s2*12;
     const p1=st.s1*12/total*100,p2=(st.s1*12+st.gap)/total*100;
-    const how=(y,a)=>`${yr(y)} → ${a.m.toFixed(2)} months${st.exit==='resign'?' × '+(a.f===0?'0':a.f===1?'1':a.f<.5?'⅓':'⅔'):''}`;
+    const how=(y,a)=>a.short?`under ${CT[st.country].min} yr — no entitlement`:`${yr(y)} → ${a.m.toFixed(2)} months${st.exit==='resign'&&a.f!==1?' × '+(a.f===0?'0':a.f<.5?'⅓':'⅔'):''}${a.capped?' · capped':''}`;
     return {bridged,counted,A,B,diff,p1,p2,how};
   };
-  const LBL={s1:()=>'First stint · '+yr(st.s1),gap:()=>'Break between · '+st.gap+' months',s2:()=>'Second stint · '+yr(st.s2),wage:()=>'Final monthly wage · '+sar(st.wage),lim:()=>'Break limit · '+st.lim+' months'};
-  /* The output column is its own function so one drag can repaint just it. */
-  const outHTML=()=>{ const {bridged,counted,A,B,diff,p1,p2,how}=calc(); return `
+  const LBL={s1:()=>'First stint · '+yr(st.s1),gap:()=>'Break between · '+st.gap+' months',s2:()=>'Second stint · '+yr(st.s2),wage:()=>'Final monthly wage · '+money(st.wage),lim:()=>'Break limit · '+st.lim+' months'};
+  const outHTML=()=>{ const {bridged,counted,A,B,diff,p1,p2,how}=calc(); const c=CT[st.country]; return `
         <div class="stage"><div class="tl"><div class="tl-row"><div class="tl-line">
           <div class="tl-seg${bridged?'':' old'}" style="left:0;width:${p1}%"></div>
           <div class="tl-seg" style="left:${p2}%;width:${100-p2}%"></div>
@@ -7085,38 +7398,43 @@ LABS.push({id:'gratuity',ch:'gulf',title:'End-of-service, and the dates that dec
           <div class="tl-lbl" style="left:${(100+p2)/2}%;color:var(--p)">counted</div>
         </div></div></div></div>
         <div class="vs">
-          <div class="ok"><span class="lbl">What the policy owes</span><span class="amt">${sar(A.amt)}</span><span class="how">${how(counted,A)}</span></div>
-          <div class="no"><span class="lbl">If the clock restarts at rehire</span><span class="amt">${sar(B.amt)}</span><span class="how">${how(st.s2,B)}</span></div>
+          <div class="ok"><span class="lbl">What the policy owes</span><span class="amt">${money(A.amt)}</span><span class="how">${how(counted,A)}</span></div>
+          <div class="no"><span class="lbl">If the clock restarts at rehire</span><span class="amt">${money(B.amt)}</span><span class="how">${how(st.s2,B)}</span></div>
         </div>
-        <div class="msg ${bridged&&diff>0.5?'bad':'ok'}">${bridged?(diff>0.5?`<span><b>${sar(diff)} short.</b> The policy bridges the break, so a fresh service clock underpays her by ${(diff/(st.wage||1)).toFixed(1)} months’ wages — and nothing in payroll flags it, because both figures are arithmetically correct. The fix is a seniority date that means what the policy means, never a back-dated hire date.</span><div class="ar-line">التاريخ الجديد بيضيّع الخدمة القديمة، والفرق ده محدش هيلاحظه.</div>`:'<span>The policy bridges the break, but at these numbers both setups pay the same — the resignation scale can zero out short service. Lengthen the first stint to see them diverge.</span>'):`<span>Under this policy the earlier service does not count${st.policy==='if'?`, because the ${st.gap}-month break is longer than the ${st.lim}-month limit`:''}, so a fresh clock is the correct setup. Record the decision anyway: the next consultant will ask why.</span>`}</div>
+        <div class="msg ${st.country==='eg'?'warn':(bridged&&diff>0.5?'bad':'ok')}">${st.country==='eg'
+          ?`<span><b>Egypt pays no statutory gratuity.</b> ${c.base}</span><div class="ar-line">مفيش مكافأة نهاية خدمة قانونية في مصر — المعاش من التأمينات، والمخالصة فيها رصيد الإجازات وأي حاجة في العقد.</div>`
+          :(bridged?(diff>0.5?`<span><b>${money(diff)} short.</b> The policy bridges the break, so a fresh service clock underpays by ${(diff/(st.wage||1)).toFixed(1)} months of wage — and nothing in payroll flags it, because both figures are arithmetically correct. The fix is a seniority date that means what the policy means, never a back-dated hire date.</span><div class="ar-line">التاريخ الجديد بيضيّع الخدمة القديمة، والفرق ده محدش هيلاحظه.</div>`
+            :'<span>The policy bridges the break, but at these numbers both setups pay the same. Lengthen the first stint, or switch the exit to a resignation, to see them diverge.</span>')
+            :`<span>Under this policy the earlier service does not count${st.policy==='if'?`, because the ${st.gap}-month break is longer than the ${st.lim}-month limit`:''}, so a fresh clock is the correct setup. Record the decision anyway: the next consultant will ask why.</span>`)}</div>
+        <div class="explain small"><b>${c.n}.</b> ${c.base}</div>
         <div class="kv"><span>Enterprise hire date</span><b>unchanged — first day in the group</b></div>
         <div class="kv"><span>Legal employer start date</span><b>resets at the rehire</b></div>
         <div class="kv total"><span>Seniority date</span><b>${bridged?'moved back to cover the first stint':'same as the new start'}</b></div>
   `; };
   const draw=()=>{
-    b.innerHTML=`<div class="calc">
+    b.innerHTML=`<div class="stepper" style="margin-bottom:14px">${Object.keys(CT).map(k=>`<button class="${st.country===k?'active':''}" data-c="${k}">${CT[k].n}</button>`).join('')}</div>
+    <div class="calc">
       <div class="in">
-        <label>First stint · ${yr(st.s1)}</label><input type="range" data-n="s1" min="0.5" max="15" step="0.5" value="${st.s1}">
-        <label>Break between · ${st.gap} months</label><input type="range" data-n="gap" min="0" max="48" step="1" value="${st.gap}">
-        <label>Second stint · ${yr(st.s2)}</label><input type="range" data-n="s2" min="0.5" max="15" step="0.5" value="${st.s2}">
-        <label>Final monthly wage · ${sar(st.wage)}</label><input type="range" data-n="wage" min="3000" max="40000" step="500" value="${st.wage}">
+        <label>${LBL.s1()}</label><input type="range" data-n="s1" min="0.5" max="15" step="0.5" value="${st.s1}">
+        <label>${LBL.gap()}</label><input type="range" data-n="gap" min="0" max="48" step="1" value="${st.gap}">
+        <label>${LBL.s2()}</label><input type="range" data-n="s2" min="0.5" max="15" step="0.5" value="${st.s2}">
+        <label>${LBL.wage()}</label><input type="range" data-n="wage" min="3000" max="40000" step="500" value="${st.wage}">
         <label>Client policy on the earlier service</label>
         <select data-s="policy"><option value="fresh" ${st.policy==='fresh'?'selected':''}>Never counts</option><option value="if" ${st.policy==='if'?'selected':''}>Counts if the break is short enough</option><option value="always" ${st.policy==='always'?'selected':''}>Always counts</option></select>
-        ${st.policy==='if'?`<label>Break limit · ${st.lim} months</label><input type="range" data-n="lim" min="0" max="36" step="1" value="${st.lim}">`:''}
+        ${st.policy==='if'?`<label>${LBL.lim()}</label><input type="range" data-n="lim" min="0" max="36" step="1" value="${st.lim}">`:''}
         <label>How the second stint ends</label>
         <div class="stepper">${[['term','Terminated'],['resign','Resigns']].map(([v,l])=>`<button class="${st.exit===v?'active':''}" data-e="${v}">${l}</button>`).join('')}</div>
       </div>
-      <div class="out">
-${outHTML()}
-      </div></div>
-    <div class="callout"><b>A teaching model.</b> It follows the Saudi award — half a month’s wage for each of the first five years, one month for each year after, on the last wage — and the resignation scale of nothing under two years, a third from two to five, two thirds from five to ten, and the full award at ten. Check the current law and the client’s own contracts before quoting a real figure.</div>`;
+      <div class="out">${outHTML()}</div></div>
+    <div class="callout"><b>A teaching model.</b> Saudi figures follow Articles 84 and 85, the UAE follows Article 51, and Egypt has no statutory award — all checked in 2026 and all subject to the contract, which may be more generous than the statutory floor. Confirm against the current law before quoting a real number.</div>`;
     b.querySelectorAll('[data-n]').forEach(x=>x.addEventListener('input',()=>{ st[x.dataset.n]=+x.value;
       /* Repaint the label and the output column in place. Re-rendering the
          whole lab here would delete the slider the pointer is holding. */
       const lbl=x.previousElementSibling; if(lbl&&lbl.tagName==='LABEL'&&LBL[x.dataset.n]) lbl.textContent=LBL[x.dataset.n]();
       const out=b.querySelector('.out'); if(out) out.innerHTML=outHTML(); }));
     b.querySelectorAll('[data-s]').forEach(x=>x.addEventListener('change',()=>{st[x.dataset.s]=x.value;draw();}));
-    b.querySelectorAll('[data-e]').forEach(x=>x.addEventListener('click',()=>{st.exit=x.dataset.e;draw();}));};
+    b.querySelectorAll('[data-e]').forEach(x=>x.addEventListener('click',()=>{st.exit=x.dataset.e;draw();}));
+    b.querySelectorAll('[data-c]').forEach(x=>x.addEventListener('click',()=>{st.country=x.dataset.c;draw();}));};
   draw();
 }});
 
@@ -7690,6 +8008,7 @@ const ICONS = {
   gulf: '<circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3a13 13 0 010 18a13 13 0 010-18z"/>',
   uae: '<path d="M4 20V9l8-5 8 5v11"/><path d="M9 20v-6h6v6"/><path d="M4 20h16"/>',
   approvals: '<path d="M4 7h16"/><path d="M4 12h10"/><path d="M4 17h7"/><path d="M15 16l2 2 4-4"/>',
+  modules: '<rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 17.5h7M17.5 14v7"/>',
   'people-data': '<rect x="3" y="13" width="4" height="8"/><rect x="10" y="9" width="4" height="12"/><rect x="17" y="5" width="4" height="16"/><circle cx="5" cy="7" r="2"/>',
 
   /* ---- Data & Analytics ---- */
@@ -8227,6 +8546,89 @@ FIGS.push({
     ${F.note(264, 214, '∞', 'strong')}
     ${F.note(486, 214, '∞', 'strong')}
     ${F.note(380, 320, 'Arrows show the direction a filter travels: one → many.', 'mid')}
+  </svg>`,
+});
+
+/* ------------------------------------------------------------------ */
+FIGS.push({
+  id: 'payroll-chain',
+  ch: 'payroll',
+  title: 'The chain, and the three places it breaks quietly',
+  caption: 'Each link depends on the one before it. The three marked below are the failures that produce no error at all: the run simply skips the person, or pays them and sends nothing to the bank.',
+  svg: () => `<svg viewBox="0 0 760 300" role="img" aria-label="Eight links in order: element, eligibility, entry, payroll run on the first row; balance, prepayments, payment and costing on the second. Eligibility, the payroll run and prepayments are marked as the three links that fail silently.">
+    ${FIG_DEFS}
+    ${F.head(30, 22, 'DEFINE IT, THEN GIVE IT TO SOMEBODY')}
+    ${F.box(30, 32, 150, 46, 'Element', 'what can be paid')}
+    ${F.across(180, 212, 55)}
+    ${F.box(214, 32, 150, 46, 'Eligibility', 'who could get it', 'accent')}
+    ${F.across(364, 396, 55)}
+    ${F.box(398, 32, 150, 46, 'Entry', 'who does, how much')}
+    ${F.across(548, 580, 55)}
+    ${F.box(582, 32, 148, 46, 'Payroll run', 'gross to net', 'accent')}
+    ${F.elbow(656, 78, 104, 140)}
+
+    ${F.head(30, 130, 'THEN CALCULATE IT, PAY IT AND BOOK IT')}
+    ${F.box(30, 140, 150, 46, 'Balance', 'running totals')}
+    ${F.across(180, 212, 163)}
+    ${F.box(214, 140, 150, 46, 'Prepayments', 'split to accounts', 'accent')}
+    ${F.across(364, 396, 163)}
+    ${F.box(398, 140, 150, 46, 'Payment', 'the bank file')}
+    ${F.across(548, 580, 163)}
+    ${F.box(582, 140, 148, 46, 'Costing', 'to the ledger')}
+
+    ${F.head(30, 224, 'THE THREE THAT FAIL WITHOUT AN ERROR')}
+    ${F.box(30, 234, 230, 46, 'No eligibility', 'nothing can be entered', 'ghost')}
+    ${F.box(275, 234, 230, 46, 'No payroll on the assignment', 'the run skips the person', 'ghost')}
+    ${F.box(520, 234, 210, 46, 'No prepayment', 'calculated, never paid', 'ghost')}
+  </svg>`,
+});
+
+/* ------------------------------------------------------------------ */
+FIGS.push({
+  id: 'import-vs-load',
+  ch: 'hdl',
+  title: 'Two inspections, one waiting room',
+  caption: 'Import reads the file and checks its shape; load assembles the staged lines into objects and checks what they mean. Knowing which gate rejected a file tells you whether the problem is in the file or in what the file points at.',
+  svg: () => `<svg viewBox="0 0 760 250" role="img" aria-label="A zipped file passes an import gate that checks format, waits in staging tables, then passes a load gate that checks content, and becomes live records. Format errors stop at the first gate; missing parents stop at the second.">
+    ${FIG_DEFS}
+    ${F.box(30, 40, 150, 50, 'Flat zip', '.dat files, no folders')}
+    ${F.across(180, 216, 65)}
+    ${F.box(218, 40, 130, 50, 'IMPORT', 'is it readable?', 'accent')}
+    ${F.across(348, 384, 65)}
+    ${F.box(386, 40, 150, 50, 'Staging tables', 'not HR data yet', 'ghost')}
+    ${F.across(536, 572, 65)}
+    ${F.box(574, 40, 130, 50, 'LOAD', 'is it valid?', 'accent')}
+    ${F.down(639, 90, 136)}
+    ${F.box(574, 136, 156, 46, 'Live records', 'in the real tables')}
+
+    ${F.head(30, 126, 'STOPS AT IMPORT — THE FILE IS WRONG')}
+    ${F.box(30, 136, 230, 46, 'Pipe count, date format, case', 'nothing was written anywhere', 'ghost')}
+    ${F.head(30, 208, 'STOPS AT LOAD — THE FILE IS FINE')}
+    ${F.box(30, 218, 300, 24, 'A parent that has not been loaded yet', null, 'ghost')}
+    ${F.note(500, 236, 'load the parent, then reload the failures', 'mid')}
+  </svg>`,
+});
+
+/* ------------------------------------------------------------------ */
+FIGS.push({
+  id: 'function-vs-data',
+  ch: 'security',
+  title: 'Same function, different scope',
+  caption: 'Both specialists hold the same job role, so they see the same screens and can take the same actions. The security profile on their data role decides whose records those actions reach — which is why a visibility problem is almost never answered by changing a job role.',
+  svg: () => `<svg viewBox="0 0 760 260" role="img" aria-label="Two HR specialists hold the same job role, Human Resource Specialist, with the same function privileges. One has an Egypt security profile and sees Egyptian records; the other has a Saudi profile and sees Saudi records. Neither sees the other's.">
+    ${FIG_DEFS}
+    ${F.head(30, 22, 'FUNCTION — WHAT YOU CAN DO')}
+    ${F.head(410, 22, 'DATA — WHOSE RECORDS')}
+    ${F.box(30, 32, 340, 54, 'Human Resource Specialist', 'the same job role for both', 'accent')}
+    ${F.across(372, 406, 59)}
+    ${F.box(410, 32, 320, 54, 'Security profile · Egypt', 'Egyptian legal employers only')}
+
+    ${F.box(30, 112, 340, 54, 'Human Resource Specialist', 'the same job role for both', 'accent')}
+    ${F.across(372, 406, 139)}
+    ${F.box(410, 112, 320, 54, 'Security profile · Saudi Arabia', 'Saudi legal employers only')}
+
+    ${F.box(30, 190, 700, 44, 'Job role + security profile = data role', 'change the profile to change what is seen; changing the job role changes what can be done', 'ghost')}
+    <path class="f-divide" d="M390 14 V176"/>
   </svg>`,
 });
 

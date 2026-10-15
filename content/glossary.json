@@ -1765,5 +1765,86 @@
     "chapter": "people-data",
     "definition": "What one row means in a people dataset: which person, in which version, valid on which date — and whether the question counts humans or workload.",
     "watchOut": "A person with two concurrent assignments is one human and two current rows; no date filter collapses that."
+  },
+  {
+    "id": "role-provisioning-rule",
+    "name": "Role provisioning rule",
+    "chapter": "security",
+    "definition": "A rule that grants a role automatically to everyone matching a condition on the worker's record — legal employer, business unit, job, grade, worker type — and removes it when the condition stops being true.",
+    "watchOut": "After changing a rule, run Autoprovision Roles for All Users; otherwise each person picks it up only at their next transaction.",
+    "ar": "قواعد منح الأدوار",
+    "say": "الـ role provisioning"
+  },
+  {
+    "id": "security-console",
+    "name": "Security Console",
+    "chapter": "security",
+    "definition": "Where roles are built, copied and inspected: the role hierarchy view shows what a role contains, and the simulation view shows what a named user can see and do.",
+    "watchOut": "Copy a delivered role rather than editing it — an edited Oracle role is overwritten by a quarterly update.",
+    "ar": "وحدة إدارة الصلاحيات",
+    "say": "الـ security console"
+  },
+  {
+    "id": "ldap-synchronization",
+    "name": "LDAP synchronization",
+    "chapter": "security",
+    "definition": "The scheduled processes that move account and role changes between HCM and the identity store — Retrieve Latest LDAP Changes and Send Pending LDAP Requests.",
+    "watchOut": "A role that is configured correctly and still has not appeared is usually waiting on one of these.",
+    "ar": "مزامنة الحسابات",
+    "say": "الـ LDAP sync"
+  },
+  {
+    "id": "requisition-and-job-offer",
+    "name": "Requisition and job offer",
+    "chapter": "modules",
+    "definition": "The approved vacancy a candidate applies to, and the offer that, once accepted, creates the work relationship and assignment in core HR.",
+    "watchOut": "Offer approvals are a separate rule set from HR approvals, and the data chosen in Recruiting becomes your core HR data.",
+    "ar": "طلب التوظيف وعرض العمل",
+    "say": "الـ requisition والـ offer"
+  },
+  {
+    "id": "onboarding-journey",
+    "name": "Onboarding journey",
+    "chapter": "modules",
+    "definition": "The task list between offer and first day, assigned across the new hire, the manager, IT and HR with dates relative to the start date.",
+    "watchOut": "In Egypt the statutory tail — insurance registration and the labour-office file — is exactly what belongs in it.",
+    "ar": "رحلة الانضمام",
+    "say": "إجراءات التعيين"
+  },
+  {
+    "id": "compensation-plan",
+    "name": "Compensation plan",
+    "chapter": "modules",
+    "definition": "The cycle or off-cycle event through which pay changes are budgeted, worked by managers and approved, writing the result to the salary record payroll reads.",
+    "watchOut": "A client running increases in a spreadsheet and loading them is doing by hand what this module exists to do.",
+    "ar": "خطة التعويضات",
+    "say": "دورة الزيادات"
+  },
+  {
+    "id": "benefits-enrolment",
+    "name": "Benefits enrolment",
+    "chapter": "modules",
+    "definition": "A worker's election into a plan — medical cover, life insurance — opened by a life event and producing the element entries payroll deducts and costs.",
+    "watchOut": "Private medical cover sits alongside Egypt's statutory health insurance rather than replacing it.",
+    "ar": "الاشتراك في المزايا",
+    "say": "التأمين الطبي"
+  },
+  {
+    "id": "goal-and-performance-document",
+    "name": "Goal and performance document",
+    "chapter": "modules",
+    "definition": "The objects behind the review cycle: aligned objectives, and a document carrying the period, competencies, ratings and the workflow between worker and manager.",
+    "watchOut": "Ratings mostly stay in the module; the connection worth naming is the review period against probation.",
+    "ar": "الأهداف وتقييم الأداء",
+    "say": "التقييم"
+  },
+  {
+    "id": "talent-review-and-succession",
+    "name": "Talent review and succession",
+    "chapter": "modules",
+    "definition": "The review meeting — performance against potential — and plans naming candidates for critical positions.",
+    "watchOut": "A succession plan is a plan for a seat, so a client who wants succession and manages by job is asking for two things.",
+    "ar": "مراجعة المواهب والإحلال",
+    "say": "الإحلال الوظيفي"
   }
 ]

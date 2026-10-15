@@ -476,3 +476,86 @@ FIGS.push({
     ${F.note(380, 320, 'Arrows show the direction a filter travels: one → many.', 'mid')}
   </svg>`,
 });
+
+/* ------------------------------------------------------------------ */
+FIGS.push({
+  id: 'payroll-chain',
+  ch: 'payroll',
+  title: 'The chain, and the three places it breaks quietly',
+  caption: 'Each link depends on the one before it. The three marked below are the failures that produce no error at all: the run simply skips the person, or pays them and sends nothing to the bank.',
+  svg: () => `<svg viewBox="0 0 760 300" role="img" aria-label="Eight links in order: element, eligibility, entry, payroll run on the first row; balance, prepayments, payment and costing on the second. Eligibility, the payroll run and prepayments are marked as the three links that fail silently.">
+    ${FIG_DEFS}
+    ${F.head(30, 22, 'DEFINE IT, THEN GIVE IT TO SOMEBODY')}
+    ${F.box(30, 32, 150, 46, 'Element', 'what can be paid')}
+    ${F.across(180, 212, 55)}
+    ${F.box(214, 32, 150, 46, 'Eligibility', 'who could get it', 'accent')}
+    ${F.across(364, 396, 55)}
+    ${F.box(398, 32, 150, 46, 'Entry', 'who does, how much')}
+    ${F.across(548, 580, 55)}
+    ${F.box(582, 32, 148, 46, 'Payroll run', 'gross to net', 'accent')}
+    ${F.elbow(656, 78, 104, 140)}
+
+    ${F.head(30, 130, 'THEN CALCULATE IT, PAY IT AND BOOK IT')}
+    ${F.box(30, 140, 150, 46, 'Balance', 'running totals')}
+    ${F.across(180, 212, 163)}
+    ${F.box(214, 140, 150, 46, 'Prepayments', 'split to accounts', 'accent')}
+    ${F.across(364, 396, 163)}
+    ${F.box(398, 140, 150, 46, 'Payment', 'the bank file')}
+    ${F.across(548, 580, 163)}
+    ${F.box(582, 140, 148, 46, 'Costing', 'to the ledger')}
+
+    ${F.head(30, 224, 'THE THREE THAT FAIL WITHOUT AN ERROR')}
+    ${F.box(30, 234, 230, 46, 'No eligibility', 'nothing can be entered', 'ghost')}
+    ${F.box(275, 234, 230, 46, 'No payroll on the assignment', 'the run skips the person', 'ghost')}
+    ${F.box(520, 234, 210, 46, 'No prepayment', 'calculated, never paid', 'ghost')}
+  </svg>`,
+});
+
+/* ------------------------------------------------------------------ */
+FIGS.push({
+  id: 'import-vs-load',
+  ch: 'hdl',
+  title: 'Two inspections, one waiting room',
+  caption: 'Import reads the file and checks its shape; load assembles the staged lines into objects and checks what they mean. Knowing which gate rejected a file tells you whether the problem is in the file or in what the file points at.',
+  svg: () => `<svg viewBox="0 0 760 250" role="img" aria-label="A zipped file passes an import gate that checks format, waits in staging tables, then passes a load gate that checks content, and becomes live records. Format errors stop at the first gate; missing parents stop at the second.">
+    ${FIG_DEFS}
+    ${F.box(30, 40, 150, 50, 'Flat zip', '.dat files, no folders')}
+    ${F.across(180, 216, 65)}
+    ${F.box(218, 40, 130, 50, 'IMPORT', 'is it readable?', 'accent')}
+    ${F.across(348, 384, 65)}
+    ${F.box(386, 40, 150, 50, 'Staging tables', 'not HR data yet', 'ghost')}
+    ${F.across(536, 572, 65)}
+    ${F.box(574, 40, 130, 50, 'LOAD', 'is it valid?', 'accent')}
+    ${F.down(639, 90, 136)}
+    ${F.box(574, 136, 156, 46, 'Live records', 'in the real tables')}
+
+    ${F.head(30, 126, 'STOPS AT IMPORT — THE FILE IS WRONG')}
+    ${F.box(30, 136, 230, 46, 'Pipe count, date format, case', 'nothing was written anywhere', 'ghost')}
+    ${F.head(30, 208, 'STOPS AT LOAD — THE FILE IS FINE')}
+    ${F.box(30, 218, 300, 24, 'A parent that has not been loaded yet', null, 'ghost')}
+    ${F.note(500, 236, 'load the parent, then reload the failures', 'mid')}
+  </svg>`,
+});
+
+/* ------------------------------------------------------------------ */
+FIGS.push({
+  id: 'function-vs-data',
+  ch: 'security',
+  title: 'Same function, different scope',
+  caption: 'Both specialists hold the same job role, so they see the same screens and can take the same actions. The security profile on their data role decides whose records those actions reach — which is why a visibility problem is almost never answered by changing a job role.',
+  svg: () => `<svg viewBox="0 0 760 260" role="img" aria-label="Two HR specialists hold the same job role, Human Resource Specialist, with the same function privileges. One has an Egypt security profile and sees Egyptian records; the other has a Saudi profile and sees Saudi records. Neither sees the other's.">
+    ${FIG_DEFS}
+    ${F.head(30, 22, 'FUNCTION — WHAT YOU CAN DO')}
+    ${F.head(410, 22, 'DATA — WHOSE RECORDS')}
+    ${F.box(30, 32, 340, 54, 'Human Resource Specialist', 'the same job role for both', 'accent')}
+    ${F.across(372, 406, 59)}
+    ${F.box(410, 32, 320, 54, 'Security profile · Egypt', 'Egyptian legal employers only')}
+
+    ${F.box(30, 112, 340, 54, 'Human Resource Specialist', 'the same job role for both', 'accent')}
+    ${F.across(372, 406, 139)}
+    ${F.box(410, 112, 320, 54, 'Security profile · Saudi Arabia', 'Saudi legal employers only')}
+
+    ${F.box(30, 190, 700, 44, 'Job role + security profile = data role', 'change the profile to change what is seen; changing the job role changes what can be done', 'ghost')}
+    <path class="f-divide" d="M390 14 V176"/>
+  </svg>`,
+});

@@ -7,7 +7,7 @@ title: The UAE
 subtitle: A second Gulf country that configures nothing like the first
 hue: 118
 minutes: 10
-labs: 
+labs: gratuity
 terms: mohre, uae-fixed-term-contract, gpssa, alternative-end-of-service-savings-scheme, emiratisation-and-nafis
 ---
 
@@ -26,6 +26,8 @@ That is a configuration statement, not a legal footnote. Contract end dates beco
 The end-of-service gratuity under Article 51 is **21 days of basic wage for each of the first five years of service, and 30 days for each year after that**, payable to anyone with at least one year of continuous service and capped at two years' total wage. Unpaid absence does not count toward service, and the settlement falls due within fourteen days of the contract ending.
 
 Three of those details differ from Saudi Arabia in ways that change the calculation, not just the number. The UAE accrues on **basic wage**, where the Saudi award in Chapter 17 is computed on the last wage as defined by that law — so the component split of the salary (Chapter 5) decides the UAE liability directly. The UAE applies a **cap** of two years' pay, which Saudi Arabia does not. And the UAE pays the full award on resignation after one year, where the Saudi scale reduces it below ten years of service. An EOSB element built for one country and reused in the other is wrong in at least three places.
+
+[[lab:gratuity]]
 
 Since 2023 employers may also join a voluntary **alternative end-of-service savings scheme**, paying monthly contributions into a regulated fund instead of accruing a lump sum on their own books. Where a client has joined it, the payroll design changes shape entirely: a monthly contribution element replaces an accrual and liability calculation, and the final settlement no longer carries the gratuity at all. Ask which model the client is on before designing either.
 
