@@ -1593,5 +1593,177 @@
     "watchOut": "End-of-service gratuity and leave bands are calculated on service. Solving a rehire by back-dating the work relationship instead of setting a seniority date corrupts every headcount and accrual figure for that period.",
     "ar": "تاريخ الأقدمية",
     "say": "الأقدمية"
+  },
+  {
+    "id": "mohre",
+    "name": "MOHRE",
+    "chapter": "uae",
+    "definition": "The UAE Ministry of Human Resources and Emiratisation: the authority for private-sector employment, contracts and wage protection on the mainland.",
+    "watchOut": "Free zones such as the DIFC and ADGM have their own employment regimes and are not under MOHRE.",
+    "ar": "وزارة الموارد البشرية والتوطين",
+    "say": "الوزارة"
+  },
+  {
+    "id": "uae-fixed-term-contract",
+    "name": "Fixed-term contract (UAE)",
+    "chapter": "uae",
+    "definition": "Since Federal Decree-Law 33/2021 every private-sector contract in the UAE is fixed-term and renewable; the unlimited contract no longer exists.",
+    "watchOut": "A client still saying 'limited and unlimited' is describing the superseded 1980 law.",
+    "ar": "عقد محدد المدة",
+    "say": "العقد المحدد"
+  },
+  {
+    "id": "gpssa",
+    "name": "GPSSA",
+    "chapter": "uae",
+    "definition": "The UAE General Pension and Social Security Authority, which covers UAE nationals and GCC nationals working in the UAE. Expatriates are outside it and receive the end-of-service gratuity instead.",
+    "watchOut": "Contribution rates differ by when the worker was first registered, so they belong in a dated global value rather than in a formula.",
+    "ar": "الهيئة العامة للمعاشات والتأمينات الاجتماعية",
+    "say": "المعاشات"
+  },
+  {
+    "id": "alternative-end-of-service-savings-scheme",
+    "name": "Alternative end-of-service savings scheme",
+    "chapter": "uae",
+    "definition": "A voluntary UAE scheme in which the employer pays monthly contributions into a regulated fund instead of accruing a gratuity liability, changing the final settlement's shape entirely.",
+    "watchOut": "Where a client has joined it, an accrual-and-liability design is the wrong design.",
+    "ar": "نظام الادخار البديل لمكافأة نهاية الخدمة",
+    "say": "نظام الادخار"
+  },
+  {
+    "id": "emiratisation-and-nafis",
+    "name": "Emiratisation and Nafis",
+    "chapter": "uae",
+    "definition": "The UAE's nationalization programme and the platform that administers it: private-sector employers above a size threshold must raise the share of UAE nationals in skilled roles each year, with monthly penalties per unfilled position.",
+    "watchOut": "It depends on job classification and nationality being right in the record long before the first report is due.",
+    "ar": "التوطين",
+    "say": "نافس"
+  },
+  {
+    "id": "salary-record",
+    "name": "Salary record",
+    "chapter": "payroll",
+    "definition": "The dated salary held on the assignment, from which Oracle derives the element entry through the salary basis.",
+    "watchOut": "Editing the derived entry directly makes the salary page and the payslip disagree, and nothing reports it.",
+    "ar": "سجل الراتب",
+    "say": "الـ salary record"
+  },
+  {
+    "id": "salary-component",
+    "name": "Salary component",
+    "chapter": "payroll",
+    "definition": "An itemised part of a salary — basic, housing, transport — held against the salary record rather than as separate manual entries.",
+    "watchOut": "The component split decides the contributable wage and the gratuity base, so it is a statutory design question.",
+    "ar": "مكونات الراتب",
+    "say": "تفاصيل الراتب"
+  },
+  {
+    "id": "rate-definition",
+    "name": "Rate definition",
+    "chapter": "payroll",
+    "definition": "A configured conversion between a stored figure and the rate a process needs: annual to hourly for overtime, monthly to daily for an absence payment.",
+    "watchOut": "Absence payments and overtime that disagree with each other usually trace back to two different rate definitions.",
+    "ar": "تعريف المعدل",
+    "say": "الـ rate definition"
+  },
+  {
+    "id": "time-card",
+    "name": "Time card",
+    "chapter": "payroll",
+    "definition": "The record of hours worked that payroll reads, entered in Oracle Time and Labor, interfaced from an attendance system, or loaded in bulk.",
+    "watchOut": "Which of the three a client uses is a design decision; discovering it in the first run is too late.",
+    "ar": "بطاقة الدوام",
+    "say": "الحضور والانصراف"
+  },
+  {
+    "id": "payroll-flow",
+    "name": "Payroll flow",
+    "chapter": "payroll",
+    "definition": "The sequenced set of tasks a payroll cycle actually is, with a checklist, owners and a status per task.",
+    "watchOut": "A 'stuck payroll' is nearly always one task in the flow waiting, not the run failing.",
+    "ar": "تدفق عمليات الرواتب",
+    "say": "الـ flow"
+  },
+  {
+    "id": "mark-for-retry-and-roll-back",
+    "name": "Mark for retry, retry and roll back",
+    "chapter": "payroll",
+    "definition": "The three corrections to a payroll process: flag the failed records, re-process them once the cause is fixed, or remove the results entirely.",
+    "watchOut": "Prepayments lock the run's results, so they must be rolled back before the run can be.",
+    "ar": "إعادة المعالجة والتراجع",
+    "say": "نعمل rollback"
+  },
+  {
+    "id": "approval-rule",
+    "name": "Approval rule",
+    "chapter": "approvals",
+    "definition": "The configured routing for one transaction type, held against that transaction in the Manage Approval Transactions for HCM task.",
+    "watchOut": "One rule set belongs to one transaction; a client's single 'approval policy' is usually conditions inside several of them.",
+    "ar": "قاعدة الاعتماد",
+    "say": "الـ approval rule"
+  },
+  {
+    "id": "approver-type",
+    "name": "Approver type",
+    "chapter": "approvals",
+    "definition": "How a rule identifies who approves: supervisory hierarchy, position hierarchy, job level, representative, approval group, application role or named user.",
+    "watchOut": "Each type needs its underlying data to exist. Routing up a position hierarchy at a job-based client leaves the transaction with no path.",
+    "ar": "نوع المعتمد",
+    "say": "مين بيعتمد"
+  },
+  {
+    "id": "serial-vs-parallel-approval",
+    "name": "Serial vs parallel approval",
+    "chapter": "approvals",
+    "definition": "Whether participants are asked in turn or at once, and for a group, whether everyone must approve or the first response decides.",
+    "watchOut": "'The team approves' means one of two different behaviours when somebody is on leave.",
+    "ar": "اعتماد تتابعي أو متوازي",
+    "say": "بالترتيب ولا مع بعض"
+  },
+  {
+    "id": "transaction-console",
+    "name": "Transaction Console",
+    "chapter": "approvals",
+    "definition": "The screen that lists in-flight, errored and completed transactions, and lets a privileged user withdraw one, force it through, or read the error behind it.",
+    "watchOut": "It can force-approve, so access is a design decision to settle before go-live, not during the first incident.",
+    "ar": "وحدة متابعة المعاملات",
+    "say": "الـ transaction console"
+  },
+  {
+    "id": "auto-approval",
+    "name": "Auto-approval",
+    "chapter": "approvals",
+    "definition": "A rule that approves a transaction without a human step — what a client means when they ask for no approvals.",
+    "watchOut": "Deleting the rule set instead leaves transactions with nowhere to go.",
+    "ar": "اعتماد تلقائي",
+    "say": "بيعدّي أوتوماتيك"
+  },
+  {
+    "id": "slowly-changing-dimension",
+    "name": "Slowly changing dimension",
+    "chapter": "people-data",
+    "definition": "A dimension whose attributes change over time. Type 1 overwrites the old value; type 2 keeps history by closing the old row and opening a new one.",
+    "watchOut": "An HR source is already type 2, so the history cannot be avoided — only handled."
+  },
+  {
+    "id": "as-of-date-join",
+    "name": "As-of-date join",
+    "chapter": "people-data",
+    "definition": "The predicate that keeps only the version of a row valid on a chosen date, written once for every date-effective table in the query.",
+    "watchOut": "Filtering one table and not the others multiplies rows silently."
+  },
+  {
+    "id": "point-in-time-snapshot",
+    "name": "Point-in-time snapshot",
+    "chapter": "people-data",
+    "definition": "The state of a population on one date, stored rather than recomputed, so a trend is a series of honest snapshots instead of today's data restated.",
+    "watchOut": "A trend built from current rows reports today's department as though it always applied."
+  },
+  {
+    "id": "headcount-grain",
+    "name": "Headcount grain",
+    "chapter": "people-data",
+    "definition": "What one row means in a people dataset: which person, in which version, valid on which date — and whether the question counts humans or workload.",
+    "watchOut": "A person with two concurrent assignments is one human and two current rows; no date filter collapses that."
   }
 ]

@@ -44,6 +44,9 @@ const ICONS = {
   method: '<path d="M5 21V4M5 4h11l-2 3.5L16 11H5"/><path d="M5 15h8"/>',
   /* a region on the globe */
   gulf: '<circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3a13 13 0 010 18a13 13 0 010-18z"/>',
+  uae: '<path d="M4 20V9l8-5 8 5v11"/><path d="M9 20v-6h6v6"/><path d="M4 20h16"/>',
+  approvals: '<path d="M4 7h16"/><path d="M4 12h10"/><path d="M4 17h7"/><path d="M15 16l2 2 4-4"/>',
+  'people-data': '<rect x="3" y="13" width="4" height="8"/><rect x="10" y="9" width="4" height="12"/><rect x="17" y="5" width="4" height="16"/><circle cx="5" cy="7" r="2"/>',
 
   /* ---- Data & Analytics ---- */
   /* a grid of rows and columns: what one row means */

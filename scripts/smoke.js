@@ -15,6 +15,9 @@ const { chromium } = require('playwright');
 const TARGET = process.argv[2] || path.join('dist', 'index.html');
 const FILE = 'file://' + path.resolve(__dirname, '..', TARGET);
 const DOMAIN_COUNT = require('../content/domains.json').length;
+const CH_IN = d => require('fs').readdirSync(require('path').join(__dirname, '..', 'content', 'chapters'))
+  .filter(f => /^domain: *(\S+)/m.exec(require('fs').readFileSync(require('path').join(__dirname, '..', 'content', 'chapters', f), 'utf8'))[1] === d).length;
+const HCM = CH_IN('hcm'), ANA = CH_IN('analytics');
 const results = [];
 const check = (name, pass, detail = '') => results.push({ name, pass, detail });
 
@@ -66,11 +69,11 @@ const check = (name, pass, detail = '') => results.push({ name, pass, detail });
     label: g.querySelector('.sec-k').textContent, rows: g.querySelectorAll('.chrow').length })));
   const grouped = groups.map(g => `${g.label}:${g.rows}`).join(' ');
   const icons = await page.evaluate(() => document.querySelectorAll('.chrow .ico').length);
-  check('every chapter row carries its icon', icons === 17, `${icons}/17`);
+  check('every chapter row carries its icon', icons === HCM, `${icons}/${HCM}`);
 
   check('chapters list groups by track',
     groups.length === 2 && groups[0].label === 'Functional' && groups[1].label === 'Technical'
-      && groups.reduce((a, g) => a + g.rows, 0) === 17, grouped);
+      && groups.reduce((a, g) => a + g.rows, 0) === HCM, grouped);
 
   await page.evaluate(() => { location.hash = 'chapters/hdl'; });
   await page.waitForTimeout(400);
@@ -103,7 +106,7 @@ const check = (name, pass, detail = '') => results.push({ name, pass, detail });
   await page.evaluate(() => { location.hash = 'home'; });
   await page.waitForTimeout(300);
   const cols = await page.evaluate(() => document.querySelectorAll('.pcol').length);
-  check('progress chart has a column per chapter', cols === 17, `${cols} columns`);
+  check('progress chart has a column per chapter', cols === HCM, `${cols} columns`);
 
 
   await page.evaluate(() => { location.hash = 'labs/insurance'; });
@@ -260,7 +263,7 @@ const check = (name, pass, detail = '') => results.push({ name, pass, detail });
   await page.evaluate(() => { location.hash = 'analytics/chapters'; });
   await page.waitForTimeout(350);
   const anaRows = await page.evaluate(() => document.querySelectorAll('.chrow').length);
-  check('switching collection changes the chapter list', hcmRows === 17 && anaRows !== 17,
+  check('switching collection changes the chapter list', hcmRows === HCM && anaRows === ANA,
     `hcm ${hcmRows}, analytics ${anaRows}`);
 
   await page.evaluate(() => { location.hash = 'hcm/chapters/dating'; });

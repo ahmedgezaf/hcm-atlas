@@ -829,5 +829,211 @@
       "fit-gap-analysis",
       "change-request"
     ]
+  },
+  {
+    "chapter": "uae",
+    "question": "A client runs payroll in Saudi Arabia and is adding the UAE. What can be reused and what has to be built again?",
+    "answer": "The chain itself — elements, eligibility, entries, run, balances, prepayments, payment, costing — is the same, and so are the structures. Almost nothing statutory transfers. End-of-service is 21 days of basic wage per year for the first five years and 30 after, capped at two years' pay and payable from one year of service, against the Saudi award on last wage with a resignation scale. The wage-protection file is a UAE Salary Information File through MOHRE, not Mudad. Pension covers nationals through GPSSA, not GOSI. Each country is its own legislative data group, so the elements and formulas are rebuilt regardless.",
+    "terms": [
+      "end-of-service-benefit-eosb-gratuity",
+      "gpssa",
+      "mohre",
+      "legislative-data-group-ldg"
+    ]
+  },
+  {
+    "chapter": "uae",
+    "question": "An HR manager in Dubai asks you to configure unlimited contracts. What do you say?",
+    "answer": "That the unlimited contract no longer exists in the private sector: Federal Decree-Law 33/2021 made every contract fixed-term and renewable. Then ask when their contracts were last reissued, because the vocabulary usually means the paperwork predates the law rather than that they want something unusual. Practically it means contract end dates are live data — expiry alerting and renewal are part of the build, not an afterthought.",
+    "terms": [
+      "uae-fixed-term-contract",
+      "end-of-contract"
+    ]
+  },
+  {
+    "chapter": "lifecycle",
+    "question": "Name the three exit routes and say what differs downstream in each.",
+    "answer": "Resignation, employer-initiated termination, and expiry of a fixed-term contract. All three end-date the work relationship and leave the person record intact. They differ in money and in notice: resignation carries no severance but does pay out accrued leave, and in the Gulf it can reduce the end-of-service award; termination carries severance exposure and the strongest documentation requirement; expiry needs neither party to act, which is why it is the one that catches a payroll team out when nobody noticed the date. All three feed a final settlement.",
+    "terms": [
+      "resignation",
+      "termination",
+      "end-of-contract",
+      "final-settlement"
+    ]
+  },
+  {
+    "chapter": "lifecycle",
+    "question": "What is a final settlement made of, and which Oracle objects produce each part?",
+    "answer": "Final pay to the termination date from the payroll run; accrued but untaken leave from the absence plan's balance, converted by a rate definition; the end-of-service award or gratuity where the country has one, usually from a dedicated element; minus any outstanding loan or advance, which is an element entry with a remaining balance. It is run as a QuickPay rather than waiting for the cycle, and the payroll relationship's last standard process date and final close date decide whether a late correction can still be paid at all.",
+    "terms": [
+      "final-settlement",
+      "quickpay",
+      "last-standard-process-date",
+      "end-of-service-benefit-eosb-gratuity"
+    ]
+  },
+  {
+    "chapter": "lifecycle",
+    "question": "The sources disagree about the notice period. How do you configure it?",
+    "answer": "As a parameter, not a constant — and then get the client's legal position in writing. Where summaries of a statute genuinely conflict, the consultant's job is to make the number configurable, record which reading was used and who approved it, and flag it for re-verification when the executive regulations land. Hard-coding either reading hides a decision that was never actually made.",
+    "terms": [
+      "notice-period",
+      "test-script"
+    ]
+  },
+  {
+    "chapter": "egypt-leave",
+    "question": "Walk through the Egyptian annual-leave ladder and its two boundary cases.",
+    "answer": "Fifteen days in the first year, pro-rated once six months of service are complete; twenty-one from the second year; thirty for workers with ten years of service or aged over fifty; forty-five for persons with disabilities; plus seven days for hazardous, arduous or remote work. The boundary cases are the test cases: the person who crosses ten years mid-year and the person who turns fifty mid-year both change band part-way through an accrual term, and the plan has to say whether the new rate applies from that date or from the next term. Figures are Law 14/2025, checked in 2026 — re-verify before configuring.",
+    "terms": [
+      "egyptian-annual-leave-entitlement",
+      "accrual-band",
+      "accrual-plan"
+    ]
+  },
+  {
+    "chapter": "egypt-leave",
+    "question": "Why is sick leave a qualification plan rather than an accrual plan?",
+    "answer": "Because nothing accumulates. The entitlement is not earned month by month and carried forward; it is triggered by an event and paid at percentages of the insurable wage that step down over the duration of the absence, within a yearly cap. An accrual plan would model a balance that does not exist. The same reasoning puts maternity in a qualification plan with an occurrence cap rather than a balance.",
+    "terms": [
+      "sick-leave",
+      "qualification-plan",
+      "accrual-plan"
+    ]
+  },
+  {
+    "chapter": "egypt-leave",
+    "question": "Why can casual leave not simply be added to the annual entitlement?",
+    "answer": "Because it is drawn from it, not added to it. Casual leave is a short-notice entitlement taken out of the annual balance with a cap on how many days a year may be used that way, so modelling it as its own accrual double-counts the entitlement and overstates the leave liability. It is configured as an absence type against the annual plan with its own rules, not as a second plan.",
+    "terms": [
+      "casual-leave",
+      "absence-type",
+      "absence-plan"
+    ]
+  },
+  {
+    "chapter": "workforce",
+    "question": "A client wants to stop using positions and manage everything with jobs. What do you ask?",
+    "answer": "Whether they budget and approve headcount by seat, and whether they need to know that a seat exists while it is empty. Positions carry that; jobs do not. If approvals, budgeting or org charts depend on vacancies being visible, positions earn their cost; if the client simply wants to know what work people do, jobs are lighter and position synchronization is one less thing to maintain. The wrong answer is to decide on tidiness.",
+    "terms": [
+      "position",
+      "job"
+    ]
+  },
+  {
+    "chapter": "workforce",
+    "question": "What is a grade ladder for, and when does a client actually need grade rates?",
+    "answer": "A grade ladder orders grades into a progression, and grade rates attach pay ranges or step values to them. A client needs rates when pay is governed by the grade — minimum and maximum by band, or fixed steps — rather than negotiated per person, which is common in the public sector and in large Gulf groups. Where pay is individual, the ladder alone is enough, and building rates nobody maintains produces ranges that are wrong within a year.",
+    "terms": [
+      "grade",
+      "grade-step"
+    ]
+  },
+  {
+    "chapter": "absence",
+    "question": "What is the difference between an absence type and an absence plan?",
+    "answer": "The type is what the worker selects — Annual Leave, Sick Leave — and the plan is the rules engine behind it: who is eligible, how entitlement is earned or granted, how it is paid. One plan can serve several types, and a type must be associated with at least one plan or it does nothing. When a client describes a new kind of leave, the real question is whether it needs new rules or only a new name on existing ones.",
+    "terms": [
+      "absence-type",
+      "absence-plan",
+      "eligibility-profile"
+    ]
+  },
+  {
+    "chapter": "absence",
+    "question": "How would you handle carryover that the client has never written down?",
+    "answer": "Pin it before building, because it is the rule that creates liability. Ask how many days may carry into the next term, when carried days expire, and whether unused leave is paid out instead. Those three answers are the carryover, expiry and encashment rules, and a client who has not agreed them internally will discover the disagreement in the first year-end — which is a bad time to find out the balance everyone was looking at was wrong.",
+    "terms": [
+      "carryover",
+      "leave-encashment",
+      "accrual-plan"
+    ]
+  },
+  {
+    "chapter": "security",
+    "question": "A line manager can open the page but sees no employees. Where do you look?",
+    "answer": "At the data side, not the function side. They have the function privilege, which is why the page opens; what they lack is scope. For a line manager that usually means the manager hierarchy is not built or their reports are not attached to them; for an HR specialist it means the security profile on their data role does not cover that population. Answering a visibility question by changing a job role is the classic wrong move.",
+    "terms": [
+      "job-role",
+      "data-role-and-security-profile",
+      "area-of-responsibility-aor"
+    ]
+  },
+  {
+    "chapter": "security",
+    "question": "Why not simply build a custom role for each department's HR representative?",
+    "answer": "Because it multiplies maintenance for something an area of responsibility already does. An AOR assigns responsibility for a defined population and drives both access and routing, so one role plus AORs covers what would otherwise be a role per department — each needing its own security profile, its own testing and its own upkeep every time the structure changes. Reach for a custom data role when the scope cannot be expressed as a responsibility, not as the default.",
+    "terms": [
+      "area-of-responsibility-aor",
+      "data-role-and-security-profile",
+      "job-role"
+    ]
+  },
+  {
+    "chapter": "payroll",
+    "question": "A client's offer letters quote basic plus housing plus transport. Why does that matter beyond presentation?",
+    "answer": "Because the statutory bases are computed from particular components. The contributable wage for Saudi GOSI and the UAE gratuity base are both drawn from the split, so how salary components are designed decides what the client owes, not just how the payslip reads. It is also far harder to restructure components after go-live than before, which makes it a first-workshop question rather than a detail.",
+    "terms": [
+      "salary-component",
+      "salary-record"
+    ]
+  },
+  {
+    "chapter": "payroll",
+    "question": "Payroll ran, prepayments ran, and then a wrong element entry is found. What order do you unwind it in?",
+    "answer": "Backwards. Prepayments lock the run's results, so the prepayments are rolled back first and only then the run; trying it the other way produces an error that reads like a defect and is not. Then fix the entry, and use mark for retry and retry so only the affected records are reprocessed rather than the whole population.",
+    "terms": [
+      "mark-for-retry-and-roll-back",
+      "prepayments",
+      "payroll-flow"
+    ]
+  },
+  {
+    "chapter": "payroll",
+    "question": "How do hours get into payroll, and what does an overtime element need?",
+    "answer": "Hours arrive from a time card in Oracle Time and Labor, from an interface with an attendance or shift system, or from a bulk load — and which one is a design decision with an owner. An overtime element needs a rate source, which is a rate definition, and a multiplier, which is statutory: Egypt's Law 14/2025 sets at least 35% above the hourly wage by day and 70% at night, and Saudi Article 107 sets 150%. Sources disagree on whether the Saudi base is basic or total wage, so that goes in writing from the client's counsel before anything is built.",
+    "terms": [
+      "time-card",
+      "rate-definition",
+      "element"
+    ]
+  },
+  {
+    "chapter": "approvals",
+    "question": "How would you configure approvals for a promotion, and what would you check first?",
+    "answer": "In Manage Approval Transactions for HCM, on the promotion transaction, with an approver type that the client's data can actually resolve — supervisory hierarchy where managers are maintained, job level where they are not, representative where HR owns it. Check that first: routing up a position hierarchy at a client who manages by job leaves the transaction waiting with no path and no error. Then add the conditions that matter, usually an extra level above a salary threshold, and test with real approver accounts rather than your own.",
+    "terms": [
+      "approval-rule",
+      "approver-type",
+      "transaction-console"
+    ]
+  },
+  {
+    "chapter": "approvals",
+    "question": "A manager says their change never happened. Where do you look, and what are you expecting to find?",
+    "answer": "The Transaction Console. Most of the time the change exists and is sitting in an approval that never reached anybody — a vacant approver position, a terminated approver, or a hierarchy gap. The console shows where it is waiting and lets a privileged user withdraw it or push it through, which is why that access is agreed with a named group before go-live rather than handed out during the first incident.",
+    "terms": [
+      "transaction-console",
+      "approver-type"
+    ]
+  },
+  {
+    "chapter": "people-data",
+    "question": "Your headcount report returns more people than the company employs. What is the first thing you check?",
+    "answer": "Whether every date-effective table in the query carries its own as-of filter. An HR source keeps one row per version, so a person promoted twice returns three rows, and two name versions joined to three assignment versions return six. After that, check the primary assignment flag: somebody with two concurrent assignments is one human with two currently valid rows, and no date predicate collapses that.",
+    "terms": [
+      "as-of-date-join",
+      "slowly-changing-dimension",
+      "headcount-grain"
+    ]
+  },
+  {
+    "chapter": "people-data",
+    "question": "Why is an attrition trend built from current rows wrong, even when the leaver dates are right?",
+    "answer": "Because it restates history with today's attributes. Grouping today's rows by hire and termination date reports each person's current department and grade as though they had always applied, so a reorganization last month appears to have happened years ago, and anyone whose record was later corrected quietly moves. The honest version evaluates the as-of predicate once per period and stores the answer — one row per person per month — so the trend reconciles with what HR reported at the time.",
+    "terms": [
+      "point-in-time-snapshot",
+      "as-of-date-join"
+    ]
   }
 ]

@@ -6,9 +6,9 @@ track: functional
 title: The Payroll Object Chain
 subtitle: Element → eligibility → entry → run → balance → prepayment → payment → costing
 hue: 152
-minutes: 13
+minutes: 18
 labs: payroll, payslip, balances, parallel-run
-terms: element, element-classification, element-eligibility-element-link, element-entry, input-value, balance, salary-basis, payroll-definition, payroll-run, quickpay, prepayments, payment-process-bank-file, costing, parallel-run
+terms: element, element-classification, element-eligibility-element-link, element-entry, input-value, balance, salary-basis, payroll-definition, payroll-run, quickpay, prepayments, payment-process-bank-file, costing, parallel-run, salary-record, salary-component, rate-definition, time-card, payroll-flow, mark-for-retry-and-roll-back
 ---
 
 Payroll in Oracle is a chain of objects, each depending on the one before it. A consultant who can recite the chain and explain what breaks when a link is missing can debug most payroll problems without opening a log. The chain runs: element → element eligibility → element entry → payroll run → balance → prepayment → payment → costing.
@@ -29,6 +29,22 @@ An **element entry** is the actual attachment of an element to a specific person
 
 The **salary basis** decides how salary is stored, quoted and paid — annual, monthly or hourly — and which element it feeds. An annual basis stores EGP 240,000 and pays EGP 20,000 monthly. Getting the basis wrong multiplies or divides everyone's pay by twelve, so always confirm how the client quotes salary in offer letters before configuring it.
 
+## Salary, and where it actually lives
+
+Salary is held as a dated **salary record** on the assignment, and Oracle derives the element entry from it through the salary basis. That direction matters: a raise is entered on the salary page and the entry follows, never the other way round. Editing the derived entry directly leaves the salary page and the payslip telling different stories about the same person, and nothing in the system flags the disagreement — it surfaces when somebody compares a letter to a payslip.
+
+Most Gulf offers are not quoted as one number. They are quoted as basic plus housing plus transport, and that split is what **salary components** are for: an itemised breakdown held against the salary record rather than as separate manual entries. The split is a statutory question, not a presentational one, because the contributable wage in Chapter 17 and the UAE gratuity base in Chapter 18 are both computed from particular components. Designing the components to match how the client's offer letters are written is therefore part of getting end-of-service right, and it is much harder to change afterwards than before.
+
+**Rate definitions** convert between the stored figure and the figure a process needs — an annual salary into an hourly rate for overtime, a daily rate for an absence payment, a monthly rate for a liability accrual. Grade rates, promised in Chapter 2, attach ranges or step values to grades so that pay governed by grade is validated against the band rather than typed in free. A client whose pay is individually negotiated rarely needs them; one in the public sector or a large Gulf group almost always does.
+
+## The hours side of pay
+
+The functional track promises money, time and law, and time so far has meant leave. Hours are the other half, and they reach payroll in one of three ways: a time card in Oracle Time and Labor, an interface from a biometric or shift system, or a bulk load (Chapter 11). Choosing between them is a design decision with an owner and a cost, and it is worth making explicitly rather than discovering in the first run that attendance arrives as a spreadsheet somebody emails.
+
+An overtime element needs two things: a rate source, which is a rate definition, and a multiplier, which is statutory rather than negotiable. Under Egypt's Labour Law 14/2025 overtime is paid at no less than 35% above the normal hourly wage for daytime hours and 70% for night hours, with total presence at the workplace capped at twelve hours a day. Saudi Arabia's Article 107 sets overtime at 150% of the hourly wage. Sources disagree on two points worth flagging rather than resolving: whether the Saudi calculation runs on basic or total wage, and whether Egyptian rest-day work is compensated as an extra day's wage plus a substitute day off or as double pay. Both were checked in 2026 and both belong in a client's written legal position before an element is built.
+
+The design question that settles the shape is whether the client pays by the hour or by the month. An hourly salary basis fed by time cards computes pay from hours every period; a monthly salary with an overtime element computes a fixed amount plus exceptions. They produce the same payslip in an ordinary month and behave completely differently in a month with unpaid leave, a mid-month joiner or a strike of overtime claims.
+
 ## Running it
 
 A **payroll definition** is the calendar: frequency, period start and end dates, cut-off dates and payment date — "Egypt Monthly Payroll, calendar months, cut-off on the 25th, paid on the last working day." A person must be assigned to a payroll, on the assignment, before they can be processed.
@@ -42,6 +58,14 @@ A **balance** is an accumulated total of element results over a period and dimen
 Calculation and payment are separate steps. **Prepayments** takes the run results and distributes them across each person's payment methods — someone may split their salary across two bank accounts. It runs after the payroll run and before the payment process, and it is the step people forget exists until a payment fails. Oracle's standard flow then archives the results, generates payslips, and produces the payments: the **payment process** creates the bank file. In Saudi Arabia and the UAE, the file must follow the Wage Protection System SIF format (Chapter 17), and a Gulf go-live always includes a bank-file test with the actual bank. The bank file is a common cause of go-live delay; never treat it as an afterthought.
 
 **Costing** allocates payroll results to accounting segments so the cost lands in the right place in the general ledger, broken down by department, project or cost centre. It is the bridge between HCM and Finance and is often owned jointly with a finance consultant.
+
+## Running it is a flow, not a button
+
+Calculate Payroll is not a button; it is a **payroll flow** — a sequenced set of tasks with a checklist, owners and a status for each step. Submitting the flow starts it, and the checklist is where a stuck task is seen. On a real cycle the flow is what the payroll team watches, and the consultant's job in hypercare is usually reading it rather than reading a log.
+
+When something is wrong, three corrections do different things. **Mark for retry** flags the records that failed so the next retry picks up only those. **Retry** re-processes them after the cause is fixed. **Roll back** removes the results entirely, as though the process had not run. The order constraint is the part to know: once prepayments have locked a run's results, the run cannot be rolled back until the prepayments are rolled back first. Corrections therefore unwind in the reverse of the order they were made, and a team that tries to roll back a run with prepayments sitting on top of it gets an error that reads like a bug and is not.
+
+Where the cost lands is the other half of finishing a cycle. Costing allocates results to accounting segments through the cost allocation flexfield, with values held at several levels — the payroll, the department, the element eligibility — and the most specific one winning. The results then move to the general ledger through Transfer to Subledger Accounting and Create Accounting, which is the point at which Finance sees payroll at all. A costing design that is merely plausible produces a month-end reconciliation that nobody can explain, which is why the finance consultant belongs in that conversation from the start rather than at the end.
 
 [[lab:payroll]]
 

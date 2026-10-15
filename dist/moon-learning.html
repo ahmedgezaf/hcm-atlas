@@ -1013,9 +1013,9 @@ track: functional
 title: The Payroll Object Chain
 subtitle: Element → eligibility → entry → run → balance → prepayment → payment → costing
 hue: 152
-minutes: 13
+minutes: 18
 labs: payroll, payslip, balances, parallel-run
-terms: element, element-classification, element-eligibility-element-link, element-entry, input-value, balance, salary-basis, payroll-definition, payroll-run, quickpay, prepayments, payment-process-bank-file, costing, parallel-run
+terms: element, element-classification, element-eligibility-element-link, element-entry, input-value, balance, salary-basis, payroll-definition, payroll-run, quickpay, prepayments, payment-process-bank-file, costing, parallel-run, salary-record, salary-component, rate-definition, time-card, payroll-flow, mark-for-retry-and-roll-back
 ---
 
 Payroll in Oracle is a chain of objects, each depending on the one before it. A consultant who can recite the chain and explain what breaks when a link is missing can debug most payroll problems without opening a log. The chain runs: element → element eligibility → element entry → payroll run → balance → prepayment → payment → costing.
@@ -1036,6 +1036,22 @@ An **element entry** is the actual attachment of an element to a specific person
 
 The **salary basis** decides how salary is stored, quoted and paid — annual, monthly or hourly — and which element it feeds. An annual basis stores EGP 240,000 and pays EGP 20,000 monthly. Getting the basis wrong multiplies or divides everyone's pay by twelve, so always confirm how the client quotes salary in offer letters before configuring it.
 
+## Salary, and where it actually lives
+
+Salary is held as a dated **salary record** on the assignment, and Oracle derives the element entry from it through the salary basis. That direction matters: a raise is entered on the salary page and the entry follows, never the other way round. Editing the derived entry directly leaves the salary page and the payslip telling different stories about the same person, and nothing in the system flags the disagreement — it surfaces when somebody compares a letter to a payslip.
+
+Most Gulf offers are not quoted as one number. They are quoted as basic plus housing plus transport, and that split is what **salary components** are for: an itemised breakdown held against the salary record rather than as separate manual entries. The split is a statutory question, not a presentational one, because the contributable wage in Chapter 17 and the UAE gratuity base in Chapter 18 are both computed from particular components. Designing the components to match how the client's offer letters are written is therefore part of getting end-of-service right, and it is much harder to change afterwards than before.
+
+**Rate definitions** convert between the stored figure and the figure a process needs — an annual salary into an hourly rate for overtime, a daily rate for an absence payment, a monthly rate for a liability accrual. Grade rates, promised in Chapter 2, attach ranges or step values to grades so that pay governed by grade is validated against the band rather than typed in free. A client whose pay is individually negotiated rarely needs them; one in the public sector or a large Gulf group almost always does.
+
+## The hours side of pay
+
+The functional track promises money, time and law, and time so far has meant leave. Hours are the other half, and they reach payroll in one of three ways: a time card in Oracle Time and Labor, an interface from a biometric or shift system, or a bulk load (Chapter 11). Choosing between them is a design decision with an owner and a cost, and it is worth making explicitly rather than discovering in the first run that attendance arrives as a spreadsheet somebody emails.
+
+An overtime element needs two things: a rate source, which is a rate definition, and a multiplier, which is statutory rather than negotiable. Under Egypt's Labour Law 14/2025 overtime is paid at no less than 35% above the normal hourly wage for daytime hours and 70% for night hours, with total presence at the workplace capped at twelve hours a day. Saudi Arabia's Article 107 sets overtime at 150% of the hourly wage. Sources disagree on two points worth flagging rather than resolving: whether the Saudi calculation runs on basic or total wage, and whether Egyptian rest-day work is compensated as an extra day's wage plus a substitute day off or as double pay. Both were checked in 2026 and both belong in a client's written legal position before an element is built.
+
+The design question that settles the shape is whether the client pays by the hour or by the month. An hourly salary basis fed by time cards computes pay from hours every period; a monthly salary with an overtime element computes a fixed amount plus exceptions. They produce the same payslip in an ordinary month and behave completely differently in a month with unpaid leave, a mid-month joiner or a strike of overtime claims.
+
 ## Running it
 
 A **payroll definition** is the calendar: frequency, period start and end dates, cut-off dates and payment date — "Egypt Monthly Payroll, calendar months, cut-off on the 25th, paid on the last working day." A person must be assigned to a payroll, on the assignment, before they can be processed.
@@ -1049,6 +1065,14 @@ A **balance** is an accumulated total of element results over a period and dimen
 Calculation and payment are separate steps. **Prepayments** takes the run results and distributes them across each person's payment methods — someone may split their salary across two bank accounts. It runs after the payroll run and before the payment process, and it is the step people forget exists until a payment fails. Oracle's standard flow then archives the results, generates payslips, and produces the payments: the **payment process** creates the bank file. In Saudi Arabia and the UAE, the file must follow the Wage Protection System SIF format (Chapter 17), and a Gulf go-live always includes a bank-file test with the actual bank. The bank file is a common cause of go-live delay; never treat it as an afterthought.
 
 **Costing** allocates payroll results to accounting segments so the cost lands in the right place in the general ledger, broken down by department, project or cost centre. It is the bridge between HCM and Finance and is often owned jointly with a finance consultant.
+
+## Running it is a flow, not a button
+
+Calculate Payroll is not a button; it is a **payroll flow** — a sequenced set of tasks with a checklist, owners and a status for each step. Submitting the flow starts it, and the checklist is where a stuck task is seen. On a real cycle the flow is what the payroll team watches, and the consultant's job in hypercare is usually reading it rather than reading a log.
+
+When something is wrong, three corrections do different things. **Mark for retry** flags the records that failed so the next retry picks up only those. **Retry** re-processes them after the cause is fixed. **Roll back** removes the results entirely, as though the process had not run. The order constraint is the part to know: once prepayments have locked a run's results, the run cannot be rolled back until the prepayments are rolled back first. Corrections therefore unwind in the reverse of the order they were made, and a team that tries to roll back a run with prepayments sitting on top of it gets an error that reads like a bug and is not.
+
+Where the cost lands is the other half of finishing a cycle. Costing allocates results to accounting segments through the cost allocation flexfield, with values held at several levels — the payroll, the department, the element eligibility — and the most specific one winning. The results then move to the general ledger through Transfer to Subledger Accounting and Create Accounting, which is the point at which Finance sees payroll at all. A costing design that is merely plausible produces a month-end reconciliation that nobody can explain, which is why the finance consultant belongs in that conversation from the start rather than at the end.
 
 [[lab:payroll]]
 
@@ -1541,6 +1565,82 @@ A naive progressive calculation that applies every band to every employee is wro
 - Mercans statutory alert, "Egypt: Minimum and Maximum Insurable Wage Limits Increase for Social Insurance from 2026". https://mercans.com/resources/statutory-alerts/egypt-minimum-and-maximum-insurable-wage-limits-increase-for-social-insurance-from-2026/
 - Deloitte Middle East, "Amendment to tax brackets and annual personal exemption" (Law 7/2024). https://www.deloitte.com/middle-east/en/services/tax/perspectives/amendment-to-tax-brackets-and-annual-personal-exemption.html
 - EY, "Egypt enacts new labor law affecting employers from 1 September 2025" (annual increment). https://www.ey.com/en_gl/technical/tax-alerts/egypt-enacts-new-labor-law-with-changes-affecting-employers-beginning-1-september-2025
+</script>
+
+<script type="text/markdown" class="src-chapter">
+---
+id: people-data
+num: 9
+domain: analytics
+track: technical
+title: Reporting on People
+subtitle: Why a headcount query is harder than a revenue query
+hue: 92
+minutes: 9
+labs: 
+terms: slowly-changing-dimension, as-of-date-join, point-in-time-snapshot, headcount-grain
+---
+
+Everything so far in this collection has been taught on orders, order lines and products, because that is where the mechanics are clearest. People data breaks one assumption those examples quietly rely on: that a row describes something that is true now. An HR record describes something that was true between two dates, and every other row for the same person describes a different window. A query written as if the table held one row per person returns a number that looks plausible and is wrong — and this is the single most common way a report built by someone competent at SQL still misreports headcount.
+
+This chapter is the bridge to the Oracle HCM collection. Chapter 4 there calls it effective dating; the modelling world calls it a slowly changing dimension. They are the same idea, and a consultant who works across both is expected to speak either.
+
+## The same idea, two vocabularies
+
+A **slowly changing dimension** is a dimension whose attributes change over time, and the question is what the warehouse does about it. Type 1 overwrites: the old value is gone, which is right for a corrected typo and wrong for anything else. **Type 2** keeps history by adding a row — the old row is closed with an end date and a new one opened — so the dimension holds one row per version of the entity, each valid for a period.
+
+That is exactly what an HR system does natively. A promotion does not update the assignment; it end-dates the current record and inserts a new one. So an HCM source is already type 2, which has two consequences for anyone reporting on it. There is no transformation step to build the history, because it is there. And there is no way to avoid dealing with it, because every query touches it.
+
+## The predicate that makes a query mean something
+
+The whole of the difference is one pair of conditions:
+
+```
+SELECT ...
+FROM   assignments a
+WHERE  DATE '2026-06-30' BETWEEN a.effective_start_date AND a.effective_end_date
+```
+
+Without it, a person promoted twice returns three rows; with it, one. Written as a join between a person dimension and a fact, the same predicate has to appear for every date-effective table in the query, not just the one the author was thinking about — two name versions joined to three assignment versions produce six rows for one human, and nothing in the result says so.
+
+Oracle's own tables carry the warning in their names: a `_f` suffix marks a date-effective table, and `_m` marks one that can change more than once in a single day, which needs a further filter to keep the last change of each day. The HCM collection's Chapter 13 has the query written out; the point to carry here is that the filter is per table, and missing one is silent.
+
+## What one row means, again
+
+Chapter 1 of this collection said the grain is the first thing to establish. In people data the grain has a second axis: not just *what* a row describes, but *when* it was true.
+
+**Headcount** counts humans at a moment. **FTE** sums the share of a full workload each one works, so a department of ten with four half-timers is a headcount of ten and an FTE of eight — two correct answers to two different questions, which the HCM collection's Chapter 7 covers from the configuration side. Both still need the as-of date, because both are a count of rows that were valid on a given day.
+
+And a person with two concurrent assignments is one human with two rows that are both current, which no date filter will collapse. That is what the primary-assignment flag is for, and it is the reason a headcount query filters on it while a workload query does not.
+
+## Point in time, period end, and the trend that always under-reports
+
+A number for a single day is a **point-in-time snapshot**. A trend is a series of them, and how the series is built decides whether it is honest.
+
+The tempting shortcut is to take today's rows and group them by hire date and termination date. It produces a smooth curve and it is wrong, because it reports today's attributes — today's department, today's grade — as if they had always applied, and it silently loses anyone whose record was later corrected. The reorganization that moved 200 people into a new department last month appears, in that curve, to have happened three years ago.
+
+The honest alternative is to evaluate the as-of predicate once per period and keep the answer: one row per person per month, built deliberately and stored, rather than recomputed from live history every time someone opens the report. It is more work on the way in and it is the only version that reconciles with what the HR team reported at the time.
+
+## What a reportable people dataset looks like
+
+For a BI tool, the shape worth building is a fact of one row per person per period, carrying the attributes as they were in that period — department, grade, location, FTE, status — plus the keys to join the dimensions. It is deliberately denormalized and deliberately snapshotted, and it makes every subsequent question cheap: headcount by month, attrition by department as it stood then, FTE against budget, a starters-and-leavers reconciliation that adds up.
+
+Building it is where the two halves of this atlas meet. The HCM side knows which object holds which attribute and when it changed; the analytics side knows what grain to land it at and why a star schema wants it that way. Neither half alone produces a number anyone should sign.
+
+## Common mistakes
+
+- Treating an HR table as one row per person. It is one row per version.
+- Filtering one date-effective table in a multi-table join and not the others.
+- Reporting a trend from current rows, so history is restated with today's attributes.
+- Counting rows for headcount when a person can hold two concurrent assignments.
+- Using headcount and FTE interchangeably because they are close in most months.
+- Rebuilding history live on every refresh instead of snapshotting it once per period.
+
+## Sources
+
+- Kimball Group, "Slowly Changing Dimensions" — the type 1, 2 and 3 definitions this chapter uses. https://www.kimballgroup.com/2008/08/slowly-changing-dimensions/
+- Kimball Group, "Slowly Changing Dimensions, Part 2". https://www.kimballgroup.com/2008/09/slowly-changing-dimensions-part-2/
+- Oracle, *Implementing Global Human Resources* — date-effective objects and the history they keep. https://docs.oracle.com/en/cloud/saas/human-resources/faigh/index.html
 </script>
 
 <script type="text/markdown" class="src-chapter">
@@ -2057,6 +2157,151 @@ What decides the money is not the formula but the service length fed into it, an
 - Ministry of Human Resources and Social Development (Saudi Arabia), *Labor Law* (Royal Decree M/51), official English translation — Articles 84 and 85. https://www.hrsd.gov.sa/sites/default/files/2023-02/Labor.pdf
 - Ministry of Human Resources and Social Development, "Calculating End-of-Service Award" and "End-of-Service Award Regulations", for the pro-rating of part years and what counts as wage. https://www.hrsd.gov.sa/en/knowledge-centre/articles/316
 - Qiwa (Ministry of Human Resources and Social Development) — the platform itself, for what employers file. https://qiwa.sa
+</script>
+
+<script type="text/markdown" class="src-chapter">
+---
+id: uae
+num: 18
+domain: hcm
+track: functional
+title: The UAE
+subtitle: A second Gulf country that configures nothing like the first
+hue: 118
+minutes: 10
+labs: 
+terms: mohre, uae-fixed-term-contract, gpssa, alternative-end-of-service-savings-scheme, emiratisation-and-nafis
+---
+
+The UAE employs more Oracle HCM consultants than anywhere else in the region, and almost nothing in a Saudi implementation transfers to it unchanged. The gratuity formula is different, the wage-protection file is different, the pension covers a different population under a different authority, and the nationalization programme counts differently. A consultant who has done one Gulf country and assumes the second is a variation of it will design the wrong thing twice before anyone notices. This chapter is the UAE half of Chapter 17.
+
+> **Every figure here moves, and the sources disagree more than usual.** The rules below were checked in 2026 against PwC and Mercans summaries; the authorities are MOHRE for labour matters, GPSSA for pensions and Nafis for Emiratisation, and the official Arabic text governs. Free zones — the DIFC and ADGM especially — run their own employment regimes that this chapter does not cover. Verify before configuring anything.
+
+## Every contract is fixed-term now
+
+Federal Decree-Law No. 33 of 2021 replaced the 1980 labour law and removed the distinction a generation of HR managers grew up with: there is no unlimited contract in the private sector any more. Every contract is fixed-term, renewable, and the renewals are where the administrative work lives.
+
+That is a configuration statement, not a legal footnote. Contract end dates become data the system has to hold and act on, which means contract-expiry alerting is not an optional extra in a UAE implementation the way it is in an Egyptian one, and the lifecycle events of Chapter 8 acquire a route that Egypt does not have: expiry without termination. A client still using "limited" and "unlimited" in a requirements workshop is describing the superseded law, and the useful response is to ask when their contracts were last reissued rather than to configure the vocabulary they used.
+
+## The gratuity is not the Saudi one
+
+The end-of-service gratuity under Article 51 is **21 days of basic wage for each of the first five years of service, and 30 days for each year after that**, payable to anyone with at least one year of continuous service and capped at two years' total wage. Unpaid absence does not count toward service, and the settlement falls due within fourteen days of the contract ending.
+
+Three of those details differ from Saudi Arabia in ways that change the calculation, not just the number. The UAE accrues on **basic wage**, where the Saudi award in Chapter 17 is computed on the last wage as defined by that law — so the component split of the salary (Chapter 5) decides the UAE liability directly. The UAE applies a **cap** of two years' pay, which Saudi Arabia does not. And the UAE pays the full award on resignation after one year, where the Saudi scale reduces it below ten years of service. An EOSB element built for one country and reused in the other is wrong in at least three places.
+
+Since 2023 employers may also join a voluntary **alternative end-of-service savings scheme**, paying monthly contributions into a regulated fund instead of accruing a lump sum on their own books. Where a client has joined it, the payroll design changes shape entirely: a monthly contribution element replaces an accrual and liability calculation, and the final settlement no longer carries the gratuity at all. Ask which model the client is on before designing either.
+
+## GPSSA covers nationals; expatriates have the gratuity instead
+
+Pension contributions through the General Pension and Social Security Authority apply to UAE nationals, and to other GCC nationals under the Gulf insurance-protection extension that Chapter 17 describes from the Saudi side. Expatriates are not in the pension system at all — the gratuity is their end-of-service provision, which is why the two subjects sit in one chapter here and in two places in a European implementation.
+
+There are two contribution regimes, split by when the worker was first registered. Workers registered before November 2023 sit on the older scheme; those entering the workforce from the end of October 2023 fall under Federal Decree-Law No. 57 of 2023, whose total contribution is higher and whose split between employee and employer differs. Published summaries disagree on both the exact cutoff date and the current percentages, and a government subsidy can reduce the employer share at lower salaries, so the rates belong in a dated global value read from GPSSA's own published schedule rather than hard-coded into a formula — the mistake Chapter 12's lab is built around.
+
+What matters structurally is the same point Chapter 17 makes about Saudi Arabia: nationality and registration date are payroll-driving attributes, not demographics. They decide which schedule applies, and a person record missing either produces a contribution that is quietly wrong rather than an error.
+
+## The Wage Protection System, UAE edition
+
+The UAE runs its own Wage Protection System through MOHRE and the Central Bank. Salaries are paid through approved agents and reported in a Salary Information File whose layout is a UAE layout — it is not the file Saudi Arabia's Mudad platform accepts, and the two countries' records are not interchangeable.
+
+This is the single most common cross-Gulf mistake in a payroll design: treating "the Gulf WPS" as one requirement. It is one idea implemented separately per country, with its own file, its own agent, its own identifiers and its own rejection behaviour. A multi-country Gulf go-live needs one bank-file build and test cycle per country, with the real bank, every time (Chapter 5).
+
+## Emiratisation, and what it asks of the data
+
+**Emiratisation** is the UAE's nationalization programme, administered with the Nafis platform. Private-sector companies above the size threshold must raise the share of UAE nationals in skilled roles by a set percentage each year, with monthly financial penalties per unfilled position, escalating annually. Penalties for artificially satisfying the quota — hiring a national who does not genuinely work — are heavier again and sit under a separate decision.
+
+For the consultant the mechanics matter less than what they require of the record: a trustworthy national identifier, an accurate nationality, a job that is correctly classified as skilled, and a reporting line that can produce the ratio on demand. Those are Chapter 2 and Chapter 13 problems wearing a compliance hat, and they are the ones to raise in design rather than in the month the first report is due.
+
+## Where the structure differs
+
+Mainland and free-zone entities answer to different regulators, which usually means separate legal employers, separate registrations and separate wage-protection arrangements, even when the group presents itself as one business. The parent-PSU shape from Chapter 1 is common here: several legal employers, one filing entity, one payroll relationship across them where the statutory unit is shared.
+
+The practical question in the first workshop is therefore not "how many companies do you have" but "how many registrations do you file under, and with whom" — and the answer frequently surprises the client.
+
+## Common mistakes
+
+- Reusing a Saudi end-of-service element in the UAE. Different accrual, different base, different cap, different resignation treatment.
+- Assuming one Gulf WPS file. The UAE and Saudi Arabia have separate systems, formats and agents.
+- Treating "limited and unlimited contracts" as current. Every private-sector contract is fixed-term under the 2021 law.
+- Putting expatriates into the pension scheme. GPSSA covers nationals; expatriates have the gratuity.
+- Hard-coding pension percentages that change by registration date and by government subsidy.
+- Treating Emiratisation as a reporting problem at go-live rather than a data-quality problem in design.
+
+## Sources
+
+- PwC Worldwide Tax Summaries, United Arab Emirates — "Other taxes", for social-security contributions and the national and GCC populations they cover. https://taxsummaries.pwc.com/united-arab-emirates/individual/other-taxes
+- Mercans, "End of Service Gratuity (EOSG) in the UAE" — the Article 51 accrual, the one-year threshold and the two-year cap. https://mercans.com/glossary/uae-end-of-service-gratuity/
+- Federal Decree-Law No. 33 of 2021 on the Regulation of Employment Relationships, and Federal Decree-Law No. 57 of 2023 on pensions — the governing texts, published by the UAE government; the Arabic text governs.
+- MOHRE for labour and wage protection, GPSSA for pension contribution schedules, and Nafis for current Emiratisation targets and penalties — the authorities to verify against before configuring.
+</script>
+
+<script type="text/markdown" class="src-chapter">
+---
+id: approvals
+num: 19
+domain: hcm
+track: technical
+title: Approvals & the Transaction Console
+subtitle: Where a transaction goes after someone presses submit
+hue: 80
+minutes: 8
+labs: 
+terms: approval-rule, approver-type, serial-vs-parallel-approval, transaction-console, auto-approval
+---
+
+Every chapter before this one ends at submit. This one covers what happens next, which is where a surprising share of a project's first live month actually goes. Approval routing is named in requirements workshops constantly, configured late, tested by the person who built it, and then found to be wrong by a manager who never received a notification. "How would you configure approvals for a promotion?" is also a standard interview question, and a candidate who can name where the rules live and what an approver type needs in order to resolve sounds like someone who has shipped one.
+
+## Where the rules live
+
+Approval rules for HCM transactions are configured through the **Manage Approval Transactions for HCM** task in Setup and Maintenance, which lists every approval-enabled transaction — hire, promotion, transfer, termination, absence, salary change — and lets each one carry its own rules. Underneath it is the same workflow engine that drives the BPM Worklist, and the older path of editing rules directly in BPM still exists, but the HCM task is the supported route for HCM transactions and the one to use.
+
+One rule set belongs to one transaction. That is worth saying plainly, because clients describe approvals as a single policy ("everything goes to the line manager, then HR") and then list four exceptions, each of which is a condition inside one transaction's rule set rather than a new policy. Pinning down which transactions are in scope is the first thing to do, and the list is usually longer than the workshop assumes.
+
+## Approver types, and what each one needs to exist
+
+A rule says who approves, as an **approver type** plus a depth. The common ones:
+
+- **Supervisory hierarchy** — the manager chain from the worker, up as many levels as the rule asks for. It needs manager relationships to be complete; a gap stops the chain.
+- **Position hierarchy** — the chain of positions rather than people. It needs positions, and a position hierarchy that is actually maintained.
+- **Job level** — climbs the management chain until it reaches someone at or above a stated level. It needs job levels populated on jobs.
+- **Representative** — the area of responsibility from Chapter 15: the HR representative or other named responsibility for that worker's population.
+- **Approval group** — a named set of people, approving in serial or in parallel.
+- **Application role or named user** — a backstop, and the one to be most careful with, because it hard-codes a person into a process they will eventually leave.
+
+The failure that follows from this list is the common one: routing a promotion up a **position hierarchy** at a client who never built positions leaves the transaction with no path to follow. It does not error in the way a missing element errors. It sits there. Chapter 7's distinction between the solid and the dotted line matters here too — approvals follow the solid line, and a matrix organization that routes to the functional manager has to say so explicitly.
+
+## Serial, parallel, and what "approved" means
+
+Participants run in **serial** — each approver in turn, any rejection ending it — or in **parallel**, where several are asked at once. For a parallel group the question to settle with the client is whether every member must approve or whether the first response decides, because "the finance team approves" means one of those two things and they behave differently when somebody is on leave.
+
+Rules can also carry conditions, and this is where a functional consultant spends their configuration time: route to one more level when the salary increase exceeds a threshold, skip HR for a reason code that means a correction, require the compensation team only for off-cycle changes. The ceiling where it stops being a functional job is roughly where the condition stops being expressible in the rule editor and starts needing custom logic — at which point it belongs with a technical colleague rather than in a workbook.
+
+## Auto-approval is still a configuration
+
+Clients ask for "no approvals" more often than consultants expect, usually for data-migration cutover or for a transaction type they consider administrative. That is **auto-approval**, and it is configured — a rule that approves automatically — rather than an absence of rules. Deleting the rule set instead produces transactions with nowhere to go. It is also worth asking whether they mean no approvals forever or none during cutover, because the second is a temporary rule that somebody must remember to put back.
+
+## The Transaction Console
+
+The **Transaction Console** is where a transaction that has not landed is found. It lists in-flight, errored and completed transactions, shows where each one is waiting, and allows a privileged user to withdraw a transaction, force it through, or see the error behind a failure. In hypercare it is the first screen to open when someone says a change "did not happen": nine times out of ten the change exists and is sitting in an approval that never reached anybody.
+
+Access to it is itself a design decision. It can withdraw and force-approve transactions, so it belongs with a small, named group — and that group should be agreed before go-live rather than during the first incident.
+
+## Testing approvals properly
+
+An approval path cannot be tested by the person who configured it, because the one thing being tested is whether it reaches somebody else. Real testing needs the actual approver accounts, in the right hierarchy, with notifications switched on, and it needs the negative cases: an approver on leave, an approver who has left the company, a worker whose manager position is vacant. Those are the cases that fail in production, and they are cheap to script in user acceptance testing and expensive to meet in week one.
+
+## Common mistakes
+
+- Routing up a position hierarchy at a client who manages by job.
+- Treating "no approvals" as deleting the rules rather than configuring auto-approval.
+- Hard-coding a named user as approver, who then leaves.
+- Agreeing "the team approves" without settling whether the first response decides.
+- Testing approvals single-handed, so nothing proves a notification ever arrived.
+- Leaving Transaction Console access unassigned until the first stuck transaction.
+
+## Sources
+
+- Oracle, *Implementing Global Human Resources* — the approvals chapters, covering the Manage Approval Transactions for HCM task, approver types and rule conditions. https://docs.oracle.com/en/cloud/saas/human-resources/faigh/index.html
+- Oracle, *Using Common Features for HCM* — the Transaction Console, and what withdrawing or forcing a transaction does. https://docs.oracle.com/en/cloud/saas/human-resources/faucf/index.html
 </script>
 
 <!-- ========================================================================
@@ -3659,6 +3904,178 @@ What decides the money is not the formula but the service length fed into it, an
     "watchOut": "End-of-service gratuity and leave bands are calculated on service. Solving a rehire by back-dating the work relationship instead of setting a seniority date corrupts every headcount and accrual figure for that period.",
     "ar": "تاريخ الأقدمية",
     "say": "الأقدمية"
+  },
+  {
+    "id": "mohre",
+    "name": "MOHRE",
+    "chapter": "uae",
+    "definition": "The UAE Ministry of Human Resources and Emiratisation: the authority for private-sector employment, contracts and wage protection on the mainland.",
+    "watchOut": "Free zones such as the DIFC and ADGM have their own employment regimes and are not under MOHRE.",
+    "ar": "وزارة الموارد البشرية والتوطين",
+    "say": "الوزارة"
+  },
+  {
+    "id": "uae-fixed-term-contract",
+    "name": "Fixed-term contract (UAE)",
+    "chapter": "uae",
+    "definition": "Since Federal Decree-Law 33/2021 every private-sector contract in the UAE is fixed-term and renewable; the unlimited contract no longer exists.",
+    "watchOut": "A client still saying 'limited and unlimited' is describing the superseded 1980 law.",
+    "ar": "عقد محدد المدة",
+    "say": "العقد المحدد"
+  },
+  {
+    "id": "gpssa",
+    "name": "GPSSA",
+    "chapter": "uae",
+    "definition": "The UAE General Pension and Social Security Authority, which covers UAE nationals and GCC nationals working in the UAE. Expatriates are outside it and receive the end-of-service gratuity instead.",
+    "watchOut": "Contribution rates differ by when the worker was first registered, so they belong in a dated global value rather than in a formula.",
+    "ar": "الهيئة العامة للمعاشات والتأمينات الاجتماعية",
+    "say": "المعاشات"
+  },
+  {
+    "id": "alternative-end-of-service-savings-scheme",
+    "name": "Alternative end-of-service savings scheme",
+    "chapter": "uae",
+    "definition": "A voluntary UAE scheme in which the employer pays monthly contributions into a regulated fund instead of accruing a gratuity liability, changing the final settlement's shape entirely.",
+    "watchOut": "Where a client has joined it, an accrual-and-liability design is the wrong design.",
+    "ar": "نظام الادخار البديل لمكافأة نهاية الخدمة",
+    "say": "نظام الادخار"
+  },
+  {
+    "id": "emiratisation-and-nafis",
+    "name": "Emiratisation and Nafis",
+    "chapter": "uae",
+    "definition": "The UAE's nationalization programme and the platform that administers it: private-sector employers above a size threshold must raise the share of UAE nationals in skilled roles each year, with monthly penalties per unfilled position.",
+    "watchOut": "It depends on job classification and nationality being right in the record long before the first report is due.",
+    "ar": "التوطين",
+    "say": "نافس"
+  },
+  {
+    "id": "salary-record",
+    "name": "Salary record",
+    "chapter": "payroll",
+    "definition": "The dated salary held on the assignment, from which Oracle derives the element entry through the salary basis.",
+    "watchOut": "Editing the derived entry directly makes the salary page and the payslip disagree, and nothing reports it.",
+    "ar": "سجل الراتب",
+    "say": "الـ salary record"
+  },
+  {
+    "id": "salary-component",
+    "name": "Salary component",
+    "chapter": "payroll",
+    "definition": "An itemised part of a salary — basic, housing, transport — held against the salary record rather than as separate manual entries.",
+    "watchOut": "The component split decides the contributable wage and the gratuity base, so it is a statutory design question.",
+    "ar": "مكونات الراتب",
+    "say": "تفاصيل الراتب"
+  },
+  {
+    "id": "rate-definition",
+    "name": "Rate definition",
+    "chapter": "payroll",
+    "definition": "A configured conversion between a stored figure and the rate a process needs: annual to hourly for overtime, monthly to daily for an absence payment.",
+    "watchOut": "Absence payments and overtime that disagree with each other usually trace back to two different rate definitions.",
+    "ar": "تعريف المعدل",
+    "say": "الـ rate definition"
+  },
+  {
+    "id": "time-card",
+    "name": "Time card",
+    "chapter": "payroll",
+    "definition": "The record of hours worked that payroll reads, entered in Oracle Time and Labor, interfaced from an attendance system, or loaded in bulk.",
+    "watchOut": "Which of the three a client uses is a design decision; discovering it in the first run is too late.",
+    "ar": "بطاقة الدوام",
+    "say": "الحضور والانصراف"
+  },
+  {
+    "id": "payroll-flow",
+    "name": "Payroll flow",
+    "chapter": "payroll",
+    "definition": "The sequenced set of tasks a payroll cycle actually is, with a checklist, owners and a status per task.",
+    "watchOut": "A 'stuck payroll' is nearly always one task in the flow waiting, not the run failing.",
+    "ar": "تدفق عمليات الرواتب",
+    "say": "الـ flow"
+  },
+  {
+    "id": "mark-for-retry-and-roll-back",
+    "name": "Mark for retry, retry and roll back",
+    "chapter": "payroll",
+    "definition": "The three corrections to a payroll process: flag the failed records, re-process them once the cause is fixed, or remove the results entirely.",
+    "watchOut": "Prepayments lock the run's results, so they must be rolled back before the run can be.",
+    "ar": "إعادة المعالجة والتراجع",
+    "say": "نعمل rollback"
+  },
+  {
+    "id": "approval-rule",
+    "name": "Approval rule",
+    "chapter": "approvals",
+    "definition": "The configured routing for one transaction type, held against that transaction in the Manage Approval Transactions for HCM task.",
+    "watchOut": "One rule set belongs to one transaction; a client's single 'approval policy' is usually conditions inside several of them.",
+    "ar": "قاعدة الاعتماد",
+    "say": "الـ approval rule"
+  },
+  {
+    "id": "approver-type",
+    "name": "Approver type",
+    "chapter": "approvals",
+    "definition": "How a rule identifies who approves: supervisory hierarchy, position hierarchy, job level, representative, approval group, application role or named user.",
+    "watchOut": "Each type needs its underlying data to exist. Routing up a position hierarchy at a job-based client leaves the transaction with no path.",
+    "ar": "نوع المعتمد",
+    "say": "مين بيعتمد"
+  },
+  {
+    "id": "serial-vs-parallel-approval",
+    "name": "Serial vs parallel approval",
+    "chapter": "approvals",
+    "definition": "Whether participants are asked in turn or at once, and for a group, whether everyone must approve or the first response decides.",
+    "watchOut": "'The team approves' means one of two different behaviours when somebody is on leave.",
+    "ar": "اعتماد تتابعي أو متوازي",
+    "say": "بالترتيب ولا مع بعض"
+  },
+  {
+    "id": "transaction-console",
+    "name": "Transaction Console",
+    "chapter": "approvals",
+    "definition": "The screen that lists in-flight, errored and completed transactions, and lets a privileged user withdraw one, force it through, or read the error behind it.",
+    "watchOut": "It can force-approve, so access is a design decision to settle before go-live, not during the first incident.",
+    "ar": "وحدة متابعة المعاملات",
+    "say": "الـ transaction console"
+  },
+  {
+    "id": "auto-approval",
+    "name": "Auto-approval",
+    "chapter": "approvals",
+    "definition": "A rule that approves a transaction without a human step — what a client means when they ask for no approvals.",
+    "watchOut": "Deleting the rule set instead leaves transactions with nowhere to go.",
+    "ar": "اعتماد تلقائي",
+    "say": "بيعدّي أوتوماتيك"
+  },
+  {
+    "id": "slowly-changing-dimension",
+    "name": "Slowly changing dimension",
+    "chapter": "people-data",
+    "definition": "A dimension whose attributes change over time. Type 1 overwrites the old value; type 2 keeps history by closing the old row and opening a new one.",
+    "watchOut": "An HR source is already type 2, so the history cannot be avoided — only handled."
+  },
+  {
+    "id": "as-of-date-join",
+    "name": "As-of-date join",
+    "chapter": "people-data",
+    "definition": "The predicate that keeps only the version of a row valid on a chosen date, written once for every date-effective table in the query.",
+    "watchOut": "Filtering one table and not the others multiplies rows silently."
+  },
+  {
+    "id": "point-in-time-snapshot",
+    "name": "Point-in-time snapshot",
+    "chapter": "people-data",
+    "definition": "The state of a population on one date, stored rather than recomputed, so a trend is a series of honest snapshots instead of today's data restated.",
+    "watchOut": "A trend built from current rows reports today's department as though it always applied."
+  },
+  {
+    "id": "headcount-grain",
+    "name": "Headcount grain",
+    "chapter": "people-data",
+    "definition": "What one row means in a people dataset: which person, in which version, valid on which date — and whether the question counts humans or workload.",
+    "watchOut": "A person with two concurrent assignments is one human and two current rows; no date filter collapses that."
   }
 ]
 </script>
@@ -4498,6 +4915,212 @@ What decides the money is not the formula but the service length fed into it, an
     "terms": [
       "fit-gap-analysis",
       "change-request"
+    ]
+  },
+  {
+    "chapter": "uae",
+    "question": "A client runs payroll in Saudi Arabia and is adding the UAE. What can be reused and what has to be built again?",
+    "answer": "The chain itself — elements, eligibility, entries, run, balances, prepayments, payment, costing — is the same, and so are the structures. Almost nothing statutory transfers. End-of-service is 21 days of basic wage per year for the first five years and 30 after, capped at two years' pay and payable from one year of service, against the Saudi award on last wage with a resignation scale. The wage-protection file is a UAE Salary Information File through MOHRE, not Mudad. Pension covers nationals through GPSSA, not GOSI. Each country is its own legislative data group, so the elements and formulas are rebuilt regardless.",
+    "terms": [
+      "end-of-service-benefit-eosb-gratuity",
+      "gpssa",
+      "mohre",
+      "legislative-data-group-ldg"
+    ]
+  },
+  {
+    "chapter": "uae",
+    "question": "An HR manager in Dubai asks you to configure unlimited contracts. What do you say?",
+    "answer": "That the unlimited contract no longer exists in the private sector: Federal Decree-Law 33/2021 made every contract fixed-term and renewable. Then ask when their contracts were last reissued, because the vocabulary usually means the paperwork predates the law rather than that they want something unusual. Practically it means contract end dates are live data — expiry alerting and renewal are part of the build, not an afterthought.",
+    "terms": [
+      "uae-fixed-term-contract",
+      "end-of-contract"
+    ]
+  },
+  {
+    "chapter": "lifecycle",
+    "question": "Name the three exit routes and say what differs downstream in each.",
+    "answer": "Resignation, employer-initiated termination, and expiry of a fixed-term contract. All three end-date the work relationship and leave the person record intact. They differ in money and in notice: resignation carries no severance but does pay out accrued leave, and in the Gulf it can reduce the end-of-service award; termination carries severance exposure and the strongest documentation requirement; expiry needs neither party to act, which is why it is the one that catches a payroll team out when nobody noticed the date. All three feed a final settlement.",
+    "terms": [
+      "resignation",
+      "termination",
+      "end-of-contract",
+      "final-settlement"
+    ]
+  },
+  {
+    "chapter": "lifecycle",
+    "question": "What is a final settlement made of, and which Oracle objects produce each part?",
+    "answer": "Final pay to the termination date from the payroll run; accrued but untaken leave from the absence plan's balance, converted by a rate definition; the end-of-service award or gratuity where the country has one, usually from a dedicated element; minus any outstanding loan or advance, which is an element entry with a remaining balance. It is run as a QuickPay rather than waiting for the cycle, and the payroll relationship's last standard process date and final close date decide whether a late correction can still be paid at all.",
+    "terms": [
+      "final-settlement",
+      "quickpay",
+      "last-standard-process-date",
+      "end-of-service-benefit-eosb-gratuity"
+    ]
+  },
+  {
+    "chapter": "lifecycle",
+    "question": "The sources disagree about the notice period. How do you configure it?",
+    "answer": "As a parameter, not a constant — and then get the client's legal position in writing. Where summaries of a statute genuinely conflict, the consultant's job is to make the number configurable, record which reading was used and who approved it, and flag it for re-verification when the executive regulations land. Hard-coding either reading hides a decision that was never actually made.",
+    "terms": [
+      "notice-period",
+      "test-script"
+    ]
+  },
+  {
+    "chapter": "egypt-leave",
+    "question": "Walk through the Egyptian annual-leave ladder and its two boundary cases.",
+    "answer": "Fifteen days in the first year, pro-rated once six months of service are complete; twenty-one from the second year; thirty for workers with ten years of service or aged over fifty; forty-five for persons with disabilities; plus seven days for hazardous, arduous or remote work. The boundary cases are the test cases: the person who crosses ten years mid-year and the person who turns fifty mid-year both change band part-way through an accrual term, and the plan has to say whether the new rate applies from that date or from the next term. Figures are Law 14/2025, checked in 2026 — re-verify before configuring.",
+    "terms": [
+      "egyptian-annual-leave-entitlement",
+      "accrual-band",
+      "accrual-plan"
+    ]
+  },
+  {
+    "chapter": "egypt-leave",
+    "question": "Why is sick leave a qualification plan rather than an accrual plan?",
+    "answer": "Because nothing accumulates. The entitlement is not earned month by month and carried forward; it is triggered by an event and paid at percentages of the insurable wage that step down over the duration of the absence, within a yearly cap. An accrual plan would model a balance that does not exist. The same reasoning puts maternity in a qualification plan with an occurrence cap rather than a balance.",
+    "terms": [
+      "sick-leave",
+      "qualification-plan",
+      "accrual-plan"
+    ]
+  },
+  {
+    "chapter": "egypt-leave",
+    "question": "Why can casual leave not simply be added to the annual entitlement?",
+    "answer": "Because it is drawn from it, not added to it. Casual leave is a short-notice entitlement taken out of the annual balance with a cap on how many days a year may be used that way, so modelling it as its own accrual double-counts the entitlement and overstates the leave liability. It is configured as an absence type against the annual plan with its own rules, not as a second plan.",
+    "terms": [
+      "casual-leave",
+      "absence-type",
+      "absence-plan"
+    ]
+  },
+  {
+    "chapter": "workforce",
+    "question": "A client wants to stop using positions and manage everything with jobs. What do you ask?",
+    "answer": "Whether they budget and approve headcount by seat, and whether they need to know that a seat exists while it is empty. Positions carry that; jobs do not. If approvals, budgeting or org charts depend on vacancies being visible, positions earn their cost; if the client simply wants to know what work people do, jobs are lighter and position synchronization is one less thing to maintain. The wrong answer is to decide on tidiness.",
+    "terms": [
+      "position",
+      "job"
+    ]
+  },
+  {
+    "chapter": "workforce",
+    "question": "What is a grade ladder for, and when does a client actually need grade rates?",
+    "answer": "A grade ladder orders grades into a progression, and grade rates attach pay ranges or step values to them. A client needs rates when pay is governed by the grade — minimum and maximum by band, or fixed steps — rather than negotiated per person, which is common in the public sector and in large Gulf groups. Where pay is individual, the ladder alone is enough, and building rates nobody maintains produces ranges that are wrong within a year.",
+    "terms": [
+      "grade",
+      "grade-step"
+    ]
+  },
+  {
+    "chapter": "absence",
+    "question": "What is the difference between an absence type and an absence plan?",
+    "answer": "The type is what the worker selects — Annual Leave, Sick Leave — and the plan is the rules engine behind it: who is eligible, how entitlement is earned or granted, how it is paid. One plan can serve several types, and a type must be associated with at least one plan or it does nothing. When a client describes a new kind of leave, the real question is whether it needs new rules or only a new name on existing ones.",
+    "terms": [
+      "absence-type",
+      "absence-plan",
+      "eligibility-profile"
+    ]
+  },
+  {
+    "chapter": "absence",
+    "question": "How would you handle carryover that the client has never written down?",
+    "answer": "Pin it before building, because it is the rule that creates liability. Ask how many days may carry into the next term, when carried days expire, and whether unused leave is paid out instead. Those three answers are the carryover, expiry and encashment rules, and a client who has not agreed them internally will discover the disagreement in the first year-end — which is a bad time to find out the balance everyone was looking at was wrong.",
+    "terms": [
+      "carryover",
+      "leave-encashment",
+      "accrual-plan"
+    ]
+  },
+  {
+    "chapter": "security",
+    "question": "A line manager can open the page but sees no employees. Where do you look?",
+    "answer": "At the data side, not the function side. They have the function privilege, which is why the page opens; what they lack is scope. For a line manager that usually means the manager hierarchy is not built or their reports are not attached to them; for an HR specialist it means the security profile on their data role does not cover that population. Answering a visibility question by changing a job role is the classic wrong move.",
+    "terms": [
+      "job-role",
+      "data-role-and-security-profile",
+      "area-of-responsibility-aor"
+    ]
+  },
+  {
+    "chapter": "security",
+    "question": "Why not simply build a custom role for each department's HR representative?",
+    "answer": "Because it multiplies maintenance for something an area of responsibility already does. An AOR assigns responsibility for a defined population and drives both access and routing, so one role plus AORs covers what would otherwise be a role per department — each needing its own security profile, its own testing and its own upkeep every time the structure changes. Reach for a custom data role when the scope cannot be expressed as a responsibility, not as the default.",
+    "terms": [
+      "area-of-responsibility-aor",
+      "data-role-and-security-profile",
+      "job-role"
+    ]
+  },
+  {
+    "chapter": "payroll",
+    "question": "A client's offer letters quote basic plus housing plus transport. Why does that matter beyond presentation?",
+    "answer": "Because the statutory bases are computed from particular components. The contributable wage for Saudi GOSI and the UAE gratuity base are both drawn from the split, so how salary components are designed decides what the client owes, not just how the payslip reads. It is also far harder to restructure components after go-live than before, which makes it a first-workshop question rather than a detail.",
+    "terms": [
+      "salary-component",
+      "salary-record"
+    ]
+  },
+  {
+    "chapter": "payroll",
+    "question": "Payroll ran, prepayments ran, and then a wrong element entry is found. What order do you unwind it in?",
+    "answer": "Backwards. Prepayments lock the run's results, so the prepayments are rolled back first and only then the run; trying it the other way produces an error that reads like a defect and is not. Then fix the entry, and use mark for retry and retry so only the affected records are reprocessed rather than the whole population.",
+    "terms": [
+      "mark-for-retry-and-roll-back",
+      "prepayments",
+      "payroll-flow"
+    ]
+  },
+  {
+    "chapter": "payroll",
+    "question": "How do hours get into payroll, and what does an overtime element need?",
+    "answer": "Hours arrive from a time card in Oracle Time and Labor, from an interface with an attendance or shift system, or from a bulk load — and which one is a design decision with an owner. An overtime element needs a rate source, which is a rate definition, and a multiplier, which is statutory: Egypt's Law 14/2025 sets at least 35% above the hourly wage by day and 70% at night, and Saudi Article 107 sets 150%. Sources disagree on whether the Saudi base is basic or total wage, so that goes in writing from the client's counsel before anything is built.",
+    "terms": [
+      "time-card",
+      "rate-definition",
+      "element"
+    ]
+  },
+  {
+    "chapter": "approvals",
+    "question": "How would you configure approvals for a promotion, and what would you check first?",
+    "answer": "In Manage Approval Transactions for HCM, on the promotion transaction, with an approver type that the client's data can actually resolve — supervisory hierarchy where managers are maintained, job level where they are not, representative where HR owns it. Check that first: routing up a position hierarchy at a client who manages by job leaves the transaction waiting with no path and no error. Then add the conditions that matter, usually an extra level above a salary threshold, and test with real approver accounts rather than your own.",
+    "terms": [
+      "approval-rule",
+      "approver-type",
+      "transaction-console"
+    ]
+  },
+  {
+    "chapter": "approvals",
+    "question": "A manager says their change never happened. Where do you look, and what are you expecting to find?",
+    "answer": "The Transaction Console. Most of the time the change exists and is sitting in an approval that never reached anybody — a vacant approver position, a terminated approver, or a hierarchy gap. The console shows where it is waiting and lets a privileged user withdraw it or push it through, which is why that access is agreed with a named group before go-live rather than handed out during the first incident.",
+    "terms": [
+      "transaction-console",
+      "approver-type"
+    ]
+  },
+  {
+    "chapter": "people-data",
+    "question": "Your headcount report returns more people than the company employs. What is the first thing you check?",
+    "answer": "Whether every date-effective table in the query carries its own as-of filter. An HR source keeps one row per version, so a person promoted twice returns three rows, and two name versions joined to three assignment versions return six. After that, check the primary assignment flag: somebody with two concurrent assignments is one human with two currently valid rows, and no date predicate collapses that.",
+    "terms": [
+      "as-of-date-join",
+      "slowly-changing-dimension",
+      "headcount-grain"
+    ]
+  },
+  {
+    "chapter": "people-data",
+    "question": "Why is an attrition trend built from current rows wrong, even when the leaver dates are right?",
+    "answer": "Because it restates history with today's attributes. Grouping today's rows by hire and termination date reports each person's current department and grade as though they had always applied, so a reorganization last month appears to have happened years ago, and anyone whose record was later corrected quietly moves. The honest version evaluates the as-of predicate once per period and stores the answer — one row per person per month — so the trend reconciles with what HR reported at the time.",
+    "terms": [
+      "point-in-time-snapshot",
+      "as-of-date-join"
     ]
   }
 ]
@@ -5735,12 +6358,12 @@ const MAPS = {
       <div class="layer-lbl">People — the data model everything reads from</div>${node('model','two')}${node('hrfunction')}
       ${node('dating','wide')}
       <div class="layer-lbl">Money &amp; time — what the model feeds</div>${node('payroll')}${node('absence')}${node('lifecycle')}
-      <div class="layer-lbl">Law — the rules configured per country</div>${node('egypt-payroll')}${node('egypt-leave')}${node('gulf')}
+      <div class="layer-lbl">Law — the rules configured per country</div>${node('egypt-payroll')}${node('egypt-leave')}${node('gulf')}${node('uae','full')}
       <div class="layer-lbl">Delivery — how the project is run</div>${node('method','full')}
     </div></div>
     ${sec('technical','Technical','What the consultant builds with: loading data in bulk, writing the calculation logic, getting information back out, extending without customizing, and controlling who sees what.')}
     <div class="sysmap-scroll"><div class="sysmap-inner">
-      <div class="layer-lbl">The consultant’s toolkit</div>${node('hdl')}${node('ff')}${node('reporting')}${node('extend','two')}${node('security')}
+      <div class="layer-lbl">The consultant’s toolkit</div>${node('hdl')}${node('ff')}${node('reporting')}${node('approvals')}${node('extend','two')}${node('security')}
     </div></div>`,
 
   analytics: (node, sec) => `
@@ -5748,6 +6371,7 @@ const MAPS = {
     <div class="sysmap-scroll"><div class="sysmap-inner">
       <div class="layer-lbl">Before the tool — what a row means</div>${node('tables','full')}
       <div class="layer-lbl">And after it — what a reader takes away</div>${node('excel')}${node('question-to-chart','two')}
+      <div class="layer-lbl">Where this collection meets the other one</div>${node('people-data','full')}
     </div></div>
     ${sec('technical')}
     <div class="sysmap-scroll"><div class="sysmap-inner">
@@ -7064,6 +7688,9 @@ const ICONS = {
   method: '<path d="M5 21V4M5 4h11l-2 3.5L16 11H5"/><path d="M5 15h8"/>',
   /* a region on the globe */
   gulf: '<circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3a13 13 0 010 18a13 13 0 010-18z"/>',
+  uae: '<path d="M4 20V9l8-5 8 5v11"/><path d="M9 20v-6h6v6"/><path d="M4 20h16"/>',
+  approvals: '<path d="M4 7h16"/><path d="M4 12h10"/><path d="M4 17h7"/><path d="M15 16l2 2 4-4"/>',
+  'people-data': '<rect x="3" y="13" width="4" height="8"/><rect x="10" y="9" width="4" height="12"/><rect x="17" y="5" width="4" height="16"/><circle cx="5" cy="7" r="2"/>',
 
   /* ---- Data & Analytics ---- */
   /* a grid of rows and columns: what one row means */

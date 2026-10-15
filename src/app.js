@@ -142,12 +142,12 @@ const MAPS = {
       <div class="layer-lbl">People — the data model everything reads from</div>${node('model','two')}${node('hrfunction')}
       ${node('dating','wide')}
       <div class="layer-lbl">Money &amp; time — what the model feeds</div>${node('payroll')}${node('absence')}${node('lifecycle')}
-      <div class="layer-lbl">Law — the rules configured per country</div>${node('egypt-payroll')}${node('egypt-leave')}${node('gulf')}
+      <div class="layer-lbl">Law — the rules configured per country</div>${node('egypt-payroll')}${node('egypt-leave')}${node('gulf')}${node('uae','full')}
       <div class="layer-lbl">Delivery — how the project is run</div>${node('method','full')}
     </div></div>
     ${sec('technical','Technical','What the consultant builds with: loading data in bulk, writing the calculation logic, getting information back out, extending without customizing, and controlling who sees what.')}
     <div class="sysmap-scroll"><div class="sysmap-inner">
-      <div class="layer-lbl">The consultant’s toolkit</div>${node('hdl')}${node('ff')}${node('reporting')}${node('extend','two')}${node('security')}
+      <div class="layer-lbl">The consultant’s toolkit</div>${node('hdl')}${node('ff')}${node('reporting')}${node('approvals')}${node('extend','two')}${node('security')}
     </div></div>`,
 
   analytics: (node, sec) => `
@@ -155,6 +155,7 @@ const MAPS = {
     <div class="sysmap-scroll"><div class="sysmap-inner">
       <div class="layer-lbl">Before the tool — what a row means</div>${node('tables','full')}
       <div class="layer-lbl">And after it — what a reader takes away</div>${node('excel')}${node('question-to-chart','two')}
+      <div class="layer-lbl">Where this collection meets the other one</div>${node('people-data','full')}
     </div></div>
     ${sec('technical')}
     <div class="sysmap-scroll"><div class="sysmap-inner">
