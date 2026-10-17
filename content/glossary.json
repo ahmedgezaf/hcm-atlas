@@ -1846,5 +1846,167 @@
     "watchOut": "A succession plan is a plan for a seat, so a client who wants succession and manages by job is asking for two things.",
     "ar": "مراجعة المواهب والإحلال",
     "say": "الإحلال الوظيفي"
+  },
+  {
+    "id": "pilgrimage-leave",
+    "name": "Pilgrimage leave",
+    "chapter": "egypt-leave",
+    "definition": "One month of paid leave to perform Hajj or visit Jerusalem, available after five continuous years of service and only once in an employee's entire service.",
+    "watchOut": "Sources differ on whether it is new under Law 14/2025 or carried from the old law; the once-in-service cap is the part that must be enforced in configuration.",
+    "ar": "إجازة الحج",
+    "say": "إجازة الحج"
+  },
+  {
+    "id": "nursing-breaks",
+    "name": "Nursing breaks",
+    "chapter": "egypt-leave",
+    "definition": "Two paid breaks of at least thirty minutes a day for two years after a birth, counted as working time rather than deducted from any balance.",
+    "watchOut": "It is a working-time rule, not a leave plan. Building it as an absence type produces a balance that means nothing.",
+    "ar": "فترات الرضاعة",
+    "say": "ساعة الرضاعة"
+  },
+  {
+    "id": "childcare-leave",
+    "name": "Childcare leave",
+    "chapter": "egypt-leave",
+    "definition": "Unpaid leave of up to two years, in establishments of fifty or more employees, after a year of service, up to three times, with at least two years between the first and second.",
+    "watchOut": "Four conditions, and a plan that enforces the duration but not the spacing grants leave the law does not.",
+    "ar": "إجازة رعاية الطفل",
+    "say": "إجازة رعاية طفل"
+  },
+  {
+    "id": "public-holiday-premium",
+    "name": "Public holiday premium",
+    "chapter": "egypt-leave",
+    "definition": "The additional pay and compensating day owed when a worker is required to work on an official holiday, commonly summarised as double pay plus a day off.",
+    "watchOut": "Holidays belong to the work schedule and calendar events, not to a leave plan — which is what keeps them out of annual balances.",
+    "ar": "بدل العمل في الأجازات الرسمية",
+    "say": "بدل الأجازة"
+  },
+  {
+    "id": "future-dated-change",
+    "name": "Future-dated change",
+    "chapter": "dating",
+    "definition": "A change entered now with an effective date ahead, which every process continues to ignore until that date arrives.",
+    "watchOut": "Looking at today's record and not seeing it is the most common reason somebody believes the change was lost.",
+    "ar": "تغيير بتاريخ مستقبلي",
+    "say": "محجوز بتاريخ قدّام"
+  },
+  {
+    "id": "retroactive-event-group",
+    "name": "Retroactive event group",
+    "chapter": "dating",
+    "definition": "The list of changes the system watches for when deciding what to reprocess retroactively. A change outside the group raises no event and is never picked up.",
+    "watchOut": "'Retro did not pick it up' is almost always this, not a defect in the retro process.",
+    "ar": "مجموعة أحداث الأثر الرجعي",
+    "say": "الـ retro event group"
+  },
+  {
+    "id": "proration",
+    "name": "Proration",
+    "chapter": "dating",
+    "definition": "Splitting a period's pay when a change takes effect part-way through it, driven by a proration event group and a proration formula on the element.",
+    "watchOut": "Proration is a mid-period change; retro is a late one. The test is when it was entered relative to the run.",
+    "ar": "التناسب الزمني",
+    "say": "الـ proration"
+  },
+  {
+    "id": "transaction-design-studio",
+    "name": "Transaction Design Studio",
+    "chapter": "extend",
+    "definition": "The tool that controls which fields and sections appear on a transaction, by role — hiding salary on a transfer for line managers, making a reason mandatory on termination.",
+    "watchOut": "Most 'can you add a field?' requests are really 'stop asking for this one', and this is where that is answered.",
+    "ar": "استوديو تصميم المعاملات",
+    "say": "الـ design studio"
+  },
+  {
+    "id": "autocomplete-rule",
+    "name": "Autocomplete rule",
+    "chapter": "extend",
+    "definition": "Configured defaulting and validation that runs as a user fills a page — defaulting a business unit, blocking an impossible date — without a formula or a technical change.",
+    "watchOut": "It covers ground that used to need development, so it is worth checking before quoting an extension.",
+    "ar": "قواعد الإكمال التلقائي",
+    "say": "الـ autocomplete rules"
+  },
+  {
+    "id": "alerts-composer",
+    "name": "Alerts Composer",
+    "chapter": "extend",
+    "definition": "Configurable notifications on events — a contract nearing expiry, a probation ending, a document expiring — built rather than coded.",
+    "watchOut": "It is how Gulf contract-expiry and document-tracking requirements are met without an extension.",
+    "ar": "منشئ التنبيهات",
+    "say": "الـ alerts"
+  },
+  {
+    "id": "position-synchronization",
+    "name": "Position synchronization",
+    "chapter": "workforce",
+    "definition": "The setting that makes a position the master for attributes on the assignments attached to it — job, department, location, grade, manager, FTE — and decides whether an assignment may override them.",
+    "watchOut": "On with no override makes exceptions impossible; off makes the position decorative and the two structures drift.",
+    "ar": "مزامنة الوظيفة المحددة",
+    "say": "الـ position sync"
+  },
+  {
+    "id": "grade-rate",
+    "name": "Grade rate",
+    "chapter": "workforce",
+    "definition": "The pay values attached to a grade or to its steps — minimum, midpoint, maximum, or a fixed rate per step — carrying a currency and a date.",
+    "watchOut": "Overwriting rates each year rather than dating them means last year's salary review can no longer be explained.",
+    "ar": "معدلات الدرجة",
+    "say": "نطاق الدرجة"
+  },
+  {
+    "id": "job-profile",
+    "name": "Job profile",
+    "chapter": "workforce",
+    "definition": "The content attached to a job — competencies, qualifications, responsibilities — which Recruiting and Talent read.",
+    "watchOut": "Recognition-level for a Core HR build, and central the moment those modules arrive.",
+    "ar": "الملف الوظيفي",
+    "say": "الـ job profile"
+  },
+  {
+    "id": "formula-result",
+    "name": "Formula result",
+    "chapter": "ff",
+    "definition": "What a payroll formula hands back and what the element does with it: a direct result becomes the pay value, an indirect result feeds another element, a message returns text, a stop entry ends the entry.",
+    "watchOut": "A loan that stops itself at zero is a stop-entry result, not somebody remembering to end it.",
+    "ar": "نتيجة الصيغة",
+    "say": "الـ formula result"
+  },
+  {
+    "id": "global-value",
+    "name": "Global value",
+    "chapter": "ff",
+    "definition": "A named, dated value a formula reads instead of carrying a number in its text — where statutory limits and rates belong.",
+    "watchOut": "A limit typed into the logic under-deducts quietly from the January it changes until a statutory return is reconciled.",
+    "ar": "القيم العامة",
+    "say": "الـ global value"
+  },
+  {
+    "id": "work-schedule",
+    "name": "Work schedule",
+    "chapter": "absence",
+    "definition": "The pattern of working days and hours an absence duration is measured against, and what keeps weekends and public holidays out of a leave balance.",
+    "watchOut": "Wrong schedules make every duration wrong in the same direction, which looks like a plan defect and is not.",
+    "ar": "جدول العمل",
+    "say": "الورديات"
+  },
+  {
+    "id": "absence-certification",
+    "name": "Absence certification",
+    "chapter": "absence",
+    "definition": "A document requirement that holds an absence or its payment until the evidence is supplied — the medical certificate behind Egyptian sick leave.",
+    "watchOut": "Configured, it is enforced; documented only, it is hoped for.",
+    "ar": "الشهادة الطبية",
+    "say": "التقرير الطبي"
+  },
+  {
+    "id": "accrual-processing",
+    "name": "Accrual processing",
+    "chapter": "absence",
+    "definition": "The scheduled process that grants each period's entitlement and maintains balances, with carryover applied at the plan term end.",
+    "watchOut": "A disputed balance has a history — enrolment, accrual runs, carryover, adjustments. Read it before changing it.",
+    "ar": "معالجة الاستحقاقات",
+    "say": "تشغيل الأرصدة"
   }
 ]

@@ -5,7 +5,7 @@ domain: hcm
 track: technical
 title: Loading Data: HCM Data Loader
 subtitle: The highest-value technical skill a functional consultant can arrive with
-hue: 198
+hue: 232
 minutes: 10
 labs: hdl, import-load, source-keys
 terms: hdl-hcm-data-loader, hsdl-hcm-spreadsheet-data-loader, source-system-key-vs-person-number

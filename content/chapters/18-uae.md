@@ -6,7 +6,7 @@ track: functional
 title: The UAE
 subtitle: A second Gulf country that configures nothing like the first
 hue: 118
-minutes: 10
+minutes: 14
 labs: gratuity
 terms: mohre, uae-fixed-term-contract, gpssa, alternative-end-of-service-savings-scheme, emiratisation-and-nafis
 ---

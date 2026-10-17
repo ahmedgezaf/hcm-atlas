@@ -6,7 +6,7 @@ track: functional
 title: The Modules Next Door
 subtitle: Enough of the rest of the suite to follow the conversation
 hue: 170
-minutes: 8
+minutes: 11
 labs: 
 terms: requisition-and-job-offer, onboarding-journey, compensation-plan, benefits-enrolment, goal-and-performance-document, talent-review-and-succession
 ---

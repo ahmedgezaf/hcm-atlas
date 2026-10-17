@@ -1132,5 +1132,144 @@
       "end-of-service-benefit-eosb-gratuity",
       "salary-component"
     ]
+  },
+  {
+    "chapter": "egypt-leave",
+    "question": "A client lists nursing breaks, the pregnancy hour and the overtime ban as leave types to configure. What do you tell them?",
+    "answer": "That none of the three is leave. A pregnant employee's day shortens by at least an hour from the sixth month and nursing breaks are two paid half-hours a day for two years after the birth — both are working-time rules, so they belong to the work schedule, not to a balance. The overtime prohibition during pregnancy and for six months after is a validation on the overtime element. Building them as absence types produces balances that mean nothing and reports nobody can use.",
+    "terms": [
+      "nursing-breaks",
+      "maternity-leave",
+      "absence-type"
+    ]
+  },
+  {
+    "chapter": "egypt-leave",
+    "question": "How is maternity leave paid in Egypt, and why is that question harder than it looks?",
+    "answer": "Four months, up to three times in service, with no minimum service qualification — that part is settled. How it is funded is not: some professional summaries describe full employer pay, others describe payment at a percentage of the insurable wage through social insurance with the employer topping up or offsetting. The two readings produce different elements and different costs, so the answer comes from the client's counsel and their insurance office, and goes into the configuration workbook with a name against it.",
+    "terms": [
+      "maternity-leave",
+      "insurable-wage",
+      "configuration-workbook"
+    ]
+  },
+  {
+    "chapter": "dating",
+    "question": "A client says retro did not pick up a change. Where do you look first?",
+    "answer": "The retroactive event group. It is the list of changes the system is watching for, and a change outside it raises no event however retrospective it looks to a human — so the process is working and the configuration is not. The Retroactive Notification report shows what events are waiting. In Egypt that group is statutory configuration rather than a technical detail: insurable-wage limits move every January and decrees land mid-cycle, so the things that must trigger retro have to be in it deliberately.",
+    "terms": [
+      "retroactive-event-group",
+      "retroactive-change-retro"
+    ]
+  },
+  {
+    "chapter": "dating",
+    "question": "What is the difference between proration and retro?",
+    "answer": "When the change was entered relative to the payroll run. A raise effective on the 16th and entered before the run is prorated — the period is paid partly at each rate, using a proration event group and a proration formula. The same raise entered after the run has already processed that period is retro: the arrears are calculated and paid in a later run. The design decision inside proration is the divisor — calendar days, working days or a fixed figure — and it changes the money.",
+    "terms": [
+      "proration",
+      "retroactive-change-retro",
+      "effective-date"
+    ]
+  },
+  {
+    "chapter": "extend",
+    "question": "A manager says the transfer screen asks for too much. What are your options?",
+    "answer": "Transaction Design Studio, before anything else: it controls which fields and sections appear per transaction and per role, so salary can be hidden from line managers on a transfer and a reason made mandatory on a termination — configuration that survives quarterly updates. If the request is defaulting or validation rather than visibility, that is an autocomplete rule. Neither needs a developer, and both are the answer to a surprising share of user-acceptance feedback.",
+    "terms": [
+      "transaction-design-studio",
+      "autocomplete-rule",
+      "sandbox"
+    ]
+  },
+  {
+    "chapter": "extend",
+    "question": "Explain the difference between configuration, extension and customization in a SaaS implementation.",
+    "answer": "Configuration is setup the product expects — plans, elements, roles, flexfields, design studio rules — and it answers most requests. An extension builds something new within supported tools: a Fast Formula, a BI Publisher report, an integration, each needing design, testing and an owner through quarterly updates. Customization in the on-premise sense of changing delivered code does not exist. The useful sentence in a workshop is that nothing is impossible and everything has an owner, which stops the client hearing no and the project hearing yes to the same request.",
+    "terms": [
+      "sandbox",
+      "quarterly-update-26a-26d",
+      "dff-descriptive-flexfield"
+    ]
+  },
+  {
+    "chapter": "workforce",
+    "question": "A Gulf client wants position management. What do you check before agreeing?",
+    "answer": "Four things: do they budget and approve headcount by seat, do they need a vacancy to be visible while it is empty, do approvals or succession depend on the seat rather than the person, and is there someone who will maintain positions through every reorganization. Three yeses and an owner mean positions. Without the owner, the structure decays within a year and the client is better served by a clean job catalogue — the maintenance, not the concept, is what decides it.",
+    "terms": [
+      "position",
+      "job",
+      "position-synchronization"
+    ]
+  },
+  {
+    "chapter": "workforce",
+    "question": "What does position synchronization actually do, and what is the trap?",
+    "answer": "It makes the position the master for attributes on the assignments attached to it — job, department, location, grade, manager, FTE — so changing the position updates everyone in it. The trap is the override setting. Synchronization with no override makes a reorganization instant and a one-off exception impossible; synchronization turned off makes the position decorative and the two structures drift until neither is trusted. The design question is which attributes belong to the seat and which to the person in it.",
+    "terms": [
+      "position-synchronization",
+      "position",
+      "assignment"
+    ]
+  },
+  {
+    "chapter": "ff",
+    "question": "What can a payroll formula return, besides a number?",
+    "answer": "Formula results, and the element decides what each one is for. A direct result becomes the element's pay value. An indirect result feeds another element, which is how one calculation creates an entry on a second without anyone keying it. A message returns text into the run results, which is the closest thing the language has to a debugger. And a stop entry ends the element entry — which is how a loan recovery stops itself at zero rather than relying on somebody remembering.",
+    "terms": [
+      "formula-result",
+      "fast-formula",
+      "element-entry"
+    ]
+  },
+  {
+    "chapter": "ff",
+    "question": "How do you test a Fast Formula when there is no debugger?",
+    "answer": "Compile it, which catches the grammar — a misspelt input, a name with a space where the element has an underscore. Then QuickPay one real person whose answer you worked out by hand first, and compare. If the number disagrees and the logic looks right, add a message result that returns an intermediate value and read it in the run results. Then test the edges deliberately: an empty input, a value exactly on a threshold, someone with no entry, and a mid-period change so proration is exercised.",
+    "terms": [
+      "fast-formula",
+      "quickpay",
+      "formula-result"
+    ]
+  },
+  {
+    "chapter": "lifecycle",
+    "question": "Why would you use a pending worker rather than hiring on the start date?",
+    "answer": "Because the record has to exist before the person does. A pending worker is created ahead of the start date so onboarding can run — accounts, equipment, documents — and converts to an employee on the day. In Egypt it matters more than most implementations allow for: the social-insurance registration and the labour-office file happen around the start date, and a record that exists beforehand is what lets that work be tracked rather than remembered.",
+    "terms": [
+      "worker-types",
+      "onboarding-journey",
+      "form-1-and-form-6"
+    ]
+  },
+  {
+    "chapter": "lifecycle",
+    "question": "A client asks to change someone's working days from five to four. Why is that not a small change?",
+    "answer": "Because it is an FTE change, and FTE is read by more things than people expect: headcount against workload reporting, leave accrual where entitlement is pro-rated, and any pay calculated on a proportion rather than a flat amount. It is a dated assignment change with an action and a reason like any other, and the reason is what lets somebody explain the pattern later. Treated as an administrative tweak, it surfaces two months on as a leave balance nobody can account for.",
+    "terms": [
+      "fte-full-time-equivalent",
+      "action-and-action-reason",
+      "assignment"
+    ]
+  },
+  {
+    "chapter": "absence",
+    "question": "An employee's leave balance is wrong. What do you check, and in what order?",
+    "answer": "Four things, in order: when they were enrolled in the plan, which accrual runs have happened since, what the carryover event did at the term end, and whether anyone has made a manual adjustment. The balance is the sum of those, so one of them is the answer. Adjusting the balance to the number the employee expected without reading them hides the defect and guarantees it comes back next year — and the first thing to rule out before any of it is the work schedule, because a wrong schedule makes every duration wrong in the same direction.",
+    "terms": [
+      "accrual-processing",
+      "carryover",
+      "work-schedule"
+    ]
+  },
+  {
+    "chapter": "absence",
+    "question": "How does an absence become money?",
+    "answer": "Through an absence element and a rate definition. The element carries the payment into the payroll run — full pay, a reduced percentage for a qualification band, or an unpaid deduction — and the rate definition supplies the base the percentage applies to. That base is where regional designs fail: Egyptian sick leave is paid on the insurable wage rather than on gross, so a plan pointed at the wrong rate pays the right percentage of the wrong number. At exit the balance becomes the leave payout in the final settlement.",
+    "terms": [
+      "rate-definition",
+      "sick-leave",
+      "final-settlement"
+    ]
   }
 ]

@@ -6,7 +6,7 @@ track: functional
 title: From Question to Chart
 subtitle: The part of the job that is not a tool — and the small number of ways to mislead
 hue: 310
-minutes: 7
+minutes: 9
 labs: 
 terms: business-question, chart-choice, truncated-axis, dual-axis, data-ink, dashboard-vs-report, sanity-check
 ---

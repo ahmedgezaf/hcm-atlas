@@ -6,7 +6,7 @@ track: technical
 title: Approvals & the Transaction Console
 subtitle: Where a transaction goes after someone presses submit
 hue: 80
-minutes: 8
+minutes: 11
 labs: 
 terms: approval-rule, approver-type, serial-vs-parallel-approval, transaction-console, auto-approval
 ---
