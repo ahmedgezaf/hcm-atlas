@@ -372,10 +372,34 @@ child scroll. The smoke test checks every chapter and lab at 360px for exactly
 this. Mount labs into `.lab-body`; both the labs view and the in-chapter embed
 use that class.
 
+## The study loop
+
+Three things sit on top of the drill deck, and they share one piece of state.
+
+**Spaced repetition.** Grading a card writes `S.due[id]`: a day out at first,
+then a week, then three weeks, and ten minutes when the answer was wrong. A card
+with no entry is due now, so a fresh deck behaves exactly as it did before the
+feature existed. `grade(id, good)` is the only place that writes both `S.drill`
+and `S.due` — never set the score directly. The **Due today** button filters the
+deck to what `isDue` returns.
+
+**The interview round.** Ten questions drawn across the collection, weakest
+first, with a clock and no way back to a card once graded; the summary names the
+chapters to reread rather than dwelling on the score. It lives in `D.iv` and
+takes over `renderDrill` while it is active. It owns a `setInterval` for the
+clock — `D.tick` — which `renderDrill` clears on every entry and the round
+clears when it ends. Anything else that adds a timer must do the same, or the
+smoke test's "no runtime errors" check will eventually catch a stray one.
+
+**The backup.** Progress is per-browser, so About carries download, copy and
+restore. Restore validates the shape before writing and replaces rather than
+merges. If a new key is added to `S`, add it to the restore list in
+`renderAbout` as well, or it will be silently dropped on a restore.
+
 ## State
 
-Reader progress (`known`, `read`, `notes`, `drill`, `custom`, `customQ`) lives in
-`localStorage` under `hcm-atlas-v2` (kept for continuity with earlier versions). When the page is published as a Claude
+Reader progress (`known`, `read`, `notes`, `drill`, `due`, `custom`, `customQ`,
+`last`) lives in `localStorage` under `hcm-atlas-v2` (kept for continuity with earlier versions). When the page is published as a Claude
 Artifact with the `db` capability it also syncs; when it is not, `claude.use()`
 resolves null and the page carries on with local storage only. Both paths must
 keep working — never make a feature depend on the Claude runtime being present.

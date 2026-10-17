@@ -628,6 +628,23 @@ pre.code{background:var(--navy);color:var(--navy-ink);border-radius:8px;padding:
 .pill.ok{background:var(--good-soft);color:var(--good)}
 .pill.no{background:var(--bad-soft);color:var(--bad)}
 
+/* ---- INTERVIEW ROUND: a timed pass with no way back to a card */
+.ivwrap{display:grid;gap:14px;max-width:70ch}
+.ivbar{display:flex;align-items:center;gap:14px;flex-wrap:wrap;padding:9px 14px;border:1px solid var(--line);border-radius:8px;background:var(--surface)}
+.ivbar .mono{font-family:var(--mono);font-variant-numeric:tabular-nums;font-weight:700}
+.ivcard{padding:20px;display:grid;gap:4px}
+.ivq{font-family:var(--body);font-size:19px;line-height:1.5;margin-top:10px}
+.ivans p{font-family:var(--body);font-size:16px;line-height:1.6;color:var(--ink-2)}
+.ivlist{margin:0;padding-left:18px;display:grid;gap:6px;font-size:15px}
+.ivlist a{color:var(--sky)}
+
+/* ---- BACKUP: progress lives in this browser, so it has to be portable */
+.backup{display:grid;gap:10px;border:1px solid var(--line);border-radius:var(--r);padding:14px;background:var(--surface)}
+.backup-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.backup textarea{width:100%;font-family:var(--mono);font-size:12px;padding:8px 10px;border:1px solid var(--line-2);border-radius:8px;background:var(--bg);color:var(--ink);resize:vertical}
+.backup summary{cursor:pointer;font-weight:700;color:var(--ink-2)}
+.backup input[type=file]{font-size:12.5px;max-width:100%}
+
 /* ---- DRILL */
 .drill-top{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:18px}
 .seg{display:inline-flex;border:1px solid var(--line-2);border-radius:8px;overflow:hidden}
@@ -837,7 +854,7 @@ pre.code{background:var(--navy);color:var(--navy-ink);border-radius:8px;padding:
   html,body{background:#fff}
   .app{display:block}
   .topbar,.sections,.reader-bar,.sync,.search-btn,.pal,.toast,.reader-toc,.ch-nav,.notes,.ask-box,.needs-sample,.ch-cover,.listen,
-  .toggle,#addTermBtn,#addTermForm,.drill-top,.grade,.selfans,.labs-nav,.hero-side,.legend{display:none!important}
+  .toggle,#addTermBtn,#addTermForm,.drill-top,.grade,.selfans,.labs-nav,.hero-side,.legend,.backup,.ivbar{display:none!important}
   .main{padding:0;max-width:none}
   .reader{display:block}
   .card{box-shadow:none;break-inside:avoid}

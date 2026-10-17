@@ -19,6 +19,13 @@ grain trap that explains an inflated headcount, and routing drills for the
 questions a consultant is actually asked — who decides, which door, change
 request or defect.
 
+The drill deck schedules itself: a card answered well comes back in a day, then
+a week, then three weeks, and **Due today** shows only what is ready. An
+**interview round** runs ten questions against a clock with no going back, then
+names the chapters to reread rather than dwelling on the score. Progress lives
+in your browser, so About carries a backup you can download, copy and restore on
+another device.
+
 Every chapter can be read or listened to — the browser's own speech engine reads
 it aloud, highlighting where it is, with no account and no network.
 

@@ -631,6 +631,23 @@ pre.code{background:var(--navy);color:var(--navy-ink);border-radius:8px;padding:
 .pill.ok{background:var(--good-soft);color:var(--good)}
 .pill.no{background:var(--bad-soft);color:var(--bad)}
 
+/* ---- INTERVIEW ROUND: a timed pass with no way back to a card */
+.ivwrap{display:grid;gap:14px;max-width:70ch}
+.ivbar{display:flex;align-items:center;gap:14px;flex-wrap:wrap;padding:9px 14px;border:1px solid var(--line);border-radius:8px;background:var(--surface)}
+.ivbar .mono{font-family:var(--mono);font-variant-numeric:tabular-nums;font-weight:700}
+.ivcard{padding:20px;display:grid;gap:4px}
+.ivq{font-family:var(--body);font-size:19px;line-height:1.5;margin-top:10px}
+.ivans p{font-family:var(--body);font-size:16px;line-height:1.6;color:var(--ink-2)}
+.ivlist{margin:0;padding-left:18px;display:grid;gap:6px;font-size:15px}
+.ivlist a{color:var(--sky)}
+
+/* ---- BACKUP: progress lives in this browser, so it has to be portable */
+.backup{display:grid;gap:10px;border:1px solid var(--line);border-radius:var(--r);padding:14px;background:var(--surface)}
+.backup-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.backup textarea{width:100%;font-family:var(--mono);font-size:12px;padding:8px 10px;border:1px solid var(--line-2);border-radius:8px;background:var(--bg);color:var(--ink);resize:vertical}
+.backup summary{cursor:pointer;font-weight:700;color:var(--ink-2)}
+.backup input[type=file]{font-size:12.5px;max-width:100%}
+
 /* ---- DRILL */
 .drill-top{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:18px}
 .seg{display:inline-flex;border:1px solid var(--line-2);border-radius:8px;overflow:hidden}
@@ -840,7 +857,7 @@ pre.code{background:var(--navy);color:var(--navy-ink);border-radius:8px;padding:
   html,body{background:#fff}
   .app{display:block}
   .topbar,.sections,.reader-bar,.sync,.search-btn,.pal,.toast,.reader-toc,.ch-nav,.notes,.ask-box,.needs-sample,.ch-cover,.listen,
-  .toggle,#addTermBtn,#addTermForm,.drill-top,.grade,.selfans,.labs-nav,.hero-side,.legend{display:none!important}
+  .toggle,#addTermBtn,#addTermForm,.drill-top,.grade,.selfans,.labs-nav,.hero-side,.legend,.backup,.ivbar{display:none!important}
   .main{padding:0;max-width:none}
   .reader{display:block}
   .card{box-shadow:none;break-inside:avoid}
@@ -941,7 +958,7 @@ const TERMS = {}; DATA.terms.forEach(t=>TERMS[t.id]=t);
 const allTerms = () => [...DATA.terms, ...S.custom];
 
 /* ---------- state ---------- */
-const S = {known:{},read:{},notes:{},drill:{},custom:[],customQ:[],updatedAt:0};
+const S = {known:{},read:{},notes:{},drill:{},due:{},custom:[],customQ:[],updatedAt:0,last:null};
 const LS='hcm-atlas-v2';
 try{ const raw=localStorage.getItem(LS); if(raw) Object.assign(S, JSON.parse(raw)); }catch(e){}
 let db=null, saveTimer=null;
@@ -1026,6 +1043,23 @@ document.querySelectorAll('[data-go]').forEach(b=>{ if(b.closest('.topbar')&&!b.
 $('#themeBtn').addEventListener('click',()=>{ const r=document.documentElement; const cur=r.getAttribute('data-theme'); const next=cur==='dark'?'light':cur==='light'?'':'dark'; if(next) r.setAttribute('data-theme',next); else r.removeAttribute('data-theme'); try{localStorage.setItem('hcm-theme',next);}catch(e){} });
 try{ const th=localStorage.getItem('hcm-theme'); if(th) document.documentElement.setAttribute('data-theme',th); }catch(e){}
 
+/* ---------- spaced repetition ----------
+   A card graded right comes back later each time: a day, then a week, then
+   three weeks. A card graded wrong comes back in this session. A card never
+   graded is due now, which is what makes a fresh deck behave as before. */
+const DAY=864e5;
+const dueAt=lvl=>Date.now()+(lvl>=2?21:lvl===1?7:1)*DAY;
+function grade(id, good){
+  const was=S.drill[id]||0;
+  S.drill[id]=good?Math.min(2,was+1):0;
+  S.due[id]=good?dueAt(S.drill[id]):Date.now()+6e5;
+  save();
+}
+const isDue=id=>!S.due[id]||S.due[id]<=Date.now();
+function dueCount(){ return cardIds().filter(isDue).length; }
+function whenDue(id){ const d=S.due[id]; if(!d||d<=Date.now()) return 'due now';
+  const days=Math.round((d-Date.now())/DAY); return days<1?'later today':days===1?'tomorrow':`in ${days} days`; }
+
 /* ---------- progress ---------- */
 function cardIds(d=dom){ const ids=[];
   allTerms().forEach(t=>{ if(chDomain(t.ch)===d) ids.push('t:'+t.id); });
@@ -1098,7 +1132,7 @@ function renderHome(v){
   const first=CHD()[0];
   v.innerHTML=`<section class="hero" data-h style="--h:${d.hue}">
     <div class="hero-side">${stat('chapters',`${pr.read} / ${pr.chapters}`,pct(pr.read,pr.chapters),'chapters read')}${stat('glossary',`${pr.known} / ${pr.total}`,pct(pr.known,pr.total),'terms marked known')}${stat('drill',`${pr.solid} / ${pr.cards}`,pct(pr.solid,pr.cards),'drill cards solid')}</div>
-    <div class="hero-main"><div class="eyebrow">${esc(d.name)}</div><h1>${esc(d.tagline)}</h1><p>${esc(d.blurb)}</p><div class="cta">${first?`<button class="btn gold" data-go2="chapters" data-ch2="${first.id}">Start with Chapter 1</button>`:''}${domLabs().length?'<button class="btn" data-go2="labs">Open the labs</button>':''}</div></div>
+    <div class="hero-main"><div class="eyebrow">${esc(d.name)}</div><h1>${esc(d.tagline)}</h1><p>${esc(d.blurb)}</p><div class="cta">${S.last&&chById(S.last)&&chById(S.last).domain===dom?`<button class="btn gold" data-go2="chapters" data-ch2="${S.last}">Continue — chapter ${chById(S.last).num}</button>`:''}${first?`<button class="btn ${S.last&&chById(S.last)&&chById(S.last).domain===dom?'':'gold'}" data-go2="chapters" data-ch2="${first.id}">Start with Chapter 1</button>`:''}${domLabs().length?'<button class="btn" data-go2="labs">Open the labs</button>':''}</div></div>
   </section>
   ${chapterProgress()}
   <div class="eyebrow" style="margin:22px 0 10px">The whole collection on one screen — each block is a chapter</div>
@@ -1152,6 +1186,7 @@ function renderChapters(v){
   v.querySelectorAll('[data-ch]').forEach(b=>b.addEventListener('click',()=>go('chapters',{ch:b.dataset.ch})));
 }
 function renderReader(v,c){
+  if(S.last!==c.id){ S.last=c.id; save(); }
   const sib=CHD(); const i=sib.indexOf(c); const prev=sib[i-1], next=sib[i+1];
   const terms=[...c.terms.map(id=>TERMS[id]).filter(Boolean), ...S.custom.filter(t=>t.ch===c.id)];
   v.innerHTML=`<div class="reader" data-h style="--h:${c.hue}"><article>
@@ -2143,21 +2178,71 @@ LABS.push({id:'cr-or-defect',ch:'method',title:'Change request, defect, or quest
 
 
 /* ================= DRILL ================= */
-const D={mode:'questions',ch:null,queue:[],idx:0,flipped:false,rebuild:true};
+const D={mode:'questions',ch:null,queue:[],idx:0,flipped:false,rebuild:true,dueOnly:false,iv:null,tick:null};
 function buildCards(){
   let cards=[];
   if(D.mode==='terms') cards=domTerms().filter(t=>!D.ch||t.ch===D.ch).map(t=>({id:'t:'+t.id,q:t.name,ch:t.ch,back:[{lb:'Definition',tx:t.what},t.trap?{lb:'Watch out',tx:t.trap,warn:true}:null].filter(Boolean)}));
   else if(D.mode==='questions') cards=DATA.questions.filter(q=>chDomain(q.ch)===dom&&(!D.ch||q.ch===D.ch)).map((q,i)=>({id:'q:'+DATA.questions.indexOf(q),q:q.q,ch:q.ch,back:[{lb:'Model answer',tx:q.a},...q.terms.map(id=>TERMS[id]).filter(Boolean).slice(0,2).map(t=>({lb:t.name,tx:t.what}))]}));
   else cards=S.customQ.filter(q=>chDomain(q.ch)===dom).map(q=>({id:'c:'+q.id,q:q.q,ch:q.ch,back:[{lb:'Your answer',tx:q.a}],mine:true}));
+  if(D.dueOnly) cards=cards.filter(c=>isDue(c.id));
   const m=c=>S.drill[c.id]||0, rnd=()=>Math.random()-.5;
   return [...cards.filter(c=>m(c)===0).sort(rnd),...cards.filter(c=>m(c)===1).sort(rnd),...cards.filter(c=>m(c)===2).sort(rnd)];
 }
+/* An interview round: ten cards drawn across the collection, weakest first,
+   with a clock running and no way back to a card once it is graded. The point
+   is the summary — which sections to reread, not the score. */
+function startInterview(){
+  const pool=DATA.questions.map((q,i)=>({id:'q:'+i,q:q.q,a:q.a,ch:q.ch})).filter(x=>chDomain(x.ch)===dom);
+  const rnd=()=>Math.random()-.5;
+  const weak=pool.filter(x=>(S.drill[x.id]||0)<2).sort(rnd), rest=pool.filter(x=>(S.drill[x.id]||0)===2).sort(rnd);
+  return {cards:[...weak,...rest].slice(0,10),i:0,shown:false,started:Date.now(),marks:[],done:false};
+}
+function renderInterview(v){
+  const iv=D.iv, c=iv.cards[iv.i];
+  const mins=t=>{const s=Math.max(0,Math.round(t/1000));return (s<60?s+'s':Math.floor(s/60)+'m '+String(s%60).padStart(2,'0')+'s');};
+  if(iv.done){
+    const got=iv.marks.filter(m=>m.ok).length, weakest={};
+    iv.marks.filter(m=>!m.ok).forEach(m=>{weakest[m.ch]=(weakest[m.ch]||0)+1;});
+    const rows=Object.entries(weakest).sort((a,b)=>b[1]-a[1]).map(([ch,n])=>{const x=chById(ch);return `<li>${esc(x.title)} — ${n} missed · <a href="#${dom}/chapters/${ch}" data-ch="${ch}">reread chapter ${x.num}</a></li>`;}).join('');
+    v.innerHTML=`<div class="view-head"><div><div class="eyebrow">Interview round · finished</div><h1>${got} of ${iv.marks.length}</h1><p>${mins(iv.ended-iv.started)} for ${iv.marks.length} questions, about ${mins((iv.ended-iv.started)/Math.max(iv.marks.length,1))} each. The score is not the point; the list below is.</p></div></div>
+    <div class="ivwrap"><div class="card" style="padding:18px">${rows?`<div class="eyebrow" style="margin-bottom:8px">What to go back to</div><ul class="ivlist">${rows}</ul>`:'<div class="eyebrow" style="margin-bottom:8px">Nothing missed</div><p class="small">Every card answered. Run it again with a different draw, or switch the deck to terms.</p>'}</div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn primary" id="ivAgain">Another round</button><button class="btn ghost" id="ivBack">Back to the deck</button></div></div>`;
+    v.querySelectorAll('[data-ch]').forEach(a=>a.addEventListener('click',e=>{e.preventDefault();D.iv=null;go('chapters',{ch:a.dataset.ch});}));
+    $('#ivAgain').addEventListener('click',()=>{D.iv=startInterview();renderDrill(v);});
+    $('#ivBack').addEventListener('click',()=>{D.iv=null;D.rebuild=true;renderDrill(v);});
+    return;
+  }
+  const ch=chById(c.ch);
+  v.innerHTML=`<div class="view-head"><div><div class="eyebrow">Interview round · answer out loud, then grade yourself</div><h1>Question ${iv.i+1} of ${iv.cards.length}</h1></div></div>
+  <div class="ivwrap">
+    <div class="ivbar"><span class="mono" id="ivClock">0s</span><span class="small muted">no going back once graded</span><span class="mono">${iv.marks.filter(m=>m.ok).length} so far</span></div>
+    <div class="card ivcard" data-h style="--h:${ch.hue}"><div class="chip">Ch. ${ch.num} · ${esc(ch.title)}</div><div class="ivq">${esc(c.q)}</div>
+      ${iv.shown?`<div class="ivans"><div class="eyebrow" style="margin:14px 0 6px">Model answer</div><p>${esc(c.a)}</p></div>`:'<p class="small muted" style="margin-top:14px">Say it in a sentence or two before revealing.</p>'}</div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">${iv.shown
+      ?`<button class="btn no" data-iv="0">Missed it</button><button class="btn yes" data-iv="1">Answered it</button>`
+      :`<button class="btn primary" id="ivShow">Reveal the model answer</button>`}<button class="btn ghost" id="ivQuit" style="margin-left:auto">End the round</button></div>
+  </div>`;
+  clearInterval(D.tick);
+  D.tick=setInterval(()=>{ const el=document.getElementById('ivClock'); if(!el){clearInterval(D.tick);return;} el.textContent=mins(Date.now()-iv.started); },1000);
+  $('#ivShow')?.addEventListener('click',()=>{iv.shown=true;renderDrill(v);});
+  v.querySelectorAll('[data-iv]').forEach(b=>b.addEventListener('click',()=>{
+    const ok=b.dataset.iv==='1'; iv.marks.push({ok,ch:c.ch}); grade(c.id,ok);
+    iv.i++; iv.shown=false;
+    if(iv.i>=iv.cards.length){ iv.done=true; iv.ended=Date.now(); clearInterval(D.tick); }
+    renderDrill(v); }));
+  $('#ivQuit').addEventListener('click',()=>{ clearInterval(D.tick); if(iv.marks.length){ iv.done=true; iv.ended=Date.now(); } else D.iv=null; renderDrill(v); });
+}
+
 function renderDrill(v){
+  if(D.iv) return renderInterview(v);
+  clearInterval(D.tick);
   if(D.rebuild){ D.queue=buildCards(); D.idx=0; D.flipped=false; D.rebuild=false; }
   const pr=progress(); const c=D.queue[D.idx]; const ch=c?chById(c.ch):CH[0]; const counts={0:0,1:0,2:0}; D.queue.forEach(x=>counts[S.drill[x.id]||0]++);
   v.innerHTML=`<div class="view-head"><div><div class="eyebrow">Retrieval practice · out loud, not in your head</div><h1>Drill</h1><p>Read the front, answer aloud in a sentence or two, flip, then grade yourself honestly. Missed cards come back first. "Solid" means it was said fluently twice.</p></div></div>
   <div class="drill-top"><div class="seg">${[['questions','Questions'],['terms','Terms'],['mine','Mine']].map(([k,l])=>`<button class="${D.mode===k?'active':''}" data-mode="${k}">${l}</button>`).join('')}</div>
   <div class="chk">${CHD().map(x=>`<label class="${D.ch===x.id?'on':''}" data-h style="--h:${x.hue}"><input type="checkbox" hidden data-pf="${x.id}">${x.num}</label>`).join('')}<span class="small muted" style="align-self:center">${D.ch?chById(D.ch).title:'all chapters'}</span></div>
+  <button class="btn sm ${D.dueOnly?'primary':'ghost'}" id="dueBtn" title="Only the cards that are due today">Due today · ${dueCount()}</button>
+  <button class="btn sm ghost" id="ivBtn">Interview round</button>
   <button class="btn sm ghost" id="shuffle" style="margin-left:auto">Reshuffle</button></div>
   ${!c?`<div class="empty">${D.mode==='mine'?'No questions of your own yet. Add one below.':'No cards match this filter.'}</div>`:`
   <div class="fc-wrap"><div>
@@ -2169,16 +2254,19 @@ function renderDrill(v){
     <div class="selfans card needs-sample" style="padding:14px;margin-top:14px" ${sample?'':'hidden'}><span class="eyebrow">Type an answer and have it checked</span><textarea id="selfA" placeholder="One or two sentences, the way it would be said in an interview…"></textarea><div style="display:flex;gap:8px;align-items:center"><button class="btn sm primary" id="checkA">Check my answer</button><span class="small muted">Graded against the model answer, not the internet.</span></div><div class="feedback" id="fb" hidden></div></div>
   </div>
   <aside class="drill-side"><div class="card" style="padding:14px"><div class="eyebrow" style="margin-bottom:8px">This deck</div><div class="mastery"><div class="m0"><div class="big num">${counts[0]}</div><div class="lbl">new</div></div><div class="m1"><div class="big num">${counts[1]}</div><div class="lbl">shaky</div></div><div class="m2"><div class="big num">${counts[2]}</div><div class="lbl">solid</div></div></div><div class="sbar" style="margin-top:10px"><i class="s2" style="width:${pct(counts[2],D.queue.length)}%"></i><i class="s1" style="width:${pct(counts[1],D.queue.length)}%"></i><i class="s0" style="width:${pct(counts[0],D.queue.length)}%"></i></div></div>
-   <div class="card" style="padding:14px"><div class="eyebrow" style="margin-bottom:6px">All cards</div><div class="small">${pr.solid} solid · ${pr.shaky} shaky · ${pr.cards-pr.solid-pr.shaky} new</div></div>
+   <div class="card" style="padding:14px"><div class="eyebrow" style="margin-bottom:6px">All cards</div><div class="small">${pr.solid} solid · ${pr.shaky} shaky · ${pr.cards-pr.solid-pr.shaky} new</div><div class="small muted" style="margin-top:6px">${dueCount()} due today${c?` · this card comes back ${whenDue(c.id)}`:''}</div></div>
    <div class="card" style="padding:14px;font-size:14px;color:var(--ink-2)"><b style="color:var(--ink)">The rule.</b> For every card that is not fluent, go back to that one section of the chapter — not the whole chapter.</div>
   </aside></div>`}
   <div style="margin-top:22px"><button class="btn sm" id="addQBtn">+ Add your own question</button><div id="addQForm"></div></div>`;
   v.querySelectorAll('[data-mode]').forEach(b=>b.addEventListener('click',()=>{D.mode=b.dataset.mode;D.rebuild=true;renderDrill(v);}));
   v.querySelectorAll('[data-pf]').forEach(b=>b.addEventListener('change',()=>{ D.ch=D.ch===b.dataset.pf?null:b.dataset.pf; D.rebuild=true; renderDrill(v); }));
   $('#shuffle').addEventListener('click',()=>{D.rebuild=true;renderDrill(v);});
+  $('#dueBtn').addEventListener('click',()=>{ D.dueOnly=!D.dueOnly; D.rebuild=true; renderDrill(v);
+    if(D.dueOnly&&!D.queue.length) toast('Nothing is due — every card has been seen recently'); });
+  $('#ivBtn').addEventListener('click',()=>{ D.iv=startInterview(); renderDrill(v); });
   const flip=()=>{ D.flipped=!D.flipped; $('#fc')?.classList.toggle('flipped',D.flipped); const fb=$('#flipBtn'); if(fb) fb.textContent=D.flipped?'Show front':'Flip'; };
   $('#fc')?.addEventListener('click',flip); $('#flipBtn')?.addEventListener('click',flip);
-  v.querySelectorAll('[data-g]').forEach(b=>b.addEventListener('click',()=>{ const m=S.drill[c.id]||0; S.drill[c.id]=b.dataset.g==='1'?Math.min(2,m+1):0; save(); D.idx=(D.idx+1)%D.queue.length; D.flipped=false; if(D.idx===0){ D.rebuild=true; toast('Deck finished — reshuffled, misses first'); } renderDrill(v); }));
+  v.querySelectorAll('[data-g]').forEach(b=>b.addEventListener('click',()=>{ grade(c.id,b.dataset.g==='1'); D.idx=(D.idx+1)%D.queue.length; D.flipped=false; if(D.idx===0){ D.rebuild=true; toast('Deck finished — reshuffled, misses first'); } renderDrill(v); }));
   $('#checkA')?.addEventListener('click',async()=>{ const ta=$('#selfA'); if(!ta.value.trim()||!sample) return; const fb=$('#fb'); fb.hidden=false; fb.textContent='Checking…';
     try{ const r=await sample(`You are a strict but fair Oracle HCM trainer checking a junior consultant's spoken-style answer. Grade it against ONLY the reference below. Format:\nVerdict: Solid / Nearly / Missing the point\nRight: one line\nMissing or wrong: one or two concrete lines\nSay it like this: one crisp interview-ready sentence.\nUnder 120 words. No praise padding.\n\nQUESTION: ${c.q}\n\nREFERENCE:\n${c.back.map(x=>x.lb+': '+x.tx).join('\n\n')}\n\nCANDIDATE ANSWER: ${ta.value.trim()}`,{onText:({text})=>{fb.textContent=text;},modelTier:'quick'}); fb.textContent=r.text; }
     catch(err){ fb.textContent=err&&err.code==='not_granted'?'Checking is not enabled for this view.':'Could not check right now.'; } });
@@ -2209,12 +2297,45 @@ function renderAbout(v){
   <h2>Reading and listening</h2>
   <p>Every chapter has a <strong>Listen</strong> control that reads it aloud using your browser's own speech engine — no account, no network, and it works offline. It reads paragraph by paragraph and highlights where it is, so you can follow along or put the phone down. The voices are whatever your operating system provides, which is why the quality varies between machines; pick a different one from the bar at the bottom if the default grates.</p>
   ${ABOUT_SOURCES[dom]||''}
+  <h2>Carrying your progress</h2>
+  <p>Everything you mark — chapters read, terms known, how each drill card has gone, your own terms and questions, and when each card is next due — lives in this browser, on this device. It is not an account and it is not on a server. That keeps it private and means a different browser starts empty, so there is a backup here: take a copy before switching devices, and paste it back on the other one.</p>
+  <div class="backup">
+    <div class="backup-row"><button class="btn sm primary" id="bkDownload">Download a backup</button><button class="btn sm" id="bkCopy">Copy to clipboard</button><span class="small muted" id="bkStat"></span></div>
+    <details><summary class="small">Restore from a backup</summary>
+      <p class="small muted" style="margin:8px 0">Paste a backup below, or choose the downloaded file. This replaces what is in this browser.</p>
+      <textarea id="bkText" rows="3" placeholder="Paste the backup here"></textarea>
+      <div class="backup-row"><input type="file" id="bkFile" accept="application/json,.json"><button class="btn sm" id="bkRestore">Restore</button></div>
+    </details>
+  </div>
+
   <h2>Adding to it</h2>
   <p>You can add your own terms from any chapter and your own drill questions from the Drill deck; they are kept with your progress in this browser. The site itself is a single HTML file. Chapters are written as Markdown and compiled in, and the build refuses to run if a chapter references a term, lab or figure that does not exist — so a broken cross-reference never ships. New knowledge is meant to arrive as a chapter with its own sources, not as loose notes.</p>
   <h2>Design</h2>
   <p>Navy and gold, a serif for reading and a grotesque for the interface, and one colour per chapter carried through its labs, glossary terms and drill cards so the colour becomes a memory cue. The collections carry their own accent in the bar at the top. Light and dark are both designed rather than inverted, wide diagrams scroll inside their own frame so the page never scrolls sideways, and a chapter prints as a clean document if you would rather read it on paper.</p>
   <p class="about-foot">Currently ${CH.length} chapters across ${DOMAINS.length} collections · ${allTerms().length} glossary terms · ${LABS.length} labs · ${FIGS.length} figures · ${DATA.questions.length} drill questions.</p>
   </div>`;
+  const stat=m=>{ const el=$('#bkStat'); if(el){ el.textContent=m; setTimeout(()=>{ if(el.textContent===m) el.textContent=''; },4000); } };
+  const payload=()=>JSON.stringify({moonLearning:1, savedAt:new Date(S.updatedAt||Date.now()).toISOString(), progress:S}, null, 1);
+  $('#bkDownload')?.addEventListener('click',()=>{
+    try{ const a=document.createElement('a'); const b=new Blob([payload()],{type:'application/json'});
+      a.href=URL.createObjectURL(b); a.download='moon-learning-progress.json'; document.body.appendChild(a); a.click();
+      setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},0); stat('Downloaded.'); }
+    catch(e){ stat('This browser blocked the download — use Copy instead.'); } });
+  $('#bkCopy')?.addEventListener('click',async()=>{
+    try{ await navigator.clipboard.writeText(payload()); stat('Copied. Paste it into the other browser.'); }
+    catch(e){ const ta=$('#bkText'); if(ta){ ta.value=payload(); ta.select(); stat('Copy it from the box below.'); } } });
+  $('#bkFile')?.addEventListener('change',e=>{ const f=e.target.files&&e.target.files[0]; if(!f) return;
+    const r=new FileReader(); r.onload=()=>{ const ta=$('#bkText'); if(ta) ta.value=String(r.result||''); stat('File read — now press Restore.'); }; r.readAsText(f); });
+  $('#bkRestore')?.addEventListener('click',()=>{
+    const raw=($('#bkText')?.value||'').trim(); if(!raw) return stat('Nothing to restore.');
+    let d; try{ d=JSON.parse(raw); }catch(e){ return stat('That is not a backup file.'); }
+    const p=d&&d.progress&&typeof d.progress==='object'?d.progress:d;
+    if(!p||typeof p!=='object'||!('drill' in p)&&!('known' in p)) return stat('That file has no progress in it.');
+    ['known','read','notes','drill','due'].forEach(k=>{ S[k]=p[k]&&typeof p[k]==='object'?p[k]:{}; });
+    S.custom=Array.isArray(p.custom)?p.custom:[]; S.customQ=Array.isArray(p.customQ)?p.customQ:[];
+    S.last=typeof p.last==='string'?p.last:null;
+    save(); toast('Progress restored'); render();
+  });
 }
 
 /* =====================================================================

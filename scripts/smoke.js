@@ -314,6 +314,38 @@ const check = (name, pass, detail = '') => results.push({ name, pass, detail });
   check('searching the Arabic finds its term', !!arTerm && arHit === arTerm.name,
     arTerm ? `${arTerm.ar} -> ${arHit || 'nothing'}` : 'no term carries Arabic');
 
+  // ---- the study loop: scheduling, the due filter and an interview round
+  const study = await browser.newPage({ viewport: { width: 1280, height: 950 } });
+  watch(study);
+  await study.goto(FILE, { waitUntil: 'load' });
+  await study.evaluate(() => { localStorage.removeItem('hcm-atlas-v2'); location.hash = 'hcm/drill'; });
+  await study.reload({ waitUntil: 'load' });
+  await study.evaluate(() => { location.hash = 'hcm/drill'; });
+  await study.waitForTimeout(400);
+  const dueBefore = await study.textContent('#dueBtn');
+  await study.click('[data-g="1"]');
+  await study.waitForTimeout(200);
+  const scheduled = await study.evaluate(() => {
+    const st = JSON.parse(localStorage.getItem('hcm-atlas-v2') || '{}');
+    const due = Object.values(st.due || {});
+    return due.length === 1 && due[0] > Date.now() + 36e5;   // a day out, not now
+  });
+  check('grading a card schedules its return', scheduled, dueBefore.trim());
+
+  await study.click('#ivBtn');
+  await study.waitForTimeout(300);
+  for (let i = 0; i < 10; i++) {
+    await study.click('#ivShow');
+    await study.waitForTimeout(40);
+    await study.click(i % 2 ? '[data-iv="1"]' : '[data-iv="0"]');
+    await study.waitForTimeout(40);
+  }
+  const summary = await study.textContent('h1');
+  const weak = await study.locator('.ivlist li').count();
+  check('an interview round runs to a summary', /^\d+ of 10$/.test(summary.trim()) && weak > 0,
+    `${summary.trim()}, ${weak} chapters to reread`);
+  await study.close();
+
   check('no runtime errors', errors.length === 0, errors.join(' | '));
   await browser.close();
 
