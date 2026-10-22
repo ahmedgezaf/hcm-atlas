@@ -1271,5 +1271,132 @@
       "sick-leave",
       "final-settlement"
     ]
+  },
+  {
+    "chapter": "modules",
+    "question": "A recruiter asks which Oracle HCM modules you know. How do you structure the answer?",
+    "answer": "By offering, then functional area. Fusion HCM is opted into as offerings: Workforce Deployment for the employment record, payroll, time and absence; Workforce Development for performance, goals, career development, succession and talent review; Compensation Management for compensation cycles, incentives and benefits. Recruiting and Learning are their own offerings. I would say I know Workforce Deployment, specifically Global HR, Absence Management and Payroll, and that I can follow a conversation about the others and name where they touch core HR, but have not configured them.",
+    "terms": [
+      "offering",
+      "functional-area"
+    ]
+  },
+  {
+    "chapter": "modules",
+    "question": "A client says 'we want workforce management'. What do you ask?",
+    "answer": "Which meaning they have in mind. Trainers and HR teams often say workforce management for maintaining worker records — hires, transfers, promotions, terminations — which is Global HR. Oracle also uses Workforce Management as the name of a feature area for time, scheduling and absence. The requirement gets written against a different module depending on the answer, so I would ask before writing anything down.",
+    "terms": [
+      "offering"
+    ]
+  },
+  {
+    "chapter": "modules",
+    "question": "What is the difference between a talent profile and a model profile, and why does a consultant on core HR care?",
+    "answer": "A talent profile describes a person — competencies, skills, languages, degrees, certifications. A model profile describes a job or position — the targeted and required skills and work requirements. Core HR cares because the model profile hangs off the job and position catalogue: a clean job catalogue makes gap comparisons and best-fit searches meaningful, and a messy one makes every talent module downstream produce noise.",
+    "terms": [
+      "talent-profile",
+      "model-profile",
+      "content-library"
+    ]
+  },
+  {
+    "chapter": "modules",
+    "question": "Why is career development described as the module that keeps succession honest?",
+    "answer": "Because talent review and succession both read the talent profile, and career development is what writes to it. A development goal can carry target outcomes such as a competency or certification, and completing the goal writes the outcome back to the profile. Without it, profiles are maintained by hand or not at all, and the first succession meeting reviews people against data a year old.",
+    "terms": [
+      "development-goal",
+      "talent-profile",
+      "talent-review-and-succession"
+    ]
+  },
+  {
+    "chapter": "modules",
+    "question": "What happens in a talent review meeting, and what is the box chart for?",
+    "answer": "A business leader's organization is reviewed: reviewers submit ratings before a deadline, and facilitators run the meeting. The box chart plots the population on one rating against another — usually performance against potential, the nine-box — and people are moved between boxes during the meeting, which is the calibration. Depending on the template, succession plans and talent pools can be worked on in the same meeting.",
+    "terms": [
+      "box-chart",
+      "talent-pool",
+      "talent-review-and-succession"
+    ]
+  },
+  {
+    "chapter": "costing",
+    "question": "Walk through how Oracle decides which cost centre a salary payment is costed to.",
+    "answer": "Through the cost hierarchy, for that segment alone. The engine starts at the lowest level, the element entry, and works up — person element, person, position, job, location, department, element eligibility, payroll — taking the first level that has a cost-centre value. If the person has an assignment-level override that wins; otherwise a job cost centre beats the department's; if nothing below the payroll has one, the payroll's applies. The other segments are resolved separately, so the account can be assembled from several levels.",
+    "terms": [
+      "cost-hierarchy",
+      "cost-allocation-key-flexfield"
+    ]
+  },
+  {
+    "chapter": "costing",
+    "question": "Finance reports a large balance in the payroll suspense account after the first live run. What do you check?",
+    "answer": "Which segment was missing or invalid, and which level should have supplied it. The common cause is a structure created in core HR without costing — a new department with no cost centre — so everyone in it is paid correctly and costed to suspense. I fix the costing at the right level for future runs, and correct the results already posted through the transfer and accounting route, reversing the transfer to Subledger Accounting rather than editing setup and hoping.",
+    "terms": [
+      "suspense-and-default-account",
+      "cost-hierarchy",
+      "transfer-to-subledger-accounting"
+    ]
+  },
+  {
+    "chapter": "costing",
+    "question": "The finance director wants employer social-insurance cost to show up in each department in proportion to salary. How?",
+    "answer": "Distributed costing. The employer contribution element is given a costing type of distributed and a distribution set made of the salary earnings elements, so its cost is spread across the same accounts and in the same proportions as the salary charged to each department. Setting it as ordinary costed would land it wherever its own hierarchy pointed, usually one account.",
+    "terms": [
+      "distributed-costing",
+      "costing-type"
+    ]
+  },
+  {
+    "chapter": "costing",
+    "question": "Why must the costing flexfield be designed with the finance consultant?",
+    "answer": "Because it mirrors Finance's chart of accounts. Each segment represents a part of the account string, validated by a value set, and the natural account values must match the general ledger's. A structure HR designs alone produces journals the ledger cannot accept, and rebuilding a flexfield after costing results exist is far more expensive than designing it once with the chart of accounts on the table.",
+    "terms": [
+      "cost-allocation-key-flexfield"
+    ]
+  },
+  {
+    "chapter": "costing",
+    "question": "When does Finance first see the payroll, technically?",
+    "answer": "After Transfer to Subledger Accounting sends payroll's costing to Subledger Accounting and Create Accounting, run in Final mode, posts the journals to the general ledger. Before that, costing results exist only in payroll. That is also why project labour cost is not available until payroll has been transferred and accounted.",
+    "terms": [
+      "transfer-to-subledger-accounting"
+    ]
+  },
+  {
+    "chapter": "costing",
+    "question": "What does an offset account do, and what goes wrong without one?",
+    "answer": "It carries the balancing side of each costing entry, because the ledger is double-entry: an expense debit needs a matching credit. Without one, payroll produces one-sided entries that cannot be posted as a journal, which surfaces as an accounting error at month end rather than in the payroll run.",
+    "terms": [
+      "offset-account"
+    ]
+  },
+  {
+    "chapter": "personas",
+    "question": "A manager says the Promote button has disappeared. Where do you start?",
+    "answer": "With the user's roles and data scope, not the transaction. Quick actions are shown by role — My Team actions come from the line manager role — and the data security attached to it decides over whom. A role removed by a provisioning rule, or a manager whose reports fall outside their security profile, explains most missing buttons. Only once the role is right do I look at the transaction's own configuration.",
+    "terms": [
+      "quick-action",
+      "me-my-team-my-client-groups"
+    ]
+  },
+  {
+    "chapter": "personas",
+    "question": "Describe one sick-leave absence from the employee, manager and HR seats.",
+    "answer": "The employee requests it in Me, sees the balance and attaches the medical certificate if the type requires one. The manager approves it in My Team, through the absence approval rules, and sees it on the team calendar. HR or the absence administrator can record it on the employee's behalf, correct the balance with a reason, and runs the accrual processes. Once approved, the paid or unpaid portion reaches the next payroll as an absence element — which is why an approval after the payroll cutoff is paid a period late.",
+    "terms": [
+      "self-service",
+      "me-my-team-my-client-groups",
+      "acting-on-behalf"
+    ]
+  },
+  {
+    "chapter": "personas",
+    "question": "A factory client has two thousand workers with no system login. How does that change the self-service design?",
+    "answer": "It means deciding how those workers reach the system — kiosks, mobile, a team leader or HR acting on their behalf, or a hybrid where office staff self-serve and everyone else goes through HR. The choice changes approvals, because a transaction HR keys may or may not still route to the manager; security, because HR needs those populations in scope; and training. It is a first-workshop decision, not a hypercare one.",
+    "terms": [
+      "self-service",
+      "acting-on-behalf"
+    ]
   }
 ]

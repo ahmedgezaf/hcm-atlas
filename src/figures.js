@@ -559,3 +559,54 @@ FIGS.push({
     <path class="f-divide" d="M390 14 V176"/>
   </svg>`,
 });
+
+/* ------------------------------------------------------------------ */
+FIGS.push({
+  id: 'cost-flow',
+  ch: 'costing',
+  title: 'From the run to the ledger',
+  caption: 'Costing is calculated in payroll but only becomes accounting when it leaves. Notice that Finance sees nothing until the final accounting run — and that a correction has to unwind the same path backwards.',
+  svg: () => `<svg viewBox="0 0 760 300" role="img" aria-label="Payroll run results become costing results against the cost allocation flexfield, which with the costing of payments are sent by Transfer to Subledger Accounting into subledger journals built by Finance's rules, and posted to the general ledger by the final accounting run.">
+    ${FIG_DEFS}
+    ${F.head(30, 22, 'CALCULATED IN PAYROLL')}
+    ${F.box(30, 32, 186, 52, 'Payroll run results', 'what each person was paid')}
+    ${F.across(216, 246, 58)}
+    ${F.box(248, 32, 216, 52, 'Costing results', 'on the cost allocation flexfield')}
+    ${F.across(464, 494, 58)}
+    ${F.box(496, 32, 234, 52, 'Transfer to Subledger Accounting', 'creates the accounting events')}
+
+    ${F.box(248, 96, 216, 42, 'Calculate Costing of Payments', 'a separate process', 'ghost')}
+    ${F.elbow(464, 117, 613, 84)}
+
+    ${F.head(30, 208, 'ACCOUNTED IN FINANCE')}
+    ${F.box(30, 218, 290, 50, 'Subledger journals', 'built by rules Finance owns')}
+    ${F.across(320, 352, 243)}
+    ${F.box(354, 218, 180, 50, 'Create Final Accounting', 'a draft run validates first')}
+    ${F.across(534, 566, 243)}
+    ${F.box(568, 218, 162, 50, 'General ledger', 'Finance sees it here')}
+    ${F.elbow(613, 84, 260, 218)}
+    ${F.note(380, 288, 'a correction unwinds backwards — reverse the transfer before touching the run', 'mid')}
+  </svg>`,
+});
+
+/* ------------------------------------------------------------------ */
+FIGS.push({
+  id: 'three-doors',
+  ch: 'personas',
+  title: 'Three doors, one record',
+  caption: 'Me, My Team and My Client Groups are audiences, not separate data. All three write to the same assignment, with the same effective dating — what differs is what each may see and what approval each change triggers.',
+  svg: () => `<svg viewBox="0 0 760 250" role="img" aria-label="Three doors — Me for a person's own record, My Team for a manager's direct reports, and My Client Groups for HR's populations — pass through roles and data security and all write to the same effective-dated assignment.">
+    ${FIG_DEFS}
+    ${F.head(30, 22, 'THREE DOORS')}
+    ${F.box(30, 32, 220, 52, 'Me', 'own record')}
+    ${F.box(270, 32, 220, 52, 'My Team', 'direct reports')}
+    ${F.box(510, 32, 220, 52, 'My Client Groups', 'populations by responsibility')}
+    ${F.down(140, 84, 112)}
+    ${F.down(380, 84, 112)}
+    ${F.down(620, 84, 112)}
+    ${F.box(30, 112, 700, 40, 'Roles and data security decide what each door shows', null, 'ghost')}
+    ${F.down(380, 152, 186)}
+    ${F.box(170, 186, 420, 50, 'The same assignment', 'one record · effective-dated', 'accent')}
+    ${F.note(380, 248, 'the door changes who may act and what is approved, never which record is written', 'mid')}
+  </svg>`,
+});

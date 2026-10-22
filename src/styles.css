@@ -645,6 +645,35 @@ pre.code{background:var(--navy);color:var(--navy-ink);border-radius:8px;padding:
 .backup summary{cursor:pointer;font-weight:700;color:var(--ink-2)}
 .backup input[type=file]{font-size:12.5px;max-width:100%}
 
+/* ---- the product map, the cost grid and the three seats */
+.ocol button.oi{width:100%;text-align:left;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:8px;font:inherit;font-size:13px}
+.ocol button.oi:hover{border-color:var(--p)}
+.ocol button.oi.on{border-color:var(--p);background:var(--p-soft);color:var(--p)}
+.ocol .oh.ghosted{border-top-color:var(--line-2);color:var(--muted)}
+.ocol .oh.act{border-top-color:var(--p);color:var(--p)}
+.ocol .oi.act{border-color:var(--p);background:var(--p-soft);color:var(--ink)}
+.ocol .oi.empty{opacity:.45}
+.spanrow{margin-top:12px;display:grid;gap:6px;min-width:560px}
+.spanitems{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:6px}
+.spanrow .oh{border-top:3px solid var(--line-2);background:var(--surface);border-radius:0 0 6px 6px;padding:8px 10px;font-weight:800;font-family:var(--display);font-size:13.5px;color:var(--muted)}
+.spanitems .oi,.spanitems button.oi{border:1px dashed var(--line-2);border-radius:6px;padding:7px 10px;font:inherit;font-size:13px;background:var(--surface);color:var(--ink-2);display:flex;justify-content:space-between;align-items:center;gap:8px;width:100%;text-align:left;cursor:pointer}
+.spanitems button.oi:hover{border-color:var(--p)}
+.spanitems button.oi.on{border-color:var(--p);background:var(--p-soft);color:var(--p)}
+.costgrid td{padding:4px 10px 4px 0}
+.costgrid .cellbtn{width:100%;min-width:104px;text-align:left;padding:5px 8px;border:1px solid var(--line);border-radius:6px;background:var(--surface);font:inherit;font-size:12.5px;color:var(--ink);cursor:pointer}
+.costgrid .cellbtn:hover:not(:disabled){border-color:var(--p)}
+.costgrid .cellbtn.win{border-color:var(--p);background:var(--p-soft);color:var(--p);font-weight:700}
+.costgrid .cellbtn.past{opacity:.4}
+.costgrid .cellbtn:disabled{opacity:.3;cursor:default}
+.acctstrip{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+@media (max-width:560px){.acctstrip{grid-template-columns:1fr}}
+.acctstrip div{border:1.5px solid var(--p);background:var(--p-soft);border-radius:8px;padding:10px 12px;display:grid;gap:2px}
+.acctstrip div.miss{border-color:var(--bad);background:var(--bad-soft)}
+.acctstrip .lbl{font-size:10.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.acctstrip b{font-family:var(--mono);font-size:15px}
+.acctstrip .how{font-size:11.5px;color:var(--muted)}
+.ocols.seats{grid-template-columns:repeat(3,1fr)}
+
 /* ---- DRILL */
 .drill-top{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:18px}
 .seg{display:inline-flex;border:1px solid var(--line-2);border-radius:8px;overflow:hidden}
@@ -821,6 +850,11 @@ pre.code{background:var(--navy);color:var(--navy-ink);border-radius:8px;padding:
   .gterm .go{grid-column:2}
 }
 @media (max-width:520px){
+  /* The deck controls are a flex row of chips and buttons; on a phone the chip
+     row scrolls on its own rather than widening the page. */
+  .drill-top{gap:8px}
+  .drill-top .chk{flex-wrap:nowrap;overflow-x:auto;max-width:100%;padding-bottom:2px}
+  .drill-top .btn{margin-left:0!important}
   .dtab span{display:none}
   .dtab{padding:8px 11px}
   .over-hero h1{font-size:28px}

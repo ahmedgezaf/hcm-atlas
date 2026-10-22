@@ -918,3 +918,140 @@ LABS.push({id:'cr-or-defect',ch:'method',title:'Change request, defect, or quest
     const n=b.querySelector('[data-next]');if(n){n.addEventListener('click',()=>{i++;picked=null;draw();});n.focus();}};
   draw();
 }});
+
+/* Lab 34: the product map — three offerings, and where this atlas sits */
+LABS.push({id:'offering-map',ch:'modules',title:'Three offerings, and where this atlas sits',lead:'Oracle draws the HCM core as three offerings with a few features spanning all of them. Click a feature to see what it is, where it touches core HR or payroll, and how deep this atlas goes on it. Switch views to see Global HR grouped by the job each part does.',render(b){
+  const OFF=[
+    ['Workforce Deployment',[['ghr','Global Human Resources','deep'],['gpay','Global Payroll and Localization','deep'],['gpi','Global Payroll Interface','name'],['wrep','Workforce Reputation Management','name'],['wpred','Workforce Predictions','name'],['wm','Workforce Management','seam'],['tl','Time and Labor','seam'],['abs','Absence Management','deep']]],
+    ['Workforce Development',[['tr','Talent Review','seam'],['perf','Performance Management','seam'],['goal','Goal Management','seam'],['cdev','Career Development','seam'],['succ','Succession Management','seam']]],
+    ['Compensation Management',[['comp','Compensation','seam'],['icomp','Incentive Compensation','name'],['ben','Benefits','seam'],['tcs','Total Compensation Statement','name']]]];
+  const SPAN=[['ff','Fast Formula','deep'],['prof','Profile Management','seam'],['dir','Workforce Directory Management','name']];
+  const OWN=[['orc','Recruiting (ORC)','seam'],['learn','Learning','seam']];
+  const NAMEONLY='Listed in Oracle’s setup figure; this atlas carries the name and nothing more.';
+  const EX={
+    ghr:['The employment record and everything that reads from it — the person, the work relationship, the assignment, and the events that change them.','It is the foundation the other two offerings read, which is why most of this atlas lives inside it.',['model','dating','lifecycle']],
+    gpay:['Gross-to-net calculation, balances, payments and costing, with a localization per country.','Egypt has no maintained localization, so the statutory rules are built here rather than delivered.',['payroll','costing','egypt-payroll']],
+    gpi:['Sends payroll-ready data to a third-party payroll instead of calculating it in Oracle.',NAMEONLY,[]],
+    wrep:['',NAMEONLY,[]],
+    wpred:['',NAMEONLY,[]],
+    wm:['Oracle uses Workforce Management for the feature area covering time, scheduling and absence.','Trainers and clients also say “workforce management” to mean managing worker records, which is the Global HR sense. Two meanings, one phrase — ask which is meant before writing the requirement.',['modules']],
+    tl:['Time cards, schedules and the hours that reach payroll.','Hours arrive as a time card, an interface or a load, and an overtime element needs a rate and a statutory multiplier.',['payroll']],
+    abs:['Plans, types, accruals and the balances behind every leave request.','Absence elements carry leave payment into the payroll run, and the balance becomes the leave payout at exit.',['absence','egypt-leave']],
+    tr:['The talent review meeting itself: facilitators, reviewers and a template that decides what is shown.','The box chart is the screen people remember — performance against potential, calibrated in the room.',['modules']],
+    perf:['The review cycle, through a performance document carrying a period, competencies, ratings and a workflow.','Ratings mostly stay in the module. The connection worth naming is the review period against probation.',['lifecycle']],
+    goal:['Objectives, aligned up a hierarchy and often cascaded.','Feeds performance and development rather than the employment record.',['modules']],
+    cdev:['Development goals — goals about the person rather than the business.','Completed outcomes write back to the talent profile, which is what keeps profiles current without HR keying them.',['modules']],
+    succ:['Succession plans and talent pools: named candidates with readiness ratings.','A succession plan is a plan for a seat, which is one of the few genuine arguments for managing by position.',['workforce']],
+    comp:['How pay changes: cycles, budgets, eligibility, manager worksheets and approvals.','A compensation cycle writes the salary record that payroll reads.',['payroll']],
+    icomp:['',NAMEONLY,[]],
+    ben:['Plans people enrol in — medical cover, life insurance — opened by life events.','An enrolment produces the element entries payroll deducts and costs.',['payroll','egypt-payroll']],
+    tcs:['',NAMEONLY,[]],
+    ff:['Oracle’s rule language, used across payroll, absence, benefits and validation.','It spans the offerings because every one of them evaluates rules.',['ff']],
+    prof:['Talent profiles for people and model profiles for jobs and positions, built from a content library.','A model profile hangs off the job, so a clean job catalogue is what makes profile matching mean anything.',['workforce']],
+    dir:['',NAMEONLY,[]],
+    orc:['Hiring up to the moment somebody becomes an employee: requisition, candidate, job offer.','An accepted offer creates the work relationship and assignment, so recruiting data quality becomes core HR data quality.',['model','modules']],
+    learn:['Courses, assignments and completions, configured as its own offering.','The seam is compliance — mandatory training with a deadline, and completions that can feed the talent profile.',['extend']]};
+  const JOBS=[['The workforce record','hire, transfer, promote, terminate',['model','dating','lifecycle']],
+    ['Security','who sees and changes which records',['security']],
+    ['People and their details','the person behind the employment',['model','lifecycle']],
+    ['Self-service','employee, manager, HR — three seats',['personas']],
+    ['Loading data','HCM Data Loader and its spreadsheet cousin',['hdl']],
+    ['Reporting','getting it back out again',['reporting']]];
+  const NEIGHBOURS=[['Payroll','the money side',['payroll','costing','ff']],['Absence','the time side',['absence','egypt-leave','personas']]];
+  const badge=k=>k==='deep'?'<span class="pill ok">deep</span>':k==='seam'?'<span class="pill p">seam</span>':'<span class="pill">name only</span>';
+  let view='setup', sel=null;
+  const chLink=ids=>ids.map(id=>{const c=chById(id);return c?`<button class="btn sm ghost" data-goch="${id}">Chapter ${c.num} · ${esc(c.title)}</button>`:'';}).join(' ');
+  const draw=()=>{
+    const e=sel?EX[sel]:null;
+    const cell=([id,n,k])=>`<button class="oi ${sel===id?'on':''}" data-f="${id}">${n} ${badge(k)}</button>`;
+    b.innerHTML=`<div class="stepper">${[['setup','As Setup and Maintenance groups it'],['globalhr','Global HR, by job']].map(([v,l])=>`<button class="${view===v?'active':''}" data-v="${v}">${l}</button>`).join('')}</div>
+    <div class="ar-line">الـ HCM متقسم لـ ٣ offerings: الـ Workforce Deployment والـ Workforce Development والـ Compensation.</div>
+    ${view==='setup'?`<div class="stage"><div class="ocols">${OFF.map(([n,fs])=>`<div class="ocol"><div class="oh">${n}</div>${fs.map(cell).join('')}</div>`).join('')}</div>
+      <div class="spanrow"><div class="oh ghosted">Spans every offering</div><div class="spanitems">${SPAN.map(cell).join('')}</div></div>
+      <div class="spanrow"><div class="oh ghosted">Offerings of their own</div><div class="spanitems">${OWN.map(cell).join('')}</div></div></div>`
+    :`<div class="stage"><div class="ocols">${JOBS.map(([n,s,ids])=>`<div class="ocol"><div class="oh">${n}<span class="small muted" style="display:block;font-weight:400">${s}</span></div>${chLink(ids)}</div>`).join('')}</div>
+      <div class="spanrow"><div class="oh ghosted">The other two functional areas a junior is hired for</div><div class="spanitems">${NEIGHBOURS.map(([n,s,ids])=>`<div class="oi" style="display:grid;gap:6px"><b>${n}</b><span class="small muted">${s}</span><span>${chLink(ids)}</span></div>`).join('')}</div></div></div>`}
+    ${view==='setup'?explainBox('offEx',e?'':'<span class="muted">Click a feature. The badge says how far this atlas goes: deep means it has its own chapters here, seam means the atlas explains where it touches core HR or payroll, and name only means the vocabulary and nothing else.</span>'):''}`;
+    if(view==='setup'&&e){ const [what,seam,ids]=e; const name=[...OFF.flatMap(o=>o[1]),...SPAN,...OWN].find(f=>f[0]===sel)[1];
+      $('#offEx').innerHTML=`<b>${esc(name)}</b>${what?`<div style="margin-top:4px">${esc(what)}</div>`:''}<div class="muted" style="margin-top:6px">${esc(seam)}</div>${ids.length?`<div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap">${chLink(ids)}</div>`:''}`; }
+    b.querySelectorAll('[data-v]').forEach(x=>x.addEventListener('click',()=>{view=x.dataset.v;draw();}));
+    b.querySelectorAll('[data-f]').forEach(x=>x.addEventListener('click',()=>{sel=x.dataset.f;draw();}));
+    b.querySelectorAll('[data-goch]').forEach(x=>x.addEventListener('click',()=>go('chapters',{ch:x.dataset.goch})));};
+  draw();
+}});
+
+/* Lab 35: the cost hierarchy, resolved segment by segment */
+LABS.push({id:'cost-hierarchy',ch:'costing',title:'Which level supplies which segment',lead:'Mona’s salary needs a company, a cost centre and a natural account. Each can be set at several levels. The engine climbs from the element entry to the payroll for each segment separately and stops at the first value it finds. Fill and empty the cells and watch the account assemble itself.',render(b){
+  const LV=[['entry','Element entry'],['pea','Person element — assignment'],['pepr','Person element — payroll relationship'],['pa','Person — assignment'],['ppr','Person — payroll relationship'],['pos','Position'],['job','Job'],['loc','Location'],['dept','Department'],['ce','Costing eligibility on assignment attributes'],['ee','Element eligibility'],['pay','Payroll']];
+  const SEG=[['co','Company'],['cc','Cost centre'],['ac','Account']];
+  const SAMPLE={co:'01',ac:'5100 Salaries'};
+  const CC={entry:'1300 Ops',job:'1200 Sales',dept:'1100 Finance',loc:'1400 Plant',pos:'1200 Sales',ce:'1100 Finance',pa:'1100 Finance',pea:'1300 Ops',pepr:'1100 Finance',ppr:'1100 Finance',ee:'1100 Finance',pay:'1100 Finance'};
+  const TYPES={cost:['Costed','The whole ladder is consulted, lowest level first.'],fixed:['Fixed costed','Only the element entry, the element eligibility and the payroll are consulted.'],susp:['Suspense / default','Only the department and the payroll are consulted, the department taking precedence.']};
+  const ALLOW={cost:LV.map(l=>l[0]),fixed:['entry','ee','pay'],susp:['dept','pay']};
+  const PRESETS=[
+    ['Department does the work',{pay:{co:1},dept:{cc:1},ee:{ac:1}},'Three segments, three levels, one account.'],
+    ['Her job overrides the department',{pay:{co:1},dept:{cc:1},job:{cc:1},ee:{ac:1}},'The job sits lower in the ladder than the department, so it wins — for that segment only.'],
+    ['A time-card entry for a project day',{pay:{co:1},dept:{cc:1},entry:{cc:1},ee:{ac:1}},'The entry is the lowest level of all, so that one result goes somewhere else entirely.'],
+    ['New department, nobody set its costing',{pay:{co:1},ee:{ac:1}},'No value for a required segment anywhere in the ladder.']];
+  let type='cost', dist=false, vals={};
+  const apply=p=>{ vals={}; Object.entries(p).forEach(([lv,segs])=>{ vals[lv]={}; Object.keys(segs).forEach(s=>{ vals[lv][s]=s==='cc'?CC[lv]:SAMPLE[s]; }); }); };
+  apply(PRESETS[0][1]);
+  let note=PRESETS[0][2];
+  const allowed=lv=>ALLOW[type].includes(lv)&&(lv!=='ce'||dist);
+  const winner=seg=>{ for(const [lv] of LV){ if(allowed(lv)&&vals[lv]&&vals[lv][seg]) return lv; } return null; };
+  const draw=()=>{
+    const win={}; SEG.forEach(([s])=>win[s]=winner(s));
+    const missing=SEG.filter(([s])=>!win[s]);
+    b.innerHTML=`<div class="stepper">${Object.entries(TYPES).map(([k,[l]])=>`<button class="${type===k?'active':''}" data-t="${k}">${l}</button>`).join('')}</div>
+    <label class="sw" style="max-width:330px"><span>Distributed costing<span class="ar">التوزيع على عناصر تانية</span></span><input type="checkbox" data-dist ${dist?'checked':''}></label>
+    <div class="stage"><table class="dt costgrid" style="min-width:560px">
+      <tr><th>Level — searched top to bottom</th>${SEG.map(([,n])=>`<th>${n}</th>`).join('')}</tr>
+      ${LV.map(([lv,name])=>{const off=!allowed(lv);
+        return `<tr class="${off?'gone':''}">${`<td>${name}${lv==='ce'?' <span class="small muted">· distributed only</span>':''}</td>`}${SEG.map(([s])=>{
+          const v=vals[lv]&&vals[lv][s], isWin=win[s]===lv, below=win[s]&&LV.findIndex(x=>x[0]===lv)>LV.findIndex(x=>x[0]===win[s]);
+          return `<td><button class="cellbtn ${isWin?'win':''} ${below?'past':''}" data-cell="${lv}:${s}" ${off?'disabled':''}>${v?esc(v):'<span class="muted">—</span>'}</button></td>`;}).join('')}</tr>`;}).join('')}
+    </table></div>
+    <div class="acctstrip">${SEG.map(([s,n])=>`<div class="${win[s]?'':'miss'}"><span class="lbl">${n}</span><b>${win[s]?esc(vals[win[s]][s]):'????'}</b><span class="how">${win[s]?esc(LV.find(l=>l[0]===win[s])[1]):'no value at any level'}</span></div>`).join('')}</div>
+    ${missing.length?`<div class="msg bad" role="status"><b>${missing.length===1?'A segment has':'Segments have'} no value — the result goes to suspense.</b><span>A new department created in core HR with no costing does exactly this: everyone in it is paid correctly and costed to suspense, and nobody notices until month end.</span><div class="ar-line">أي segment من غير قيمة بيروح على حساب معلّق.</div></div>`
+      :`<div class="msg ok" role="status"><span>${esc(note)}</span><div class="ar-line">الـ costing بيدوّر segment segment، من الـ element entry لحد الـ payroll، وأول قيمة يلاقيها هي اللي بتكسب.</div></div>`}
+    <div class="stepper">${PRESETS.map(([n],i)=>`<button data-p="${i}">${n}</button>`).join('')}</div>
+    ${explainBox('chEx',`<b>${esc(TYPES[type][0])}.</b> ${esc(TYPES[type][1])} Priority accounts and percentage splits are not modelled here: a priority account sits above all of this and must carry every segment, and anything its split leaves over is built through the hierarchy as normal.`)}`;
+    b.querySelectorAll('[data-t]').forEach(x=>x.addEventListener('click',()=>{type=x.dataset.t;draw();}));
+    b.querySelector('[data-dist]').addEventListener('change',e2=>{dist=e2.target.checked;draw();});
+    b.querySelectorAll('[data-cell]').forEach(x=>x.addEventListener('click',()=>{ const [lv,s]=x.dataset.cell.split(':');
+      vals[lv]=vals[lv]||{}; if(vals[lv][s]) delete vals[lv][s]; else vals[lv][s]=s==='cc'?CC[lv]:SAMPLE[s];
+      note='Changed by hand.'; draw(); }));
+    b.querySelectorAll('[data-p]').forEach(x=>x.addEventListener('click',()=>{ const p=PRESETS[+x.dataset.p]; apply(p[1]); note=p[2]; type='cost'; draw(); }));};
+  draw();
+}});
+
+/* Lab 36: one absence, three seats */
+LABS.push({id:'three-seats',ch:'personas',title:'One absence, three seats',lead:'The same sick-leave absence, from request to payslip. Step through it and see which seat acts, where, and what the other two see. This is the common delivered pattern; a client’s roles and approval rules decide the details.',render(b){
+  const SEATS=[['emp','Employee','Me'],['mgr','Manager','My Team'],['hr','HR','My Client Groups']];
+  const STEPS=[
+    ['Request',{emp:['act','Requests sick leave and attaches the certificate'],mgr:['',''],hr:['','']}],
+    ['Approve',{emp:['see','Sees it pending'],mgr:['act','Approves it — the absence approval rule of Chapter 19'],hr:['','']}],
+    ['Record',{emp:['see','Sees it approved'],mgr:['see','Sees it on the team calendar'],hr:['act','Can record or correct one on the worker’s behalf']}],
+    ['Balance',{emp:['see','Sees the balance reduce'],mgr:['',''],hr:['act','Runs the accruals, and adjusts a balance only with a reason']}],
+    ['Payroll',{emp:['',''],mgr:['',''],hr:['act','The absence element reaches the next run — Chapter 6']}],
+    ['Payslip',{emp:['act','Sees the absence pay line on the payslip'],mgr:['',''],hr:['','']}]];
+  let i=0, nologin=false, late=false;
+  const draw=()=>{
+    const step=JSON.parse(JSON.stringify(STEPS[i][1]));
+    if(nologin&&i===0){ step.emp=['see','No system account — nothing to do here']; step.hr=['act','Records the absence on the worker’s behalf']; }
+    if(nologin&&i===1){ step.mgr=['act','Does the manager still approve? Decide it per transaction, in writing']; }
+    if(late&&i===4){ step.hr=['act','Approved after the payroll cutoff — paid one period late']; }
+    b.innerHTML=`<div class="stepper">${STEPS.map(([n],k)=>`<button class="${k===i?'active':''}" data-s="${k}">${k+1}. ${n}</button>`).join('')}</div>
+    <div class="switches" style="grid-template-columns:repeat(auto-fit,minmax(230px,1fr));display:grid">
+      <label class="sw"><span>The worker has no system login<span class="ar">مفيش حساب على السيستم</span></span><input type="checkbox" data-n ${nologin?'checked':''}></label>
+      <label class="sw"><span>Approved after the payroll cutoff<span class="ar">الموافقة بعد الإقفال</span></span><input type="checkbox" data-l ${late?'checked':''}></label></div>
+    <div class="stage"><div class="ocols seats">${SEATS.map(([k,who,where])=>{const [state,txt]=step[k];
+      return `<div class="ocol"><div class="oh ${state==='act'?'act':''}">${who}<span class="ar" style="display:block;font-weight:600;font-size:13px">${k==='emp'?'الموظف':k==='mgr'?'المدير':'شؤون العاملين'}</span><span class="small muted" style="display:block;font-weight:400">${where}</span></div>
+      <div class="oi ${state==='act'?'act':state===''?'empty':''}">${txt||'—'}</div></div>`;}).join('')}</div></div>
+    ${explainBox('tsEx',i===4&&late?'<b>One period late.</b> The absence is correct and the payroll is correct; the design question is the cutoff and the reminders around it, not the payroll.':i===0&&nologin?'<b>Somebody has to act for them.</b> A workforce with no corporate logins is the normal case in Egyptian manufacturing and retail. Kiosks, mobile, or HR acting on behalf are the options, and the choice changes the approval rules and the security design.':'<span class="muted">Three seats, one record. Each column writes to the same assignment with the same effective dating; what differs is what each may see and what approval the change triggers.</span>')}
+    <div class="ar-line">نفس الإجازة: الموظف بيطلب، المدير بيوافق، والـ HR بيصحّح ويشغّل الـ accruals.</div>`;
+    b.querySelectorAll('[data-s]').forEach(x=>x.addEventListener('click',()=>{i=+x.dataset.s;draw();}));
+    b.querySelector('[data-n]').addEventListener('change',e2=>{nologin=e2.target.checked;draw();});
+    b.querySelector('[data-l]').addEventListener('change',e2=>{late=e2.target.checked;draw();});};
+  draw();
+}});

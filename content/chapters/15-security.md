@@ -15,7 +15,7 @@ Security determines who can see and do what. A consultant needs conceptual fluen
 
 ## Role types
 
-Oracle's documentation defines five role types. A **job role** represents the specific job a worker does in the enterprise — Human Resource Analyst, Payroll Manager — and is the most-discussed role type in requirements sessions. An **abstract role** represents a worker's role independently of any job: the predefined Employee, Contingent Worker and Line Manager roles, which grant baseline self-service access to everyone in the system. A **duty role** is a logical grouping of function privileges — the granular building block from which job and abstract roles are composed; duty roles are never assigned directly to users. Aggregate privileges combine a task's function privilege with its data-security policy and are predefined and non-editable.
+Oracle's documentation defines five role types. A **job role** represents the specific job a worker does in the enterprise — Human Resource Analyst, Payroll Manager — and is the most-discussed role type in requirements sessions. An **abstract role** represents a worker's role independently of any job: the predefined Employee, Contingent Worker and Line Manager roles, which grant baseline self-service access to everyone in the system. They are what light up Me and My Team for an ordinary user (Chapter 22). A **duty role** is a logical grouping of function privileges — the granular building block from which job and abstract roles are composed; duty roles are never assigned directly to users. Aggregate privileges combine a task's function privilege with its data-security policy and are predefined and non-editable.
 
 ## Data scope: security profiles and data roles
 

@@ -2008,5 +2008,185 @@
     "watchOut": "A disputed balance has a history — enrolment, accrual runs, carryover, adjustments. Read it before changing it.",
     "ar": "معالجة الاستحقاقات",
     "say": "تشغيل الأرصدة"
+  },
+  {
+    "id": "offering",
+    "name": "Offering",
+    "chapter": "modules",
+    "definition": "The unit of Fusion a client opts into in Setup and Maintenance — Workforce Deployment, Workforce Development, Compensation Management — and opting in is what generates the setup task list.",
+    "watchOut": "Answering 'which modules do you know?' with menu names. The real answer is an offering and the functional areas inside it.",
+    "ar": "حزمة المنتج (العرض)",
+    "say": "الـ offering"
+  },
+  {
+    "id": "functional-area",
+    "name": "Functional area",
+    "chapter": "modules",
+    "definition": "A switchable part of an offering — Payroll, Absence Management, Workforce Structures — whose setup tasks appear only when it is enabled.",
+    "watchOut": "Looking for a setup task that is missing because its functional area was never opted into.",
+    "ar": "المجال الوظيفي",
+    "say": "الـ functional area"
+  },
+  {
+    "id": "talent-profile",
+    "name": "Talent profile",
+    "chapter": "modules",
+    "definition": "The record of what a person has — competencies, skills, languages, degrees, certifications — built from a person profile type and read by career development, succession and talent review.",
+    "watchOut": "Assuming it stays current on its own. It is kept up by career development, learning and people editing it, or it decays.",
+    "ar": "ملف المهارات والمواهب",
+    "say": "الـ talent profile"
+  },
+  {
+    "id": "content-library",
+    "name": "Content library",
+    "chapter": "modules",
+    "definition": "The catalogue of content types (competencies, languages, degrees, and the client's own) and their items, from which every profile's sections are built.",
+    "watchOut": "",
+    "ar": "مكتبة المحتوى",
+    "say": "الـ content library"
+  },
+  {
+    "id": "model-profile",
+    "name": "Model profile",
+    "chapter": "modules",
+    "definition": "A profile for a job or position rather than a person: the targeted and required skills and the work requirements of the role, used for gap comparisons and best-fit searches.",
+    "watchOut": "A model profile is only as good as the job catalogue it hangs off.",
+    "ar": "الملف النموذجي للوظيفة",
+    "say": "الـ job profile"
+  },
+  {
+    "id": "development-goal",
+    "name": "Development goal",
+    "chapter": "modules",
+    "definition": "A goal about the person rather than the business, owned in career development; its target outcomes are written back to the talent profile when it is completed.",
+    "watchOut": "Confusing it with a performance goal, which is about business results and lives in goal management.",
+    "ar": "هدف التطوير",
+    "say": "الـ development goal"
+  },
+  {
+    "id": "talent-pool",
+    "name": "Talent pool",
+    "chapter": "modules",
+    "definition": "A group of people being developed for a kind of role, looser than a succession plan, which names candidates for one specific role.",
+    "watchOut": "",
+    "ar": "مجمّع المواهب",
+    "say": "الـ talent pool"
+  },
+  {
+    "id": "box-chart",
+    "name": "Box chart (nine-box)",
+    "chapter": "modules",
+    "definition": "The talent review grid that plots a population on one rating against another, most often performance against potential, and where people are moved between boxes during calibration.",
+    "watchOut": "Treating the box as a rating stored on the employment record. It is a talent review output.",
+    "ar": "مصفوفة الأداء والإمكانات (المربعات التسعة)",
+    "say": "الـ nine-box"
+  },
+  {
+    "id": "cost-allocation-key-flexfield",
+    "name": "Cost allocation key flexfield",
+    "chapter": "costing",
+    "definition": "Payroll's copy of Finance's account structure — one segment per part of the account string, each validated by a value set, one structure per legislative data group.",
+    "watchOut": "Designing it without the chart of accounts. Natural account values must match the general ledger's.",
+    "ar": "هيكل توزيع التكاليف",
+    "say": "الـ costing flexfield"
+  },
+  {
+    "id": "cost-hierarchy",
+    "name": "Cost hierarchy",
+    "chapter": "costing",
+    "definition": "The order in which payroll looks for an account value, from element entry up to the payroll, taking the first level that has one — separately for every segment.",
+    "watchOut": "Thinking the most specific level supplies the whole account. Each segment is resolved on its own.",
+    "ar": "التسلسل الهرمي للتكلفة",
+    "say": "الـ costing hierarchy"
+  },
+  {
+    "id": "costing-type",
+    "name": "Costing type",
+    "chapter": "costing",
+    "definition": "The setting on an element's eligibility that decides how its results are costed: through the hierarchy, to a fixed account, or distributed over other elements.",
+    "watchOut": "",
+    "ar": "نوع التكلفة",
+    "say": "الـ costing type"
+  },
+  {
+    "id": "distributed-costing",
+    "name": "Distributed costing",
+    "chapter": "costing",
+    "definition": "Spreading an amount, usually an employer liability, across the same accounts and proportions as a set of earnings elements.",
+    "watchOut": "Expecting employer contributions to follow salary by department without setting them up this way.",
+    "ar": "التكلفة الموزّعة",
+    "say": "الـ distributed costing"
+  },
+  {
+    "id": "offset-account",
+    "name": "Offset account",
+    "chapter": "costing",
+    "definition": "The balancing side of a costing entry, so every cost has a matching credit and the journal is double-entry.",
+    "watchOut": "",
+    "ar": "الحساب المقابل",
+    "say": "حساب الـ offset"
+  },
+  {
+    "id": "suspense-and-default-account",
+    "name": "Suspense and default accounts",
+    "chapter": "costing",
+    "definition": "The two safety nets: suspense catches results with missing or invalid segments, default catches what is left when percentage splits do not reach a hundred.",
+    "watchOut": "Treating a suspense balance as Finance's problem. It is the costing design reporting its own gap.",
+    "ar": "الحساب المعلّق والحساب الافتراضي",
+    "say": "الـ suspense"
+  },
+  {
+    "id": "priority-account",
+    "name": "Priority account",
+    "chapter": "costing",
+    "definition": "A fully populated account set on an element that overrides the cost hierarchy for whatever share it covers.",
+    "watchOut": "",
+    "ar": "حساب الأولوية",
+    "say": "الـ priority account"
+  },
+  {
+    "id": "transfer-to-subledger-accounting",
+    "name": "Transfer to Subledger Accounting",
+    "chapter": "costing",
+    "definition": "The process that hands payroll's costing to Subledger Accounting, after which Create Accounting in Final mode posts the journals to the general ledger.",
+    "watchOut": "Correcting a transferred run without reversing the transfer first.",
+    "ar": "الترحيل إلى محاسبة الدفاتر الفرعية",
+    "say": "الـ transfer to SLA"
+  },
+  {
+    "id": "self-service",
+    "name": "Self-service",
+    "chapter": "personas",
+    "definition": "Employees and managers acting on their own and their team's records directly, instead of asking HR to do it for them.",
+    "watchOut": "Designing it for a workforce that mostly has no system login.",
+    "ar": "الخدمة الذاتية",
+    "say": "الـ self-service"
+  },
+  {
+    "id": "me-my-team-my-client-groups",
+    "name": "Me, My Team, My Client Groups",
+    "chapter": "personas",
+    "definition": "The three areas of the Fusion home page for the employee, the manager and HR — three views of the same records, not three sets of data.",
+    "watchOut": "",
+    "ar": "أنا، فريقي، مجموعات العملاء",
+    "say": "الـ My Client Groups"
+  },
+  {
+    "id": "quick-action",
+    "name": "Quick action",
+    "chapter": "personas",
+    "definition": "A named task such as Request Absence or Promote that opens a guided flow; which ones a user sees is decided by their roles.",
+    "watchOut": "Debugging a missing quick action before checking the user's roles and data scope.",
+    "ar": "إجراء سريع",
+    "say": "الـ quick action"
+  },
+  {
+    "id": "acting-on-behalf",
+    "name": "Acting on behalf",
+    "chapter": "personas",
+    "definition": "HR or a delegate submitting a transaction for an employee or manager who cannot or does not use self-service.",
+    "watchOut": "Not deciding which transactions still need approval when HR is the one keying them.",
+    "ar": "التنفيذ بالنيابة عن الموظف",
+    "say": "الـ HR بيدخلها بالنيابة"
   }
 ]

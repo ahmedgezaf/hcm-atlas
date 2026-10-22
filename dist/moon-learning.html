@@ -1123,7 +1123,7 @@ A **balance** is an accumulated total of element results over a period and dimen
 
 Calculation and payment are separate steps. **Prepayments** takes the run results and distributes them across each person's payment methods — someone may split their salary across two bank accounts. It runs after the payroll run and before the payment process, and it is the step people forget exists until a payment fails. Oracle's standard flow then archives the results, generates payslips, and produces the payments: the **payment process** creates the bank file. In Saudi Arabia and the UAE, the file must follow the Wage Protection System SIF format (Chapter 17), and a Gulf go-live always includes a bank-file test with the actual bank. The bank file is a common cause of go-live delay; never treat it as an afterthought.
 
-**Costing** allocates payroll results to accounting segments so the cost lands in the right place in the general ledger, broken down by department, project or cost centre. It is the bridge between HCM and Finance and is often owned jointly with a finance consultant.
+**Costing** allocates payroll results to accounting segments so the cost lands in the right place in the general ledger, broken down by department, project or cost centre. It is the bridge between HCM and Finance and is often owned jointly with a finance consultant. Chapter 21 covers how the account is built and how it reaches the ledger.
 
 ## Running it is a flow, not a button
 
@@ -1131,7 +1131,7 @@ Calculate Payroll is not a button; it is a **payroll flow** — a sequenced set 
 
 When something is wrong, three corrections do different things. **Mark for retry** flags the records that failed so the next retry picks up only those. **Retry** re-processes them after the cause is fixed. **Roll back** removes the results entirely, as though the process had not run. The order constraint is the part to know: once prepayments have locked a run's results, the run cannot be rolled back until the prepayments are rolled back first. Corrections therefore unwind in the reverse of the order they were made, and a team that tries to roll back a run with prepayments sitting on top of it gets an error that reads like a bug and is not.
 
-Where the cost lands is the other half of finishing a cycle. Costing allocates results to accounting segments through the cost allocation flexfield, with values held at several levels — the payroll, the department, the element eligibility — and the most specific one winning. The results then move to the general ledger through Transfer to Subledger Accounting and Create Accounting, which is the point at which Finance sees payroll at all. A costing design that is merely plausible produces a month-end reconciliation that nobody can explain, which is why the finance consultant belongs in that conversation from the start rather than at the end.
+Where the cost lands is the other half of finishing a cycle. Costing is resolved segment by segment through the cost hierarchy, so one account string can be assembled from values held at several different levels. The results then reach the ledger through Transfer to Subledger Accounting and the accounting processes that follow it — Chapter 21. A costing design that is merely plausible produces a month-end reconciliation that nobody can explain, which is why the finance consultant belongs in that conversation from the start rather than at the end.
 
 [[fig:payroll-chain]]
 
@@ -1213,7 +1213,7 @@ A **no-entitlement plan** exists because unpaid absence still needs to be record
 
 A plan is only half the design. The other half is what happens when somebody asks for a day off.
 
-An absence record carries a type, dates, a duration and a status, and it moves through approval like any other transaction (Chapter 19). The duration is where the configuration shows: it is calculated against the worker's **work schedule**, so a five-day absence spanning a weekend is not five days of leave, and a public holiday inside a leave period is not deducted from the balance — provided the calendar is configured (Chapter 10). A client whose schedules are wrong will report leave balances that are wrong in the same direction every time.
+An absence record carries a type, dates, a duration and a status, and it moves through approval like any other transaction (Chapter 19). Who may request it, who approves it and who can record or correct one on a worker's behalf is the three-seats question of Chapter 22. The duration is where the configuration shows: it is calculated against the worker's **work schedule**, so a five-day absence spanning a weekend is not five days of leave, and a public holiday inside a leave period is not deducted from the balance — provided the calendar is configured (Chapter 10). A client whose schedules are wrong will report leave balances that are wrong in the same direction every time.
 
 Two further settings matter in practice. Certification requirements hold an absence — or its payment — until a document is supplied, which is how Egyptian sick leave's medical certificate is enforced rather than hoped for. And the entry rules on the type decide whether half days are allowed, whether an end date is mandatory, and how far in the past or future a request can be made, which is the quiet cause of most "the system let them do that" tickets.
 
@@ -2214,7 +2214,7 @@ Security determines who can see and do what. A consultant needs conceptual fluen
 
 ## Role types
 
-Oracle's documentation defines five role types. A **job role** represents the specific job a worker does in the enterprise — Human Resource Analyst, Payroll Manager — and is the most-discussed role type in requirements sessions. An **abstract role** represents a worker's role independently of any job: the predefined Employee, Contingent Worker and Line Manager roles, which grant baseline self-service access to everyone in the system. A **duty role** is a logical grouping of function privileges — the granular building block from which job and abstract roles are composed; duty roles are never assigned directly to users. Aggregate privileges combine a task's function privilege with its data-security policy and are predefined and non-editable.
+Oracle's documentation defines five role types. A **job role** represents the specific job a worker does in the enterprise — Human Resource Analyst, Payroll Manager — and is the most-discussed role type in requirements sessions. An **abstract role** represents a worker's role independently of any job: the predefined Employee, Contingent Worker and Line Manager roles, which grant baseline self-service access to everyone in the system. They are what light up Me and My Team for an ordinary user (Chapter 22). A **duty role** is a logical grouping of function privileges — the granular building block from which job and abstract roles are composed; duty roles are never assigned directly to users. Aggregate privileges combine a task's function privilege with its data-security policy and are predefined and non-editable.
 
 ## Data scope: security profiles and data roles
 
@@ -2557,25 +2557,79 @@ id: modules
 num: 20
 domain: hcm
 track: functional
-title: The Modules Next Door
-subtitle: Enough of the rest of the suite to follow the conversation
+title: The Product Map
+subtitle: Three offerings, the modules inside them, and the seams that matter
 hue: 170
-minutes: 11
-labs: 
-terms: requisition-and-job-offer, onboarding-journey, compensation-plan, benefits-enrolment, goal-and-performance-document, talent-review-and-succession
+minutes: 16
+labs: offering-map
+terms: offering, functional-area, requisition-and-job-offer, onboarding-journey, compensation-plan, benefits-enrolment, goal-and-performance-document, talent-review-and-succession, talent-profile, content-library, model-profile, development-goal, talent-pool, box-chart
 ---
 
 This atlas teaches three modules: core HR, absence and payroll. They are what a junior functional consultant in Egypt is hired to do, and depth in them is worth more than breadth across the suite. But a client's HR director will list Recruiting, Benefits and Goals in the same sentence as payroll, a screening call will ask which modules you have worked with, and a workshop will reach a point where somebody says "that comes from Recruiting" and the room moves on.
 
-This chapter is vocabulary and seams, not depth. The aim is to follow the conversation, know what to ask, and know where the handover sits — and to say plainly, when asked, that you have not configured these. Claiming otherwise is the one thing that ends an interview badly.
+This chapter is the map: how Oracle packages the suite, where the three modules sit inside that package, and enough vocabulary and seams for everything else to follow the conversation, know what to ask, and know where the handover sits. It is not depth, and it should not be presented as depth. Saying plainly, when asked, that you have not configured a module is the answer that survives an interview; claiming otherwise is the one that ends it.
+
+## Three offerings, one suite
+
+Oracle does not sell or configure Fusion HCM as one block. In Setup and Maintenance the suite is divided into **offerings** — the unit a client opts into — and each offering is subdivided into **functional areas** and features that can be switched on or left off. Opting into an offering is what generates the setup task list, so the offering decides which configuration tasks a project even sees.
+
+Oracle's own implementation guide draws the HCM core as three offerings. **Workforce Deployment** holds the employment record and everything that pays and schedules people: global HR, payroll and payroll interfaces, time and labor, and absence management. **Workforce Development** holds what grows people: performance, goals, career development, succession and talent review. **Compensation Management** holds what rewards them: compensation cycles, incentive compensation, benefits and the total compensation statement. A small set of features — Fast Formula, profile management and the workforce directory — is drawn across all three rather than inside any one, because every offering reads them.
+
+Recruiting and Learning are configured as offerings of their own, outside that three-part figure, and the names in the Offerings page change between releases often enough that the training or client instance is the source to check against rather than a slide.
+
+[[lab:offering-map]]
+
+The practical consequence for a junior is that "which modules do you know?" is really "which offerings, and which functional areas inside them?" — and the honest answer for most new consultants in the region is one offering, Workforce Deployment, and three functional areas inside it.
+
+## Inside Workforce Deployment
+
+Global HR is the part of Workforce Deployment everything else reads from, and it is easier to hold if it is grouped by the job each part does rather than by menu. Managing the workforce record — hire, transfer, promotion, termination, and the person, work relationship and assignment underneath them — is Chapters 3, 4 and 8. Security, deciding who can see and change which records, is Chapter 15. The self-service layer, where employees and managers act on their own records instead of asking HR, is Chapter 22. Bulk loading through HCM Data Loader and its spreadsheet cousin is Chapter 11, and reporting is Chapter 13.
+
+One phrase causes more confusion than it should. Trainers and clients say **workforce management** to mean managing worker records, which is the Global HR sense. Oracle also uses Workforce Management as the name of a feature area covering time, scheduling and absence. In a workshop the two meanings can sit in the same sentence; asking which one is meant costs a second and saves a requirement being written against the wrong module.
+
+Payroll and absence are the other two functional areas a junior is hired for, and their seams with each other are covered where they meet: absence elements carrying leave payment into the run (Chapter 6), and the costing that carries the run into Finance (Chapter 21).
+
+## Profile management: the spine of the talent side
+
+Nearly every Workforce Development module reads the same underlying data, which is why Oracle draws profile management across the offerings rather than inside one. A **talent profile** holds what a person has — competencies, skills, languages, degrees, certifications — and a model profile holds what a job or position needs.
+
+The building blocks are a **content library**, which holds the content types (competencies, languages and degrees are delivered; a client adds its own), and the content items inside each type. A **profile type** is the template a profile is built from, and there are two kinds: a person profile type for workers, and a **model profile** type for workforce structures such as jobs and positions, which records the targeted and required skills and the work requirements of the role. Each content section on a profile carries its own role access, so whether an employee can edit their own languages but only view their competency ratings is a configuration decision rather than a given.
+
+The seam into core HR is the job and position of Chapter 2. A model profile hangs off the job, so a client with a clean job catalogue gets meaningful gap comparisons and best-fit searches, and a client whose jobs are an inherited spreadsheet of titles gets noise. Profile data can be loaded with HCM Data Loader, which matters because no client wants to key in a competency framework by hand.
+
+## Performance and goals
+
+Performance manages the review cycle through a **performance document** — a template, a period, a set of competencies and ratings, and a workflow between worker and manager. Goals manages objectives, aligned up a hierarchy and often cascaded.
+
+The seam into core HR is thinner than people expect: ratings mostly stay in the module, feeding compensation and talent review rather than the employment record. The connection worth naming is the review period against the probation period of Chapter 8 — clients frequently want the probation decision to come out of a performance document.
+
+## Career development
+
+Career development is where an employee and their manager plan growth, and its working unit is the **development goal**: a goal about the person rather than the business. A development goal can carry target outcomes drawn from the talent profile's catalogues — a competency, a certification, a language — and when the goal is completed the outcome is written back to the person's talent profile, rated by the manager when approvals are on.
+
+That write-back is the seam. Career development is the module that keeps talent profiles current without HR keying them, which makes it quietly important to talent review and succession, both of which read the profile. A client that buys succession and skips career development usually finds its profiles a year out of date by the first succession meeting.
+
+## Talent review and succession
+
+A talent review is a meeting, and the module is built around it: a business leader, facilitators who run the meeting, and reviewers who submit ratings before a deadline. The meeting's template decides which ratings are shown, what the potential assessment looks like, and whether succession plans and talent pools can be worked on in the room.
+
+The screen people remember is the **box chart** — the review population plotted on one rating against another, most often performance against potential, which is the nine-box grid HR textbooks describe. During the meeting participants move people between boxes, which is the calibration the meeting exists for.
+
+**Succession plans** name candidates for a critical role, each with a readiness rating, and can be built around an incumbent, a job or a position. A **talent pool** is the looser cousin — a group being developed for a kind of role rather than a named seat.
+
+The seam is positions, from Chapter 2. Succession is one of the few genuine arguments for managing by position rather than by job, because a succession plan is a plan for a seat. A client who wants position-based succession and has no positions is asking for two things.
+
+## Learning
+
+Oracle Learning delivers and tracks courses: catalogue, learning item, assignment, completion. It is configured as its own offering. The seam is compliance — mandatory training with a completion deadline, which in practice means a report that proves it, and sometimes a journey task that will not close until the course is done. Completed learning can also feed the talent profile, which is the second way profiles stay current.
 
 ## Recruiting
 
-Oracle Recruiting Cloud handles hiring up to the point someone becomes an employee. The words in the room are **requisition** (the approved vacancy), candidate, and **job offer** — and offers have their own approval rules, separate from the HR approvals in Chapter 19, because an offer is a commercial commitment rather than a record change.
+Oracle Recruiting — still widely called **ORC**, Oracle Recruiting Cloud — handles hiring up to the point someone becomes an employee, and it is configured as its own offering. The words in the room are **requisition** (the approved vacancy), candidate, and **job offer** — and offers have their own approval rules, separate from the HR approvals in Chapter 19, because an offer is a commercial commitment rather than a record change.
 
 The seam matters more than the module. When an offer is accepted, the candidate becomes a **pending worker** or an employee, and that act creates the work relationship and assignment of Chapter 3 — so the data quality in a requisition becomes the data quality in your core HR record. Job, grade, department, legal employer and start date are all chosen in Recruiting by people who are not thinking about payroll. In Egypt this is where the national identifier should be captured, because the alternative is chasing it after the hire.
 
-What Core HR owes Recruiting: the structures to pick from. What Recruiting writes back: the person, and the first version of almost every attribute.
+What Core HR owes Recruiting: the structures to pick from, and the model profiles a requisition can match candidates against. What Recruiting writes back: the person, and the first version of almost every attribute.
 
 ## Onboarding
 
@@ -2585,7 +2639,7 @@ The seam is the pending worker: the record exists before day one so documents ca
 
 ## Compensation
 
-Oracle Compensation covers how pay changes, as distinct from how it is paid. The vocabulary: **compensation plan**, the annual cycle or off-cycle event; budgets pushed down a management hierarchy; eligibility; worksheets that managers complete; and approvals before anything reaches the record.
+Compensation Management is the third offering, and its first module covers how pay changes, as distinct from how it is paid. The vocabulary: **compensation plan**, the annual cycle or off-cycle event; budgets pushed down a management hierarchy; eligibility; worksheets that managers complete; and approvals before anything reaches the record. Oracle separates the cycle-based work of a whole workforce from one-off awards to an individual, and a client asking for "compensation" usually means one of the two.
 
 The seam is the salary record of Chapter 5. A compensation cycle writes salary, and payroll reads it — which is why a client who runs annual increases in a spreadsheet and loads the results is doing with HDL what this module exists to do. Worth knowing when the question is whether to buy it.
 
@@ -2595,41 +2649,178 @@ Benefits manages plans people enrol in: medical cover, life insurance, allowance
 
 The seam is payroll. An enrolment produces an element entry for the employee contribution and often an employer cost, so the plan design decides what appears on the payslip. In Egypt private medical cover sits alongside the statutory universal health insurance of Chapter 9 rather than replacing it, and clients routinely conflate the two in a workshop.
 
-## Performance and goals
-
-Performance manages the review cycle through a **performance document** — a template, a period, a set of competencies and ratings, and a workflow between worker and manager. Goals manages objectives, aligned up a hierarchy and often cascaded.
-
-The seam into core HR is thinner than people expect: ratings mostly stay in the module, feeding compensation and talent rather than the employment record. The connection worth naming is the review period against the probation period of Chapter 8 — clients frequently want the probation decision to come out of a performance document.
-
-## Talent review and succession
-
-Talent management covers the review meeting itself — the nine-box grid of performance against potential — and **succession plans** that name candidates for critical positions.
-
-The seam is positions, from Chapter 2. Succession is one of the few genuine arguments for managing by position rather than by job, because a succession plan is a plan for a seat. A client who wants succession and has no positions is asking for two things.
-
-## Learning
-
-Oracle Learning delivers and tracks courses: catalogue, learning item, assignment, completion. The seam is compliance — mandatory training with a completion deadline, which in practice means a report that proves it, and sometimes a journey task that will not close until the course is done.
-
 ## What a junior is most likely to be put on next
 
-In Egypt and the Gulf, after core HR, absence and payroll, the usual next step is Recruiting or Benefits — Recruiting because almost every client buys it and it touches the hire, Benefits because medical cover is close to payroll and the questions arrive through the payroll team anyway. Compensation tends to follow once the core is stable, and Learning and Talent are often a later phase or never.
+In Egypt and the Gulf, after core HR, absence and payroll, the usual next step is Recruiting or Benefits — Recruiting because almost every client buys it and it touches the hire, Benefits because medical cover is close to payroll and the questions arrive through the payroll team anyway. Compensation tends to follow once the core is stable, and the Workforce Development modules are often a later phase or never.
 
-The honest version of this chapter in an interview is one sentence: these are the modules, this is where each one touches what I have built, and I have not configured them.
+The honest version of this chapter in an interview is one sentence: these are the offerings, this is where each module touches what I have built, and I have not configured them.
 
 ## Common mistakes
 
 - Claiming module experience from vocabulary. An interviewer's second question settles it.
+- Answering "which modules?" with a list of menu names instead of the offering and the functional areas inside it.
+- Hearing "workforce management" and assuming which of its two meanings the speaker had in mind.
 - Treating offer approvals as the same rule set as HR approvals.
 - Designing core HR without asking what Recruiting will write into it.
 - Letting a benefits plan be designed without payroll in the room, then discovering the element.
-- Promising succession planning to a client who manages by job and has no positions.
+- Buying succession without career development, then reviewing talent against profiles nobody has updated.
+- Promising position-based succession planning to a client who manages by job and has no positions.
 - Assuming private medical cover replaces Egypt's statutory health insurance.
 
 ## Sources
 
-- Oracle, *Oracle Fusion Cloud HCM* documentation library — the module guides named in this chapter. https://docs.oracle.com/en/cloud/saas/human-resources/index.html
+- Oracle, *Implementing Global Human Resources* — "Generate the Setup Task List for HCM" (the figure of offerings and their features). https://docs.oracle.com/en/cloud/saas/human-resources/fapus/generate-the-setup-task-list-for-hcm.html
+- Oracle, *Implementing Global Human Resources* — "Overview of Global Human Resources" (Workforce Deployment functional areas). https://docs.oracle.com/en/cloud/saas/human-resources/faitl/overview-of-global-human-resources.html
+- Oracle, *Using Global Human Resources* — the self-service areas the quick actions sit in. https://docs.oracle.com/en/cloud/saas/human-resources/fawhr/index.html
 - Oracle, *Implementing Global Human Resources* — pending workers, and the point at which a candidate becomes a worker. https://docs.oracle.com/en/cloud/saas/human-resources/faigh/index.html
+- Oracle, Fusion HCM documentation — "Profile Types". https://docs.oracle.com/en/cloud/saas/human-resources/faucf/profile-types.html
+- Oracle, Talent Management documentation — "How Career Development Works with Profiles". https://docs.oracle.com/en/cloud/saas/talent-management/faucd/how-career-development-works-with-profiles.html
+- Oracle, Talent Management documentation — "Talent Review Meeting Details". https://docs.oracle.com/en/cloud/saas/talent-management/factr/talent-review-meeting-details.html
+- Oracle, *Talent Review and Succession Management* data sheet. https://www.oracle.com/a/ocom/docs/applications/hcm/oracle-hcm-talent-review-succession-ds.pdf
+- Oracle, *Oracle Recruiting* product page. https://www.oracle.com/recruiting
+- Oracle, *Oracle Fusion Cloud HCM* documentation library — the module guides named in this chapter. https://docs.oracle.com/en/cloud/saas/human-resources/index.html
+</script>
+
+<script type="text/markdown" class="src-chapter">
+---
+id: costing
+num: 21
+domain: hcm
+track: functional
+title: Payroll Costing
+subtitle: Where the payroll lands in Finance, and how Oracle decides which account
+hue: 315
+minutes: 12
+labs: cost-hierarchy
+terms: cost-allocation-key-flexfield, cost-hierarchy, costing-type, distributed-costing, offset-account, suspense-and-default-account, priority-account, transfer-to-subledger-accounting
+---
+
+Chapter 5 ends the payroll cycle at the bank file, and for the payroll team that is the end. For Finance it is the start. Every amount the run calculated — each earning, each deduction, each employer contribution — has to land in a general-ledger account, against the right company, cost centre and natural account, so that the month-end close shows what people cost and where. That is **costing**, and it is the part of a payroll design that the payroll team does not see until Finance rejects the journal.
+
+Costing is set up inside payroll configuration, but it is a joint design. The account structure belongs to Finance; which salary goes where belongs to HR and the business; how the two meet is the payroll consultant's to configure. A costing workshop without the finance consultant in the room produces a design that has to be rebuilt.
+
+## The account structure: the cost allocation key flexfield
+
+Finance already has a chart of accounts: a string of segments such as company, cost centre, natural account and sometimes project or intercompany. Payroll does not invent its own. It mirrors that structure in the **cost allocation key flexfield**, which Oracle describes as the structure for the financial accounting of payroll costs. Each segment of the flexfield represents a part of the account number and is validated by a value set, and there is one flexfield per legislative data group — so an Egyptian and a Saudi payroll can cost against different ledgers.
+
+The rule that matters most is alignment. The natural account segment in payroll must hold the same values as the natural accounts in the general ledger, or the journal that payroll sends is meaningless to the ledger that receives it. This is why the flexfield is designed against the finance team's chart of accounts, segment by segment, rather than drafted by HR and handed over.
+
+## Where a value can come from: the cost hierarchy
+
+A payroll result needs a value for every segment, and Oracle lets those values be set at many levels: the payroll as a whole, the element eligibility, the department, the location, the job, the position, the person, and the individual element entry. The engine resolves them through the **cost hierarchy**. It starts at the lowest level, the element entry, and works up towards the payroll, checking each level until it finds a value — and it does this separately for each segment.
+
+That last point is the one most people get wrong. Costing is not "pick the most specific level and take its account". It is "for each segment, take the most specific level that has a value for that segment". A department can supply the cost centre while the element eligibility supplies the natural account and the payroll supplies the company, and the result is one account string assembled from three places.
+
+Oracle's documented order for standard run results, from lowest to highest, is: element entry; person element at assignment level; person element at payroll-relationship level; person at assignment level; person at payroll-relationship level; position; job; location; department; costing eligibility on assignment attributes, which applies to distributed costing only; element eligibility; and payroll. The person-level settings follow the element: earnings are usually costed at the assignment level and most deductions at the payroll-relationship level, so which person level is consulted depends on how the element was defined.
+
+[[lab:cost-hierarchy]]
+
+Not every account type walks the whole ladder. Fixed-cost accounts look only at the element entry, the element eligibility and the payroll. Suspense and default accounts look only at the department and the payroll, the department taking precedence. Priority accounts are set on element eligibility. The offset account is set there too and is documented as not following a hierarchy at all — with one exception worth knowing, because the documentation carries both statements: costing eligibility rules on assignment attributes can supply an offset account for payroll-relationship-level elements, and that one sits above the element eligibility offset. Knowing which levels an account type reads is most of the skill in explaining a costing result.
+
+## Costing types and accounts
+
+Each element's eligibility carries a **costing type** that decides how its results are costed. A costed element follows the hierarchy above. A fixed-costed element takes its account from the short list of levels just described, which is how an amount that must always land in one place — a statutory accrual, say — is kept out of the department-driven logic. **Distributed costing** is for amounts that should follow other amounts: an employer liability is spread across the same accounts, in the same proportions, as a set of earnings elements. An employer social-insurance contribution (Chapter 9) distributed over the salary elements lands in each department in proportion to the salary charged there, which is what Finance means when it asks for "fully loaded" cost per department.
+
+Every costed amount needs both sides of the entry. The **cost account** carries the expense or liability; the **offset account** carries the balancing entry, because the ledger is double-entry and a debit with no credit is not a journal. Two safety nets catch what the design misses. A **suspense account** receives results whose required segments are missing or whose account combination is invalid, and a **default account** receives what is left over when percentage splits do not add up to a hundred. A **priority account**, at the top, overrides the hierarchy entirely for an element and must have every segment populated; anything it does not cover is then built through the hierarchy as normal.
+
+Payment costing has its own accounts — a payroll liability account per payment source, and cash and cash-clearing accounts tied to bank accounts — because the moment money leaves the bank is a separate accounting event from the moment it was earned.
+
+## From the run to the ledger
+
+Costing results are calculated by payroll, but they become accounting only when they leave it. Calculate Payroll costs its own run results as it calculates them; **Calculate Costing of Payments** is a separate process that costs prepayments and payments, because money leaving the bank is a separate accounting event from the amount being earned. Those transactions, with any partial-period accruals and retroactive costing, are sent on by **Transfer to Subledger Accounting**, which creates the accounting events. Subledger Accounting builds journal entries from them using rules the finance team owns, and **Create Final Accounting** posts those journals to the general ledger — there is a draft run first, which validates without posting. Only after the final run does Finance see payroll at all.
+
+[[fig:cost-flow]]
+
+The flow runs backwards too. If a run has been transferred but has to be corrected, the transfer is reversed before the run is touched — the same reverse-order unwinding as rolling back prepayments in Chapter 5. And labour distribution to projects, where a client uses Oracle Project Costing, imports payroll costs only after they have been transferred and accounted, which is why a project manager asking for "this month's labour cost" before the payroll close is asking for a number that does not exist yet.
+
+## Reading a suspense balance
+
+A suspense account with money in it is the costing design reporting its own gaps. The question is never "which account should this have gone to" in the abstract; it is which segment had no value, at which level the engine stopped looking, and which level should have supplied it. A new department created in core HR without its cost centre is the classic case: everybody hired into it is paid correctly and costed to suspense, and nobody notices until month end. Fixing the department fixes the next run. The results already in suspense are corrected by the transfer and accounting route above, not by editing the department and hoping.
+
+## Common mistakes
+
+- Designing the cost allocation flexfield without the finance consultant and the chart of accounts.
+- Assuming the most specific level supplies the whole account, when the hierarchy is resolved segment by segment.
+- Creating departments, jobs or positions in core HR with no costing, then discovering the gap in suspense at month end.
+- Configuring a cost account with no offset, as if the ledger were single-entry.
+- Expecting employer contributions to follow salary by department without setting them up as distributed.
+- Correcting a costed run without reversing its transfer to Subledger Accounting first.
+- Treating a non-empty suspense account as Finance's problem rather than a configuration defect.
+
+## Sources
+
+- Oracle, *Administering Global Payroll Costing* — "Cost Hierarchy". https://docs.oracle.com/en/cloud/saas/human-resources/faipc/cost-hierarchy.html
+- Oracle, *Administering Global Payroll Costing* — "Payroll Setup for Costing Accounts". https://docs.oracle.com/en/cloud/saas/human-resources/faipc/payroll-setup-for-costing-accounts.html
+- Oracle, *Administering Global Payroll Costing* — "Payroll Cost Allocation Key Flexfield Structure". https://docs.oracle.com/en/cloud/saas/human-resources/faipc/payroll-cost-allocation-key-flexfield-structure.html
+- Oracle, *Administering Global Payroll Costing* — "How Payroll Costing Components Integrate with Other Applications". https://docs.oracle.com/en/cloud/saas/human-resources/faipc/how-payroll-costing-components-integrate-with-other-applications.html
+- Oracle, *Administering Global Payroll Costing* — "Set Up Distributed Costing". https://docs.oracle.com/en/cloud/saas/human-resources/faipc/set-up-distributed-costing.html
+- Oracle, *Administering Global Payroll Costing* — "Payroll Processes that Generate Costing Results", for which process produces which costing result. https://docs.oracle.com/en/cloud/saas/human-resources/faipc/payroll-processes-that-generate-costing-results.html
+- Oracle, *Administering Global Payroll Costing* (full guide, PDF). https://docs.oracle.com/en/cloud/saas/human-resources/faipc/administering-global-payroll-costing.pdf
+</script>
+
+<script type="text/markdown" class="src-chapter">
+---
+id: personas
+num: 22
+domain: hcm
+track: functional
+title: Self-Service and the Three Seats
+subtitle: Employee, manager, HR — one record, three doors into it
+hue: 347
+minutes: 10
+labs: three-seats
+terms: self-service, me-my-team-my-client-groups, quick-action, acting-on-behalf
+---
+
+Most of this atlas describes records: the person, the assignment, the absence, the element entry. Real projects are judged on something else — who touches those records, from which screen, and what happens next. A leave request that is configured perfectly but can only be entered by HR is a design that has quietly moved the HR team's workload in the wrong direction. Self-service is the part of Global HR that decides this, and it is where most of a client's users will ever meet the system.
+
+The useful frame is three seats around one record. The **employee** acts on their own data. The **manager** acts on their team's. **HR** — HR specialists, absence and payroll administrators — acts on whole populations. Every transaction in Fusion can be described by which of the three seats starts it, which approves it, and which can correct it afterwards.
+
+## Me, My Team, My Client Groups
+
+Fusion's home page reflects the three seats directly. **Me** holds what a person does for themselves: personal details, contacts, bank accounts for pay, absences, payslips, goals. **My Team** holds what a manager does for their reports: approve, promote, transfer, change working hours, view the team's absences. **My Client Groups** holds what HR does for the populations they are responsible for: hire, terminate, correct, run processes, maintain balances.
+
+Inside each area the work is launched through **quick actions** — a named task such as Request Absence, Change Manager or Promote, opening a guided flow. Quick actions are not a separate permission system. Whether one appears for a user is decided by their roles (Chapter 15): the employee abstract role gives the Me actions, the line manager role the My Team actions, and an HR job role the My Client Groups actions, each scoped by the data security that says over whom. "The button is missing" is therefore almost always a role question, and checking the user's roles and data scope comes before anything else.
+
+The three areas are labels for audiences, not separate data. A manager changing a report's working hours in My Team and an HR specialist doing the same in My Client Groups write to the same assignment, with the same effective dating (Chapter 4). What differs is what each is allowed to see, which fields the flow shows them, and what approval the change triggers.
+
+[[fig:three-doors]]
+
+## One absence, three seats
+
+Absence shows the pattern most clearly, because every seat has a distinct job. The employee requests time off, sees their balance and its projection, and can withdraw a request that has not been taken. The manager approves or rejects it — through the approval rules of Chapter 19 — and sees it on the team calendar alongside everyone else's. HR, or an absence administrator, can record an absence on a worker's behalf, enrol or adjust plans, correct a balance with a reason, and run the accrual processes of Chapter 6 that keep every balance true.
+
+[[lab:three-seats]]
+
+The handover to payroll is where the seats meet the run. An approved, paid absence becomes an absence element in the next payroll (Chapter 6); an unpaid one becomes a deduction. Neither the employee nor the manager sees that step, and neither should have to — but it means an approval that arrives after the payroll cutoff is paid a period late, which is a self-service design question about cutoffs and reminders rather than a payroll defect.
+
+## Acting on someone's behalf
+
+Every self-service design needs an answer for the people who cannot or will not use it. A worker with no system account, a manager on leave, a request made by phone — each ends with somebody **acting on behalf** of someone else. Fusion supports this directly: HR can submit most employee and manager transactions from My Client Groups, and an approval waiting on someone who is away can be reassigned or delegated through the approval tooling rather than left to expire (Chapter 19).
+
+The design question is whose name the transaction carries and whether it still routes for approval. An absence that HR records for an employee who phoned in sick may reasonably skip the manager's approval; a salary change that HR keys for a manager should not skip the approvals that would have applied had the manager keyed it. Settling which transactions bypass approval when HR acts, and agreeing it in writing, avoids a control finding in the first audit.
+
+## Adoption is part of the design
+
+Many workforces in Egypt and the wider region include factory floors, field crews and retail staff who work without a corporate login, and a self-service design that assumes everybody has one fails on day one. The options are known: shared kiosks, mobile access, HR or a team leader acting on behalf, or a hybrid in which office staff self-serve and everyone else goes through HR. None is wrong, but the choice changes the approval rules, the security design and the training plan, so it belongs in the first workshop rather than in hypercare.
+
+The opposite failure is self-service switched on everywhere with no change plan. Managers who were never told they now approve leave do not approve leave, the requests sit in the Transaction Console, and HR is blamed for a system that is working exactly as configured.
+
+## Common mistakes
+
+- Treating Me, My Team and My Client Groups as separate data rather than three views of the same records.
+- Debugging a missing quick action before checking the user's roles and data scope.
+- Designing self-service for a workforce that mostly has no system access.
+- Letting HR act on behalf without deciding which transactions still route for approval.
+- Switching on manager approvals without telling the managers, then reading the backlog as a defect.
+- Ignoring the payroll cutoff when designing absence approvals.
+
+## Sources
+
+- Oracle, *Securing HCM* — "Overview of Quick Actions". https://docs.oracle.com/en/cloud/saas/human-resources/ochus/overview-of-quick-actions.html
+- Oracle, *Using Global Human Resources* — "Quick Actions". https://docs.oracle.com/en/cloud/saas/human-resources/fawhr/quick-actions.html
+- Oracle, *Using Absence Management* — "Overview of Absence Processes". https://docs.oracle.com/en/cloud/saas/human-resources/faiam/overview-of-absence-processes.html
+- Oracle, *Securing HCM* — role types and the abstract employee and line manager roles. https://docs.oracle.com/en/cloud/saas/human-resources/ochus/index.html
 </script>
 
 <!-- ========================================================================
@@ -4647,6 +4838,186 @@ The honest version of this chapter in an interview is one sentence: these are th
     "watchOut": "A disputed balance has a history — enrolment, accrual runs, carryover, adjustments. Read it before changing it.",
     "ar": "معالجة الاستحقاقات",
     "say": "تشغيل الأرصدة"
+  },
+  {
+    "id": "offering",
+    "name": "Offering",
+    "chapter": "modules",
+    "definition": "The unit of Fusion a client opts into in Setup and Maintenance — Workforce Deployment, Workforce Development, Compensation Management — and opting in is what generates the setup task list.",
+    "watchOut": "Answering 'which modules do you know?' with menu names. The real answer is an offering and the functional areas inside it.",
+    "ar": "حزمة المنتج (العرض)",
+    "say": "الـ offering"
+  },
+  {
+    "id": "functional-area",
+    "name": "Functional area",
+    "chapter": "modules",
+    "definition": "A switchable part of an offering — Payroll, Absence Management, Workforce Structures — whose setup tasks appear only when it is enabled.",
+    "watchOut": "Looking for a setup task that is missing because its functional area was never opted into.",
+    "ar": "المجال الوظيفي",
+    "say": "الـ functional area"
+  },
+  {
+    "id": "talent-profile",
+    "name": "Talent profile",
+    "chapter": "modules",
+    "definition": "The record of what a person has — competencies, skills, languages, degrees, certifications — built from a person profile type and read by career development, succession and talent review.",
+    "watchOut": "Assuming it stays current on its own. It is kept up by career development, learning and people editing it, or it decays.",
+    "ar": "ملف المهارات والمواهب",
+    "say": "الـ talent profile"
+  },
+  {
+    "id": "content-library",
+    "name": "Content library",
+    "chapter": "modules",
+    "definition": "The catalogue of content types (competencies, languages, degrees, and the client's own) and their items, from which every profile's sections are built.",
+    "watchOut": "",
+    "ar": "مكتبة المحتوى",
+    "say": "الـ content library"
+  },
+  {
+    "id": "model-profile",
+    "name": "Model profile",
+    "chapter": "modules",
+    "definition": "A profile for a job or position rather than a person: the targeted and required skills and the work requirements of the role, used for gap comparisons and best-fit searches.",
+    "watchOut": "A model profile is only as good as the job catalogue it hangs off.",
+    "ar": "الملف النموذجي للوظيفة",
+    "say": "الـ job profile"
+  },
+  {
+    "id": "development-goal",
+    "name": "Development goal",
+    "chapter": "modules",
+    "definition": "A goal about the person rather than the business, owned in career development; its target outcomes are written back to the talent profile when it is completed.",
+    "watchOut": "Confusing it with a performance goal, which is about business results and lives in goal management.",
+    "ar": "هدف التطوير",
+    "say": "الـ development goal"
+  },
+  {
+    "id": "talent-pool",
+    "name": "Talent pool",
+    "chapter": "modules",
+    "definition": "A group of people being developed for a kind of role, looser than a succession plan, which names candidates for one specific role.",
+    "watchOut": "",
+    "ar": "مجمّع المواهب",
+    "say": "الـ talent pool"
+  },
+  {
+    "id": "box-chart",
+    "name": "Box chart (nine-box)",
+    "chapter": "modules",
+    "definition": "The talent review grid that plots a population on one rating against another, most often performance against potential, and where people are moved between boxes during calibration.",
+    "watchOut": "Treating the box as a rating stored on the employment record. It is a talent review output.",
+    "ar": "مصفوفة الأداء والإمكانات (المربعات التسعة)",
+    "say": "الـ nine-box"
+  },
+  {
+    "id": "cost-allocation-key-flexfield",
+    "name": "Cost allocation key flexfield",
+    "chapter": "costing",
+    "definition": "Payroll's copy of Finance's account structure — one segment per part of the account string, each validated by a value set, one structure per legislative data group.",
+    "watchOut": "Designing it without the chart of accounts. Natural account values must match the general ledger's.",
+    "ar": "هيكل توزيع التكاليف",
+    "say": "الـ costing flexfield"
+  },
+  {
+    "id": "cost-hierarchy",
+    "name": "Cost hierarchy",
+    "chapter": "costing",
+    "definition": "The order in which payroll looks for an account value, from element entry up to the payroll, taking the first level that has one — separately for every segment.",
+    "watchOut": "Thinking the most specific level supplies the whole account. Each segment is resolved on its own.",
+    "ar": "التسلسل الهرمي للتكلفة",
+    "say": "الـ costing hierarchy"
+  },
+  {
+    "id": "costing-type",
+    "name": "Costing type",
+    "chapter": "costing",
+    "definition": "The setting on an element's eligibility that decides how its results are costed: through the hierarchy, to a fixed account, or distributed over other elements.",
+    "watchOut": "",
+    "ar": "نوع التكلفة",
+    "say": "الـ costing type"
+  },
+  {
+    "id": "distributed-costing",
+    "name": "Distributed costing",
+    "chapter": "costing",
+    "definition": "Spreading an amount, usually an employer liability, across the same accounts and proportions as a set of earnings elements.",
+    "watchOut": "Expecting employer contributions to follow salary by department without setting them up this way.",
+    "ar": "التكلفة الموزّعة",
+    "say": "الـ distributed costing"
+  },
+  {
+    "id": "offset-account",
+    "name": "Offset account",
+    "chapter": "costing",
+    "definition": "The balancing side of a costing entry, so every cost has a matching credit and the journal is double-entry.",
+    "watchOut": "",
+    "ar": "الحساب المقابل",
+    "say": "حساب الـ offset"
+  },
+  {
+    "id": "suspense-and-default-account",
+    "name": "Suspense and default accounts",
+    "chapter": "costing",
+    "definition": "The two safety nets: suspense catches results with missing or invalid segments, default catches what is left when percentage splits do not reach a hundred.",
+    "watchOut": "Treating a suspense balance as Finance's problem. It is the costing design reporting its own gap.",
+    "ar": "الحساب المعلّق والحساب الافتراضي",
+    "say": "الـ suspense"
+  },
+  {
+    "id": "priority-account",
+    "name": "Priority account",
+    "chapter": "costing",
+    "definition": "A fully populated account set on an element that overrides the cost hierarchy for whatever share it covers.",
+    "watchOut": "",
+    "ar": "حساب الأولوية",
+    "say": "الـ priority account"
+  },
+  {
+    "id": "transfer-to-subledger-accounting",
+    "name": "Transfer to Subledger Accounting",
+    "chapter": "costing",
+    "definition": "The process that hands payroll's costing to Subledger Accounting, after which Create Accounting in Final mode posts the journals to the general ledger.",
+    "watchOut": "Correcting a transferred run without reversing the transfer first.",
+    "ar": "الترحيل إلى محاسبة الدفاتر الفرعية",
+    "say": "الـ transfer to SLA"
+  },
+  {
+    "id": "self-service",
+    "name": "Self-service",
+    "chapter": "personas",
+    "definition": "Employees and managers acting on their own and their team's records directly, instead of asking HR to do it for them.",
+    "watchOut": "Designing it for a workforce that mostly has no system login.",
+    "ar": "الخدمة الذاتية",
+    "say": "الـ self-service"
+  },
+  {
+    "id": "me-my-team-my-client-groups",
+    "name": "Me, My Team, My Client Groups",
+    "chapter": "personas",
+    "definition": "The three areas of the Fusion home page for the employee, the manager and HR — three views of the same records, not three sets of data.",
+    "watchOut": "",
+    "ar": "أنا، فريقي، مجموعات العملاء",
+    "say": "الـ My Client Groups"
+  },
+  {
+    "id": "quick-action",
+    "name": "Quick action",
+    "chapter": "personas",
+    "definition": "A named task such as Request Absence or Promote that opens a guided flow; which ones a user sees is decided by their roles.",
+    "watchOut": "Debugging a missing quick action before checking the user's roles and data scope.",
+    "ar": "إجراء سريع",
+    "say": "الـ quick action"
+  },
+  {
+    "id": "acting-on-behalf",
+    "name": "Acting on behalf",
+    "chapter": "personas",
+    "definition": "HR or a delegate submitting a transaction for an employee or manager who cannot or does not use self-service.",
+    "watchOut": "Not deciding which transactions still need approval when HR is the one keying them.",
+    "ar": "التنفيذ بالنيابة عن الموظف",
+    "say": "الـ HR بيدخلها بالنيابة"
   }
 ]
 </script>
@@ -5929,6 +6300,133 @@ The honest version of this chapter in an interview is one sentence: these are th
       "sick-leave",
       "final-settlement"
     ]
+  },
+  {
+    "chapter": "modules",
+    "question": "A recruiter asks which Oracle HCM modules you know. How do you structure the answer?",
+    "answer": "By offering, then functional area. Fusion HCM is opted into as offerings: Workforce Deployment for the employment record, payroll, time and absence; Workforce Development for performance, goals, career development, succession and talent review; Compensation Management for compensation cycles, incentives and benefits. Recruiting and Learning are their own offerings. I would say I know Workforce Deployment, specifically Global HR, Absence Management and Payroll, and that I can follow a conversation about the others and name where they touch core HR, but have not configured them.",
+    "terms": [
+      "offering",
+      "functional-area"
+    ]
+  },
+  {
+    "chapter": "modules",
+    "question": "A client says 'we want workforce management'. What do you ask?",
+    "answer": "Which meaning they have in mind. Trainers and HR teams often say workforce management for maintaining worker records — hires, transfers, promotions, terminations — which is Global HR. Oracle also uses Workforce Management as the name of a feature area for time, scheduling and absence. The requirement gets written against a different module depending on the answer, so I would ask before writing anything down.",
+    "terms": [
+      "offering"
+    ]
+  },
+  {
+    "chapter": "modules",
+    "question": "What is the difference between a talent profile and a model profile, and why does a consultant on core HR care?",
+    "answer": "A talent profile describes a person — competencies, skills, languages, degrees, certifications. A model profile describes a job or position — the targeted and required skills and work requirements. Core HR cares because the model profile hangs off the job and position catalogue: a clean job catalogue makes gap comparisons and best-fit searches meaningful, and a messy one makes every talent module downstream produce noise.",
+    "terms": [
+      "talent-profile",
+      "model-profile",
+      "content-library"
+    ]
+  },
+  {
+    "chapter": "modules",
+    "question": "Why is career development described as the module that keeps succession honest?",
+    "answer": "Because talent review and succession both read the talent profile, and career development is what writes to it. A development goal can carry target outcomes such as a competency or certification, and completing the goal writes the outcome back to the profile. Without it, profiles are maintained by hand or not at all, and the first succession meeting reviews people against data a year old.",
+    "terms": [
+      "development-goal",
+      "talent-profile",
+      "talent-review-and-succession"
+    ]
+  },
+  {
+    "chapter": "modules",
+    "question": "What happens in a talent review meeting, and what is the box chart for?",
+    "answer": "A business leader's organization is reviewed: reviewers submit ratings before a deadline, and facilitators run the meeting. The box chart plots the population on one rating against another — usually performance against potential, the nine-box — and people are moved between boxes during the meeting, which is the calibration. Depending on the template, succession plans and talent pools can be worked on in the same meeting.",
+    "terms": [
+      "box-chart",
+      "talent-pool",
+      "talent-review-and-succession"
+    ]
+  },
+  {
+    "chapter": "costing",
+    "question": "Walk through how Oracle decides which cost centre a salary payment is costed to.",
+    "answer": "Through the cost hierarchy, for that segment alone. The engine starts at the lowest level, the element entry, and works up — person element, person, position, job, location, department, element eligibility, payroll — taking the first level that has a cost-centre value. If the person has an assignment-level override that wins; otherwise a job cost centre beats the department's; if nothing below the payroll has one, the payroll's applies. The other segments are resolved separately, so the account can be assembled from several levels.",
+    "terms": [
+      "cost-hierarchy",
+      "cost-allocation-key-flexfield"
+    ]
+  },
+  {
+    "chapter": "costing",
+    "question": "Finance reports a large balance in the payroll suspense account after the first live run. What do you check?",
+    "answer": "Which segment was missing or invalid, and which level should have supplied it. The common cause is a structure created in core HR without costing — a new department with no cost centre — so everyone in it is paid correctly and costed to suspense. I fix the costing at the right level for future runs, and correct the results already posted through the transfer and accounting route, reversing the transfer to Subledger Accounting rather than editing setup and hoping.",
+    "terms": [
+      "suspense-and-default-account",
+      "cost-hierarchy",
+      "transfer-to-subledger-accounting"
+    ]
+  },
+  {
+    "chapter": "costing",
+    "question": "The finance director wants employer social-insurance cost to show up in each department in proportion to salary. How?",
+    "answer": "Distributed costing. The employer contribution element is given a costing type of distributed and a distribution set made of the salary earnings elements, so its cost is spread across the same accounts and in the same proportions as the salary charged to each department. Setting it as ordinary costed would land it wherever its own hierarchy pointed, usually one account.",
+    "terms": [
+      "distributed-costing",
+      "costing-type"
+    ]
+  },
+  {
+    "chapter": "costing",
+    "question": "Why must the costing flexfield be designed with the finance consultant?",
+    "answer": "Because it mirrors Finance's chart of accounts. Each segment represents a part of the account string, validated by a value set, and the natural account values must match the general ledger's. A structure HR designs alone produces journals the ledger cannot accept, and rebuilding a flexfield after costing results exist is far more expensive than designing it once with the chart of accounts on the table.",
+    "terms": [
+      "cost-allocation-key-flexfield"
+    ]
+  },
+  {
+    "chapter": "costing",
+    "question": "When does Finance first see the payroll, technically?",
+    "answer": "After Transfer to Subledger Accounting sends payroll's costing to Subledger Accounting and Create Accounting, run in Final mode, posts the journals to the general ledger. Before that, costing results exist only in payroll. That is also why project labour cost is not available until payroll has been transferred and accounted.",
+    "terms": [
+      "transfer-to-subledger-accounting"
+    ]
+  },
+  {
+    "chapter": "costing",
+    "question": "What does an offset account do, and what goes wrong without one?",
+    "answer": "It carries the balancing side of each costing entry, because the ledger is double-entry: an expense debit needs a matching credit. Without one, payroll produces one-sided entries that cannot be posted as a journal, which surfaces as an accounting error at month end rather than in the payroll run.",
+    "terms": [
+      "offset-account"
+    ]
+  },
+  {
+    "chapter": "personas",
+    "question": "A manager says the Promote button has disappeared. Where do you start?",
+    "answer": "With the user's roles and data scope, not the transaction. Quick actions are shown by role — My Team actions come from the line manager role — and the data security attached to it decides over whom. A role removed by a provisioning rule, or a manager whose reports fall outside their security profile, explains most missing buttons. Only once the role is right do I look at the transaction's own configuration.",
+    "terms": [
+      "quick-action",
+      "me-my-team-my-client-groups"
+    ]
+  },
+  {
+    "chapter": "personas",
+    "question": "Describe one sick-leave absence from the employee, manager and HR seats.",
+    "answer": "The employee requests it in Me, sees the balance and attaches the medical certificate if the type requires one. The manager approves it in My Team, through the absence approval rules, and sees it on the team calendar. HR or the absence administrator can record it on the employee's behalf, correct the balance with a reason, and runs the accrual processes. Once approved, the paid or unpaid portion reaches the next payroll as an absence element — which is why an approval after the payroll cutoff is paid a period late.",
+    "terms": [
+      "self-service",
+      "me-my-team-my-client-groups",
+      "acting-on-behalf"
+    ]
+  },
+  {
+    "chapter": "personas",
+    "question": "A factory client has two thousand workers with no system login. How does that change the self-service design?",
+    "answer": "It means deciding how those workers reach the system — kiosks, mobile, a team leader or HR acting on their behalf, or a hybrid where office staff self-serve and everyone else goes through HR. The choice changes approvals, because a transaction HR keys may or may not still route to the manager; security, because HR needs those populations in scope; and training. It is a first-workshop decision, not a hypercare one.",
+    "terms": [
+      "self-service",
+      "acting-on-behalf"
+    ]
   }
 ]
 </script>
@@ -6587,6 +7085,35 @@ pre.code{background:var(--navy);color:var(--navy-ink);border-radius:8px;padding:
 .backup summary{cursor:pointer;font-weight:700;color:var(--ink-2)}
 .backup input[type=file]{font-size:12.5px;max-width:100%}
 
+/* ---- the product map, the cost grid and the three seats */
+.ocol button.oi{width:100%;text-align:left;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:8px;font:inherit;font-size:13px}
+.ocol button.oi:hover{border-color:var(--p)}
+.ocol button.oi.on{border-color:var(--p);background:var(--p-soft);color:var(--p)}
+.ocol .oh.ghosted{border-top-color:var(--line-2);color:var(--muted)}
+.ocol .oh.act{border-top-color:var(--p);color:var(--p)}
+.ocol .oi.act{border-color:var(--p);background:var(--p-soft);color:var(--ink)}
+.ocol .oi.empty{opacity:.45}
+.spanrow{margin-top:12px;display:grid;gap:6px;min-width:560px}
+.spanitems{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:6px}
+.spanrow .oh{border-top:3px solid var(--line-2);background:var(--surface);border-radius:0 0 6px 6px;padding:8px 10px;font-weight:800;font-family:var(--display);font-size:13.5px;color:var(--muted)}
+.spanitems .oi,.spanitems button.oi{border:1px dashed var(--line-2);border-radius:6px;padding:7px 10px;font:inherit;font-size:13px;background:var(--surface);color:var(--ink-2);display:flex;justify-content:space-between;align-items:center;gap:8px;width:100%;text-align:left;cursor:pointer}
+.spanitems button.oi:hover{border-color:var(--p)}
+.spanitems button.oi.on{border-color:var(--p);background:var(--p-soft);color:var(--p)}
+.costgrid td{padding:4px 10px 4px 0}
+.costgrid .cellbtn{width:100%;min-width:104px;text-align:left;padding:5px 8px;border:1px solid var(--line);border-radius:6px;background:var(--surface);font:inherit;font-size:12.5px;color:var(--ink);cursor:pointer}
+.costgrid .cellbtn:hover:not(:disabled){border-color:var(--p)}
+.costgrid .cellbtn.win{border-color:var(--p);background:var(--p-soft);color:var(--p);font-weight:700}
+.costgrid .cellbtn.past{opacity:.4}
+.costgrid .cellbtn:disabled{opacity:.3;cursor:default}
+.acctstrip{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+@media (max-width:560px){.acctstrip{grid-template-columns:1fr}}
+.acctstrip div{border:1.5px solid var(--p);background:var(--p-soft);border-radius:8px;padding:10px 12px;display:grid;gap:2px}
+.acctstrip div.miss{border-color:var(--bad);background:var(--bad-soft)}
+.acctstrip .lbl{font-size:10.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.acctstrip b{font-family:var(--mono);font-size:15px}
+.acctstrip .how{font-size:11.5px;color:var(--muted)}
+.ocols.seats{grid-template-columns:repeat(3,1fr)}
+
 /* ---- DRILL */
 .drill-top{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:18px}
 .seg{display:inline-flex;border:1px solid var(--line-2);border-radius:8px;overflow:hidden}
@@ -6763,6 +7290,11 @@ pre.code{background:var(--navy);color:var(--navy-ink);border-radius:8px;padding:
   .gterm .go{grid-column:2}
 }
 @media (max-width:520px){
+  /* The deck controls are a flex row of chips and buttons; on a phone the chip
+     row scrolls on its own rather than widening the page. */
+  .drill-top{gap:8px}
+  .drill-top .chk{flex-wrap:nowrap;overflow-x:auto;max-width:100%;padding-bottom:2px}
+  .drill-top .btn{margin-left:0!important}
   .dtab span{display:none}
   .dtab{padding:8px 11px}
   .over-hero h1{font-size:28px}
@@ -7195,12 +7727,13 @@ const MAPS = {
   hcm: (node, sec) => `
     ${sec('functional','Functional','What the business configures and runs: the structures people sit in, the record that describes them, and the money, time and law that follow.')}
     <div class="sysmap-scroll"><div class="sysmap-inner">
+      <div class="layer-lbl">The suite — how Oracle packages it, and where this atlas sits</div>${node('modules','full')}
       <div class="layer-lbl">Structure — what exists before anyone is hired</div>${node('org')}${node('workforce','two')}
       <div class="layer-lbl">People — the data model everything reads from</div>${node('model','two')}${node('hrfunction')}
       ${node('dating','wide')}
-      <div class="layer-lbl">Money &amp; time — what the model feeds</div>${node('payroll')}${node('absence')}${node('lifecycle')}
+      <div class="layer-lbl">Money &amp; time — what the model feeds</div>${node('payroll')}${node('costing')}${node('absence')}
+      <div class="layer-lbl">And the events that drive them</div>${node('lifecycle')}${node('personas','two')}
       <div class="layer-lbl">Law — the rules configured per country</div>${node('egypt-payroll')}${node('egypt-leave')}${node('gulf')}${node('uae','full')}
-      <div class="layer-lbl">The rest of the suite — enough to follow the conversation</div>${node('modules','full')}
       <div class="layer-lbl">Delivery — how the project is run</div>${node('method','full')}
     </div></div>
     ${sec('technical','Technical','What the consultant builds with: loading data in bulk, writing the calculation logic, getting information back out, extending without customizing, and controlling who sees what.')}
@@ -8277,6 +8810,143 @@ LABS.push({id:'cr-or-defect',ch:'method',title:'Change request, defect, or quest
   draw();
 }});
 
+/* Lab 34: the product map — three offerings, and where this atlas sits */
+LABS.push({id:'offering-map',ch:'modules',title:'Three offerings, and where this atlas sits',lead:'Oracle draws the HCM core as three offerings with a few features spanning all of them. Click a feature to see what it is, where it touches core HR or payroll, and how deep this atlas goes on it. Switch views to see Global HR grouped by the job each part does.',render(b){
+  const OFF=[
+    ['Workforce Deployment',[['ghr','Global Human Resources','deep'],['gpay','Global Payroll and Localization','deep'],['gpi','Global Payroll Interface','name'],['wrep','Workforce Reputation Management','name'],['wpred','Workforce Predictions','name'],['wm','Workforce Management','seam'],['tl','Time and Labor','seam'],['abs','Absence Management','deep']]],
+    ['Workforce Development',[['tr','Talent Review','seam'],['perf','Performance Management','seam'],['goal','Goal Management','seam'],['cdev','Career Development','seam'],['succ','Succession Management','seam']]],
+    ['Compensation Management',[['comp','Compensation','seam'],['icomp','Incentive Compensation','name'],['ben','Benefits','seam'],['tcs','Total Compensation Statement','name']]]];
+  const SPAN=[['ff','Fast Formula','deep'],['prof','Profile Management','seam'],['dir','Workforce Directory Management','name']];
+  const OWN=[['orc','Recruiting (ORC)','seam'],['learn','Learning','seam']];
+  const NAMEONLY='Listed in Oracle’s setup figure; this atlas carries the name and nothing more.';
+  const EX={
+    ghr:['The employment record and everything that reads from it — the person, the work relationship, the assignment, and the events that change them.','It is the foundation the other two offerings read, which is why most of this atlas lives inside it.',['model','dating','lifecycle']],
+    gpay:['Gross-to-net calculation, balances, payments and costing, with a localization per country.','Egypt has no maintained localization, so the statutory rules are built here rather than delivered.',['payroll','costing','egypt-payroll']],
+    gpi:['Sends payroll-ready data to a third-party payroll instead of calculating it in Oracle.',NAMEONLY,[]],
+    wrep:['',NAMEONLY,[]],
+    wpred:['',NAMEONLY,[]],
+    wm:['Oracle uses Workforce Management for the feature area covering time, scheduling and absence.','Trainers and clients also say “workforce management” to mean managing worker records, which is the Global HR sense. Two meanings, one phrase — ask which is meant before writing the requirement.',['modules']],
+    tl:['Time cards, schedules and the hours that reach payroll.','Hours arrive as a time card, an interface or a load, and an overtime element needs a rate and a statutory multiplier.',['payroll']],
+    abs:['Plans, types, accruals and the balances behind every leave request.','Absence elements carry leave payment into the payroll run, and the balance becomes the leave payout at exit.',['absence','egypt-leave']],
+    tr:['The talent review meeting itself: facilitators, reviewers and a template that decides what is shown.','The box chart is the screen people remember — performance against potential, calibrated in the room.',['modules']],
+    perf:['The review cycle, through a performance document carrying a period, competencies, ratings and a workflow.','Ratings mostly stay in the module. The connection worth naming is the review period against probation.',['lifecycle']],
+    goal:['Objectives, aligned up a hierarchy and often cascaded.','Feeds performance and development rather than the employment record.',['modules']],
+    cdev:['Development goals — goals about the person rather than the business.','Completed outcomes write back to the talent profile, which is what keeps profiles current without HR keying them.',['modules']],
+    succ:['Succession plans and talent pools: named candidates with readiness ratings.','A succession plan is a plan for a seat, which is one of the few genuine arguments for managing by position.',['workforce']],
+    comp:['How pay changes: cycles, budgets, eligibility, manager worksheets and approvals.','A compensation cycle writes the salary record that payroll reads.',['payroll']],
+    icomp:['',NAMEONLY,[]],
+    ben:['Plans people enrol in — medical cover, life insurance — opened by life events.','An enrolment produces the element entries payroll deducts and costs.',['payroll','egypt-payroll']],
+    tcs:['',NAMEONLY,[]],
+    ff:['Oracle’s rule language, used across payroll, absence, benefits and validation.','It spans the offerings because every one of them evaluates rules.',['ff']],
+    prof:['Talent profiles for people and model profiles for jobs and positions, built from a content library.','A model profile hangs off the job, so a clean job catalogue is what makes profile matching mean anything.',['workforce']],
+    dir:['',NAMEONLY,[]],
+    orc:['Hiring up to the moment somebody becomes an employee: requisition, candidate, job offer.','An accepted offer creates the work relationship and assignment, so recruiting data quality becomes core HR data quality.',['model','modules']],
+    learn:['Courses, assignments and completions, configured as its own offering.','The seam is compliance — mandatory training with a deadline, and completions that can feed the talent profile.',['extend']]};
+  const JOBS=[['The workforce record','hire, transfer, promote, terminate',['model','dating','lifecycle']],
+    ['Security','who sees and changes which records',['security']],
+    ['People and their details','the person behind the employment',['model','lifecycle']],
+    ['Self-service','employee, manager, HR — three seats',['personas']],
+    ['Loading data','HCM Data Loader and its spreadsheet cousin',['hdl']],
+    ['Reporting','getting it back out again',['reporting']]];
+  const NEIGHBOURS=[['Payroll','the money side',['payroll','costing','ff']],['Absence','the time side',['absence','egypt-leave','personas']]];
+  const badge=k=>k==='deep'?'<span class="pill ok">deep</span>':k==='seam'?'<span class="pill p">seam</span>':'<span class="pill">name only</span>';
+  let view='setup', sel=null;
+  const chLink=ids=>ids.map(id=>{const c=chById(id);return c?`<button class="btn sm ghost" data-goch="${id}">Chapter ${c.num} · ${esc(c.title)}</button>`:'';}).join(' ');
+  const draw=()=>{
+    const e=sel?EX[sel]:null;
+    const cell=([id,n,k])=>`<button class="oi ${sel===id?'on':''}" data-f="${id}">${n} ${badge(k)}</button>`;
+    b.innerHTML=`<div class="stepper">${[['setup','As Setup and Maintenance groups it'],['globalhr','Global HR, by job']].map(([v,l])=>`<button class="${view===v?'active':''}" data-v="${v}">${l}</button>`).join('')}</div>
+    <div class="ar-line">الـ HCM متقسم لـ ٣ offerings: الـ Workforce Deployment والـ Workforce Development والـ Compensation.</div>
+    ${view==='setup'?`<div class="stage"><div class="ocols">${OFF.map(([n,fs])=>`<div class="ocol"><div class="oh">${n}</div>${fs.map(cell).join('')}</div>`).join('')}</div>
+      <div class="spanrow"><div class="oh ghosted">Spans every offering</div><div class="spanitems">${SPAN.map(cell).join('')}</div></div>
+      <div class="spanrow"><div class="oh ghosted">Offerings of their own</div><div class="spanitems">${OWN.map(cell).join('')}</div></div></div>`
+    :`<div class="stage"><div class="ocols">${JOBS.map(([n,s,ids])=>`<div class="ocol"><div class="oh">${n}<span class="small muted" style="display:block;font-weight:400">${s}</span></div>${chLink(ids)}</div>`).join('')}</div>
+      <div class="spanrow"><div class="oh ghosted">The other two functional areas a junior is hired for</div><div class="spanitems">${NEIGHBOURS.map(([n,s,ids])=>`<div class="oi" style="display:grid;gap:6px"><b>${n}</b><span class="small muted">${s}</span><span>${chLink(ids)}</span></div>`).join('')}</div></div></div>`}
+    ${view==='setup'?explainBox('offEx',e?'':'<span class="muted">Click a feature. The badge says how far this atlas goes: deep means it has its own chapters here, seam means the atlas explains where it touches core HR or payroll, and name only means the vocabulary and nothing else.</span>'):''}`;
+    if(view==='setup'&&e){ const [what,seam,ids]=e; const name=[...OFF.flatMap(o=>o[1]),...SPAN,...OWN].find(f=>f[0]===sel)[1];
+      $('#offEx').innerHTML=`<b>${esc(name)}</b>${what?`<div style="margin-top:4px">${esc(what)}</div>`:''}<div class="muted" style="margin-top:6px">${esc(seam)}</div>${ids.length?`<div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap">${chLink(ids)}</div>`:''}`; }
+    b.querySelectorAll('[data-v]').forEach(x=>x.addEventListener('click',()=>{view=x.dataset.v;draw();}));
+    b.querySelectorAll('[data-f]').forEach(x=>x.addEventListener('click',()=>{sel=x.dataset.f;draw();}));
+    b.querySelectorAll('[data-goch]').forEach(x=>x.addEventListener('click',()=>go('chapters',{ch:x.dataset.goch})));};
+  draw();
+}});
+
+/* Lab 35: the cost hierarchy, resolved segment by segment */
+LABS.push({id:'cost-hierarchy',ch:'costing',title:'Which level supplies which segment',lead:'Mona’s salary needs a company, a cost centre and a natural account. Each can be set at several levels. The engine climbs from the element entry to the payroll for each segment separately and stops at the first value it finds. Fill and empty the cells and watch the account assemble itself.',render(b){
+  const LV=[['entry','Element entry'],['pea','Person element — assignment'],['pepr','Person element — payroll relationship'],['pa','Person — assignment'],['ppr','Person — payroll relationship'],['pos','Position'],['job','Job'],['loc','Location'],['dept','Department'],['ce','Costing eligibility on assignment attributes'],['ee','Element eligibility'],['pay','Payroll']];
+  const SEG=[['co','Company'],['cc','Cost centre'],['ac','Account']];
+  const SAMPLE={co:'01',ac:'5100 Salaries'};
+  const CC={entry:'1300 Ops',job:'1200 Sales',dept:'1100 Finance',loc:'1400 Plant',pos:'1200 Sales',ce:'1100 Finance',pa:'1100 Finance',pea:'1300 Ops',pepr:'1100 Finance',ppr:'1100 Finance',ee:'1100 Finance',pay:'1100 Finance'};
+  const TYPES={cost:['Costed','The whole ladder is consulted, lowest level first.'],fixed:['Fixed costed','Only the element entry, the element eligibility and the payroll are consulted.'],susp:['Suspense / default','Only the department and the payroll are consulted, the department taking precedence.']};
+  const ALLOW={cost:LV.map(l=>l[0]),fixed:['entry','ee','pay'],susp:['dept','pay']};
+  const PRESETS=[
+    ['Department does the work',{pay:{co:1},dept:{cc:1},ee:{ac:1}},'Three segments, three levels, one account.'],
+    ['Her job overrides the department',{pay:{co:1},dept:{cc:1},job:{cc:1},ee:{ac:1}},'The job sits lower in the ladder than the department, so it wins — for that segment only.'],
+    ['A time-card entry for a project day',{pay:{co:1},dept:{cc:1},entry:{cc:1},ee:{ac:1}},'The entry is the lowest level of all, so that one result goes somewhere else entirely.'],
+    ['New department, nobody set its costing',{pay:{co:1},ee:{ac:1}},'No value for a required segment anywhere in the ladder.']];
+  let type='cost', dist=false, vals={};
+  const apply=p=>{ vals={}; Object.entries(p).forEach(([lv,segs])=>{ vals[lv]={}; Object.keys(segs).forEach(s=>{ vals[lv][s]=s==='cc'?CC[lv]:SAMPLE[s]; }); }); };
+  apply(PRESETS[0][1]);
+  let note=PRESETS[0][2];
+  const allowed=lv=>ALLOW[type].includes(lv)&&(lv!=='ce'||dist);
+  const winner=seg=>{ for(const [lv] of LV){ if(allowed(lv)&&vals[lv]&&vals[lv][seg]) return lv; } return null; };
+  const draw=()=>{
+    const win={}; SEG.forEach(([s])=>win[s]=winner(s));
+    const missing=SEG.filter(([s])=>!win[s]);
+    b.innerHTML=`<div class="stepper">${Object.entries(TYPES).map(([k,[l]])=>`<button class="${type===k?'active':''}" data-t="${k}">${l}</button>`).join('')}</div>
+    <label class="sw" style="max-width:330px"><span>Distributed costing<span class="ar">التوزيع على عناصر تانية</span></span><input type="checkbox" data-dist ${dist?'checked':''}></label>
+    <div class="stage"><table class="dt costgrid" style="min-width:560px">
+      <tr><th>Level — searched top to bottom</th>${SEG.map(([,n])=>`<th>${n}</th>`).join('')}</tr>
+      ${LV.map(([lv,name])=>{const off=!allowed(lv);
+        return `<tr class="${off?'gone':''}">${`<td>${name}${lv==='ce'?' <span class="small muted">· distributed only</span>':''}</td>`}${SEG.map(([s])=>{
+          const v=vals[lv]&&vals[lv][s], isWin=win[s]===lv, below=win[s]&&LV.findIndex(x=>x[0]===lv)>LV.findIndex(x=>x[0]===win[s]);
+          return `<td><button class="cellbtn ${isWin?'win':''} ${below?'past':''}" data-cell="${lv}:${s}" ${off?'disabled':''}>${v?esc(v):'<span class="muted">—</span>'}</button></td>`;}).join('')}</tr>`;}).join('')}
+    </table></div>
+    <div class="acctstrip">${SEG.map(([s,n])=>`<div class="${win[s]?'':'miss'}"><span class="lbl">${n}</span><b>${win[s]?esc(vals[win[s]][s]):'????'}</b><span class="how">${win[s]?esc(LV.find(l=>l[0]===win[s])[1]):'no value at any level'}</span></div>`).join('')}</div>
+    ${missing.length?`<div class="msg bad" role="status"><b>${missing.length===1?'A segment has':'Segments have'} no value — the result goes to suspense.</b><span>A new department created in core HR with no costing does exactly this: everyone in it is paid correctly and costed to suspense, and nobody notices until month end.</span><div class="ar-line">أي segment من غير قيمة بيروح على حساب معلّق.</div></div>`
+      :`<div class="msg ok" role="status"><span>${esc(note)}</span><div class="ar-line">الـ costing بيدوّر segment segment، من الـ element entry لحد الـ payroll، وأول قيمة يلاقيها هي اللي بتكسب.</div></div>`}
+    <div class="stepper">${PRESETS.map(([n],i)=>`<button data-p="${i}">${n}</button>`).join('')}</div>
+    ${explainBox('chEx',`<b>${esc(TYPES[type][0])}.</b> ${esc(TYPES[type][1])} Priority accounts and percentage splits are not modelled here: a priority account sits above all of this and must carry every segment, and anything its split leaves over is built through the hierarchy as normal.`)}`;
+    b.querySelectorAll('[data-t]').forEach(x=>x.addEventListener('click',()=>{type=x.dataset.t;draw();}));
+    b.querySelector('[data-dist]').addEventListener('change',e2=>{dist=e2.target.checked;draw();});
+    b.querySelectorAll('[data-cell]').forEach(x=>x.addEventListener('click',()=>{ const [lv,s]=x.dataset.cell.split(':');
+      vals[lv]=vals[lv]||{}; if(vals[lv][s]) delete vals[lv][s]; else vals[lv][s]=s==='cc'?CC[lv]:SAMPLE[s];
+      note='Changed by hand.'; draw(); }));
+    b.querySelectorAll('[data-p]').forEach(x=>x.addEventListener('click',()=>{ const p=PRESETS[+x.dataset.p]; apply(p[1]); note=p[2]; type='cost'; draw(); }));};
+  draw();
+}});
+
+/* Lab 36: one absence, three seats */
+LABS.push({id:'three-seats',ch:'personas',title:'One absence, three seats',lead:'The same sick-leave absence, from request to payslip. Step through it and see which seat acts, where, and what the other two see. This is the common delivered pattern; a client’s roles and approval rules decide the details.',render(b){
+  const SEATS=[['emp','Employee','Me'],['mgr','Manager','My Team'],['hr','HR','My Client Groups']];
+  const STEPS=[
+    ['Request',{emp:['act','Requests sick leave and attaches the certificate'],mgr:['',''],hr:['','']}],
+    ['Approve',{emp:['see','Sees it pending'],mgr:['act','Approves it — the absence approval rule of Chapter 19'],hr:['','']}],
+    ['Record',{emp:['see','Sees it approved'],mgr:['see','Sees it on the team calendar'],hr:['act','Can record or correct one on the worker’s behalf']}],
+    ['Balance',{emp:['see','Sees the balance reduce'],mgr:['',''],hr:['act','Runs the accruals, and adjusts a balance only with a reason']}],
+    ['Payroll',{emp:['',''],mgr:['',''],hr:['act','The absence element reaches the next run — Chapter 6']}],
+    ['Payslip',{emp:['act','Sees the absence pay line on the payslip'],mgr:['',''],hr:['','']}]];
+  let i=0, nologin=false, late=false;
+  const draw=()=>{
+    const step=JSON.parse(JSON.stringify(STEPS[i][1]));
+    if(nologin&&i===0){ step.emp=['see','No system account — nothing to do here']; step.hr=['act','Records the absence on the worker’s behalf']; }
+    if(nologin&&i===1){ step.mgr=['act','Does the manager still approve? Decide it per transaction, in writing']; }
+    if(late&&i===4){ step.hr=['act','Approved after the payroll cutoff — paid one period late']; }
+    b.innerHTML=`<div class="stepper">${STEPS.map(([n],k)=>`<button class="${k===i?'active':''}" data-s="${k}">${k+1}. ${n}</button>`).join('')}</div>
+    <div class="switches" style="grid-template-columns:repeat(auto-fit,minmax(230px,1fr));display:grid">
+      <label class="sw"><span>The worker has no system login<span class="ar">مفيش حساب على السيستم</span></span><input type="checkbox" data-n ${nologin?'checked':''}></label>
+      <label class="sw"><span>Approved after the payroll cutoff<span class="ar">الموافقة بعد الإقفال</span></span><input type="checkbox" data-l ${late?'checked':''}></label></div>
+    <div class="stage"><div class="ocols seats">${SEATS.map(([k,who,where])=>{const [state,txt]=step[k];
+      return `<div class="ocol"><div class="oh ${state==='act'?'act':''}">${who}<span class="ar" style="display:block;font-weight:600;font-size:13px">${k==='emp'?'الموظف':k==='mgr'?'المدير':'شؤون العاملين'}</span><span class="small muted" style="display:block;font-weight:400">${where}</span></div>
+      <div class="oi ${state==='act'?'act':state===''?'empty':''}">${txt||'—'}</div></div>`;}).join('')}</div></div>
+    ${explainBox('tsEx',i===4&&late?'<b>One period late.</b> The absence is correct and the payroll is correct; the design question is the cutoff and the reminders around it, not the payroll.':i===0&&nologin?'<b>Somebody has to act for them.</b> A workforce with no corporate logins is the normal case in Egyptian manufacturing and retail. Kiosks, mobile, or HR acting on behalf are the options, and the choice changes the approval rules and the security design.':'<span class="muted">Three seats, one record. Each column writes to the same assignment with the same effective dating; what differs is what each may see and what approval the change triggers.</span>')}
+    <div class="ar-line">نفس الإجازة: الموظف بيطلب، المدير بيوافق، والـ HR بيصحّح ويشغّل الـ accruals.</div>`;
+    b.querySelectorAll('[data-s]').forEach(x=>x.addEventListener('click',()=>{i=+x.dataset.s;draw();}));
+    b.querySelector('[data-n]').addEventListener('change',e2=>{nologin=e2.target.checked;draw();});
+    b.querySelector('[data-l]').addEventListener('change',e2=>{late=e2.target.checked;draw();});};
+  draw();
+}});
+
 
 /* ================= DRILL ================= */
 const D={mode:'questions',ch:null,queue:[],idx:0,flipped:false,rebuild:true,dueOnly:false,iv:null,tick:null};
@@ -8640,6 +9310,8 @@ const ICONS = {
   uae: '<path d="M4 20V9l8-5 8 5v11"/><path d="M9 20v-6h6v6"/><path d="M4 20h16"/>',
   approvals: '<path d="M4 7h16"/><path d="M4 12h10"/><path d="M4 17h7"/><path d="M15 16l2 2 4-4"/>',
   modules: '<rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 17.5h7M17.5 14v7"/>',
+  costing: '<rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18"/><path d="M12 9v11"/>',
+  personas: '<circle cx="6" cy="8" r="2"/><circle cx="12" cy="8" r="2"/><circle cx="18" cy="8" r="2"/><path d="M4 16h16"/><path d="M6 13v3M12 13v3M18 13v3"/>',
   'people-data': '<rect x="3" y="13" width="4" height="8"/><rect x="10" y="9" width="4" height="12"/><rect x="17" y="5" width="4" height="16"/><circle cx="5" cy="7" r="2"/>',
 
   /* ---- Data & Analytics ---- */
@@ -9260,6 +9932,57 @@ FIGS.push({
 
     ${F.box(30, 190, 700, 44, 'Job role + security profile = data role', 'change the profile to change what is seen; changing the job role changes what can be done', 'ghost')}
     <path class="f-divide" d="M390 14 V176"/>
+  </svg>`,
+});
+
+/* ------------------------------------------------------------------ */
+FIGS.push({
+  id: 'cost-flow',
+  ch: 'costing',
+  title: 'From the run to the ledger',
+  caption: 'Costing is calculated in payroll but only becomes accounting when it leaves. Notice that Finance sees nothing until the final accounting run — and that a correction has to unwind the same path backwards.',
+  svg: () => `<svg viewBox="0 0 760 300" role="img" aria-label="Payroll run results become costing results against the cost allocation flexfield, which with the costing of payments are sent by Transfer to Subledger Accounting into subledger journals built by Finance's rules, and posted to the general ledger by the final accounting run.">
+    ${FIG_DEFS}
+    ${F.head(30, 22, 'CALCULATED IN PAYROLL')}
+    ${F.box(30, 32, 186, 52, 'Payroll run results', 'what each person was paid')}
+    ${F.across(216, 246, 58)}
+    ${F.box(248, 32, 216, 52, 'Costing results', 'on the cost allocation flexfield')}
+    ${F.across(464, 494, 58)}
+    ${F.box(496, 32, 234, 52, 'Transfer to Subledger Accounting', 'creates the accounting events')}
+
+    ${F.box(248, 96, 216, 42, 'Calculate Costing of Payments', 'a separate process', 'ghost')}
+    ${F.elbow(464, 117, 613, 84)}
+
+    ${F.head(30, 208, 'ACCOUNTED IN FINANCE')}
+    ${F.box(30, 218, 290, 50, 'Subledger journals', 'built by rules Finance owns')}
+    ${F.across(320, 352, 243)}
+    ${F.box(354, 218, 180, 50, 'Create Final Accounting', 'a draft run validates first')}
+    ${F.across(534, 566, 243)}
+    ${F.box(568, 218, 162, 50, 'General ledger', 'Finance sees it here')}
+    ${F.elbow(613, 84, 260, 218)}
+    ${F.note(380, 288, 'a correction unwinds backwards — reverse the transfer before touching the run', 'mid')}
+  </svg>`,
+});
+
+/* ------------------------------------------------------------------ */
+FIGS.push({
+  id: 'three-doors',
+  ch: 'personas',
+  title: 'Three doors, one record',
+  caption: 'Me, My Team and My Client Groups are audiences, not separate data. All three write to the same assignment, with the same effective dating — what differs is what each may see and what approval each change triggers.',
+  svg: () => `<svg viewBox="0 0 760 250" role="img" aria-label="Three doors — Me for a person's own record, My Team for a manager's direct reports, and My Client Groups for HR's populations — pass through roles and data security and all write to the same effective-dated assignment.">
+    ${FIG_DEFS}
+    ${F.head(30, 22, 'THREE DOORS')}
+    ${F.box(30, 32, 220, 52, 'Me', 'own record')}
+    ${F.box(270, 32, 220, 52, 'My Team', 'direct reports')}
+    ${F.box(510, 32, 220, 52, 'My Client Groups', 'populations by responsibility')}
+    ${F.down(140, 84, 112)}
+    ${F.down(380, 84, 112)}
+    ${F.down(620, 84, 112)}
+    ${F.box(30, 112, 700, 40, 'Roles and data security decide what each door shows', null, 'ghost')}
+    ${F.down(380, 152, 186)}
+    ${F.box(170, 186, 420, 50, 'The same assignment', 'one record · effective-dated', 'accent')}
+    ${F.note(380, 248, 'the door changes who may act and what is approved, never which record is written', 'mid')}
   </svg>`,
 });
 

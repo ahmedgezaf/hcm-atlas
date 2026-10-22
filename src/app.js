@@ -155,12 +155,13 @@ const MAPS = {
   hcm: (node, sec) => `
     ${sec('functional','Functional','What the business configures and runs: the structures people sit in, the record that describes them, and the money, time and law that follow.')}
     <div class="sysmap-scroll"><div class="sysmap-inner">
+      <div class="layer-lbl">The suite — how Oracle packages it, and where this atlas sits</div>${node('modules','full')}
       <div class="layer-lbl">Structure — what exists before anyone is hired</div>${node('org')}${node('workforce','two')}
       <div class="layer-lbl">People — the data model everything reads from</div>${node('model','two')}${node('hrfunction')}
       ${node('dating','wide')}
-      <div class="layer-lbl">Money &amp; time — what the model feeds</div>${node('payroll')}${node('absence')}${node('lifecycle')}
+      <div class="layer-lbl">Money &amp; time — what the model feeds</div>${node('payroll')}${node('costing')}${node('absence')}
+      <div class="layer-lbl">And the events that drive them</div>${node('lifecycle')}${node('personas','two')}
       <div class="layer-lbl">Law — the rules configured per country</div>${node('egypt-payroll')}${node('egypt-leave')}${node('gulf')}${node('uae','full')}
-      <div class="layer-lbl">The rest of the suite — enough to follow the conversation</div>${node('modules','full')}
       <div class="layer-lbl">Delivery — how the project is run</div>${node('method','full')}
     </div></div>
     ${sec('technical','Technical','What the consultant builds with: loading data in bulk, writing the calculation logic, getting information back out, extending without customizing, and controlling who sees what.')}
