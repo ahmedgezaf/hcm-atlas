@@ -3935,6 +3935,191 @@ And if the requirement is a calculation the product already performs, the delive
 
 <script type="text/markdown" class="src-deep">
 ---
+id: gulf
+minutes: 36
+---
+
+A Saudi implementation runs on government platforms that have no Egyptian equivalent, and Oracle's generic Gulf localization does not reach them. This chapter covers the systems, the numbers that matter, and the ways a Saudi implementation differs structurally from an Egyptian one.
+
+> **Figures move here too.** Saudi social-insurance rates are being phased up under the 2024 reform, and platform rules change by ministerial decision. Verify against GOSI and the Ministry of Human Resources and Social Development before configuring.
+
+This chapter is unusually full of flagged disagreements, and that is deliberate rather than apologetic. Saudi employment rules have been amended repeatedly in recent years, the authoritative texts are in Arabic, and the English material available is largely written by payroll vendors and calculator sites that copy one another. Where the sources consulted for this chapter disagree, both readings are given and the arbiter is named. A consultant who presents a disputed figure as settled is the one who gets a client's payroll wrong.
+
+## How a Saudi implementation differs structurally
+
+Before the detail, the shape, because it is what changes a project plan.
+
+An Egyptian implementation is largely self-contained: configure the product, produce the forms, file them. A Saudi implementation is **integrated with government platforms** that hold their own copy of the employment relationship, and those copies have to agree with each other and with the payroll. That makes several things that are HR data in Egypt into compliance data in Saudi Arabia — nationality, basic salary, contract terms, residency documents — and it adds a class of defect that does not exist elsewhere: the system is internally correct and disagrees with a platform.
+
+Three design consequences follow and belong in the first workshop. Nationality drives payroll, not just reporting. Basic salary is a number several external systems hold, so changing it is a multi-system event. And documents — iqama, visa, contract — have expiry dates that have operational consequences, which means document tracking is a requirement rather than a nice-to-have.
+
+## GOSI: social insurance with two populations
+
+The **General Organization for Social Insurance (GOSI)** is the Saudi counterpart to Egypt's NOSI. The structural difference from Egypt is that contribution treatment depends on nationality.
+
+For Saudi nationals registered before the new Social Insurance Law took effect on 3 July 2024, the combined rate is 21.5% of the contributable wage — employee 9.75% (9% pension plus 0.75% SANED unemployment insurance), employer 11.75% (9% pension, 2% occupational hazards, 0.75% SANED). Nationals registered on or after that date fall under a phased schedule that rises from 22.5% to 23.5% combined from 1 July 2026, with further annual steps and a retirement age of 65. Expatriates carry only the employer-paid 2% occupational-hazards contribution — no pension, no SANED.
+
+[[fig:gosi-populations]]
+
+The two-schedule split among nationals is the part that catches people, and it is worth being precise about what it means for a build. The determinant is **when the person was first registered with GOSI**, not when they joined this employer and not their age. That is a fact about the person's history, it has to be captured and migrated, and there is no way to derive it from anything else in the record. A design that assumes one national rate will be wrong for a growing share of the workforce every year, and will drift further wrong with each annual step in the schedule.
+
+For an Oracle design this means nationality is a payroll-driving attribute, GOSI registration dates matter, and the element inventory needs separate treatment for the two populations.
+
+## The contributable wage
+
+The contributable wage is basic salary plus housing allowance, capped at SAR 45,000 per month; transport, commission and bonuses are excluded.
+
+[[fig:contributable-wage]]
+
+That definition is why Chapter 5 insists on salary components rather than a single salary figure. If basic and housing are not held as distinct, identifiable components, the contributable wage cannot be computed without guessing — and the guess will be wrong for exactly the employees whose packages are structured unusually, who are generally the senior ones.
+
+Two practical notes. The cap is monthly, so the same proration question arises as in Egypt for part months, and it needs an answer in writing. And because the base excludes several allowances, the employer's contribution as a share of total payroll cost is lower than the headline rate suggests — a figure worth computing honestly for a finance director rather than quoting the rate.
+
+## Registration, and the monthly rhythm
+
+GOSI is not only a calculation; it is a registration and a monthly submission.
+
+Each employee is registered, joiners and leavers are reported, and contributions are submitted against the establishment. The employee's GOSI identifier and registration date are data the HR system has to hold, for the reason given above, and the joiner and leaver events have to reach the platform within the timeframes the authority sets.
+
+The design question is the same one Egypt raises about Forms 1 and 6: does the output come from the system, from an integration, or from a person working on the platform directly. All three are used in practice. What matters is that somebody decides, and that the decision is visible — because the failure mode is a go-live where the payroll is perfect and nobody has been registered.
+
+## Qiwa, Mudad and the Wage Protection System
+
+**Qiwa** is the Ministry of Human Resources' digital labour platform: employment contracts are authenticated through it, and it handles work permits and establishment services. **Mudad** is the platform supporting wage protection and payroll compliance. The **Wage Protection System (WPS)** requires employers to pay salaries through official banking channels and to upload monthly payroll documentation — the **SIF** (Salary Information File) — containing each employee's ID or iqama number, basic salary, allowances, deductions and net pay. The system matches the file against actual bank transfers; when they match, the employee is legally considered paid.
+
+Compliance is enforced through consequences: late files escalate from a minor violation to a partial freeze of Qiwa services, and after three months to the employee's right to transfer sponsorship without consent.
+
+That escalation is worth stating plainly to a client, because it reframes the WPS file from an administrative task to a business risk. A frozen Qiwa account means no new work permits and no new visas, which for a growing Gulf business is an immediate operational problem; and a workforce that can transfer sponsorship without consent is a retention problem. "The payroll file was late" sounds minor. Its consequences are not.
+
+In Oracle terms, the payment process (Chapter 5) produces the WPS file, an eText template is the delivered mechanism for a fixed-format file (Chapter 13), and a Gulf go-live always includes a bank-file test with the actual bank. Plan that test early: the bank's own cycle for validating a new employer file is measured in weeks, not days, and it is one of the most reliable causes of a delayed Gulf go-live.
+
+## The three platforms must agree
+
+The basic salary in the Qiwa contract must equal the basic salary in Mudad and in GOSI, so salary changes have to land on all three at once.
+
+[[fig:wps-agreement]]
+
+This is the single most important operational fact in the chapter, and it is a *process* requirement rather than a configuration one. A salary change entered in Oracle is not finished when the payroll is right; it is finished when the contract on Qiwa, the GOSI registration and the WPS file all carry the same number.
+
+The design response is a documented procedure with an owner — which, in most Saudi clients, is the government-relations or PRO function rather than HR (Chapter 7). A journey (Chapter 14) is the right place to hang it, so that a salary change creates the platform tasks and somebody has to mark them done.
+
+The reconciliation that catches the drift is worth building once and running monthly: the basic salary in the payroll against the basic salary filed, per employee. The differences will not be many. They will be the ones that matter.
+
+## Nitaqat and nationality as compliance data
+
+**Nitaqat**, or Saudization, is the quota system requiring employers to maintain minimum percentages of Saudi national employees, with a colour-banded compliance rating that directly affects the ability to obtain visas and government services. WPS compliance feeds the rating. As a result, nationality reporting and workforce-composition analytics take on compliance significance in Saudi implementations that they do not have in Egypt: nationality is a compliance-reportable attribute, not merely demographic data.
+
+## How the ratio is computed, and what the sources disagree about
+
+The structure of the calculation is consistent across the sources consulted. A **weighted** count of Saudi employees is divided by the total workforce, with certain categories excluded from the denominator, and the result places the establishment in a colour band whose threshold depends on the establishment's economic activity and size. Bands in the current cycle are described as Platinum, High Green, Medium Green, Low Green and Red, with the former Yellow band reported as retired — though sources differ on when.
+
+The **weights** are where the available material stops agreeing, and a consultant should not present any of them as settled.
+
+A Saudi employee with a documented disability is widely described as counting as four, subject to conditions — registration in social insurance, a minimum monthly salary, actively working — and with the benefit capped at a share of the establishment's Saudi workforce. One calculator instead uses a weight of two, and another describes the multiplier as "up to" four.
+
+Part-time Saudi employees are described as counting as a fraction, commonly half, in line with ministry rules.
+
+Saudi women are described in one source as carrying a bonus weight commonly cited at 1.5, and in another only as one of the categories that may count fractionally when part-time. The "commonly cited" phrasing is itself a warning.
+
+Two further points appear consistently enough to plan around. Only Saudi employees whose contracts are documented on Qiwa count, which closes the loop back to the platform agreement above. And the classification is recalculated frequently from Qiwa and GOSI data rather than annually, with sources variously describing near-daily recalculation and a rolling average over some number of weeks.
+
+The consulting position to take: the formula's *structure* is something to design for — the system must be able to produce an accurate, classified headcount by nationality, employment type and job classification (Chapter 2) — and the *weights* are the ministry's, to be read from Qiwa and the ministerial decisions for the client's own activity and size. Building a Nitaqat calculator into a client's reporting using numbers from a vendor blog is how a client is told they are Green when they are not.
+
+## Iqama, visas and document-driven employment
+
+Employment legality in the Gulf is document-dependent in a way it is not in Egypt. **Iqama** (residency permit) numbers, visa details, expiry dates and renewal alerts become genuine HR requirements for every expatriate, and they combine with contract-expiry alerting (Chapter 8). Egyptian implementations mostly do not carry this; every Gulf one does.
+
+The configuration is not difficult and is frequently done badly. Documents belong in the delivered document-records structure rather than in flexfields, because that is what carries a type, an issue and expiry date, an attachment and its own security. Expiry alerts belong in Alerts Composer (Chapter 14), with lead times agreed per document type — a visa renewal needs more notice than a safety certificate. And the renewal itself is a task for the government-relations function, which means a journey rather than a notification into a void.
+
+The design test is whether the system can answer, in one report, "whose documents expire in the next ninety days, and who is chasing each one". A client who cannot answer that has the data and no process.
+
+## End-of-service benefit
+
+Gulf labour law provides an **end-of-service benefit (EOSB)** in place of a state pension for expatriates: a statutory lump sum on departure, calculated on length of service and final wage, with country-specific formulas and reductions for resignation before a service threshold. It is a central component of the final settlement in any Gulf payroll and has no Egyptian equivalent.
+
+The Saudi award under Articles 84 and 85 of the Labour Law is the pattern to know: half a month's wage for each of the first five years and a full month for each year after that, calculated on the last wage and pro-rated for part years, then reduced where the worker resigns — nothing below two years of service, a third from two to five, two thirds from five to ten, and the full award at ten years or more. Figures checked in 2026; Saudi labour law has been amended repeatedly in recent years, so verify against the current text and the client's own contracts, which may be more generous than the statutory floor.
+
+Two cases sit outside the reduction and are worth knowing because they come up. Where the employment ends for reasons genuinely beyond the worker's control, the full award is due despite the departure being worker-initiated. And a female worker who ends her contract within a defined period after marriage or after giving birth is likewise entitled to the full award. Both are exceptions written into the statute rather than employer policy, which means a configuration that applies the reduction mechanically will under-pay them.
+
+## The resignation reductions, and the open question since 2025
+
+Here the sources genuinely diverge, and the divergence is material to money.
+
+Amendments in force since February 2025 introduced a definition of resignation that refers to a fixed-term contract. Some practitioners read that as confining the Article 85 reductions to fixed-term contracts, so that an employee giving notice under an **indefinite** contract would keep the full award. Others continue to apply the reductions to any employee-initiated departure. At least one source states that Articles 84 to 88 themselves were left unchanged by the amendments, which does not settle the question, because the definition sits elsewhere.
+
+Separately, the end of a fixed-term contract by non-renewal is generally described as attracting the full award rather than the resignation reduction, on the basis that declining to renew is not a resignation — a position attributed to the ministry but which this atlas could not confirm against an official source.
+
+And the boundary of the two-thirds band is reported inconsistently: some sources say five to ten years, others "more than five and under ten", which is the same thing stated carelessly but is the kind of carelessness that produces an off-by-one at exactly five years.
+
+None of this is a reason to refuse to build. It is a reason to put the question in writing to the client's Saudi employment counsel, to record the answer and its date in the configuration workbook (Chapter 16), and to implement the client's legal position rather than a consultant's reading of a calculator website. It is also a genuinely strong thing to say in an interview: the honest answer to "how does Saudi EOSB work on resignation" in 2026 includes the sentence that the 2025 amendments left practitioners reading it two ways.
+
+## What decides the money is the service, not the formula
+
+What decides the money is not the formula but the service length fed into it, and that is a configuration question. A worker who left and returned, or who moved between group companies, has a new work relationship and a new legal employer start date; whether the earlier service still counts is a policy decision the client has to state, and it is expressed through a seniority date rather than by back-dating the new employment (Chapter 3). A rehire configured with a fresh service clock under a policy that bridges the break under-pays every affected leaver, and no payroll report flags it, because both figures are arithmetically correct.
+
+The second input is the **wage** the award is calculated on, which is the salary-component question from Chapter 5 again. The last wage is not necessarily basic salary alone, and the client's contracts may define it differently from the statutory floor. Both inputs have to be agreed and documented before the formula is built, and both are where disputes come from.
+
+[[lab:gratuity]]
+
+## Payment timing
+
+One operational rule worth building into the exit process: the settlement is due quickly, and how quickly depends on who ended the relationship — within about a week where the employer ended it, and about two where the employee did.
+
+That turns the final-settlement sequence of Chapter 8 into a timed process rather than an administrative one. The accrual run, the loan clearance, the gratuity calculation and the payment all have to happen inside a window measured in days. A client whose settlement process currently takes a month has a compliance problem they may not know about, and surfacing it is part of the job.
+
+## The rest of the Gulf, briefly
+
+The chapter is titled for the region and has so far described one country, so it is worth stating the pattern — and being clear that each country's specifics must be verified separately rather than assumed from Saudi Arabia.
+
+Every Gulf state shares the same four structural features. **Social insurance splits by nationality**, with nationals covered by a pension system and expatriates covered for much less or not at all. **Wages are protected** through a system that requires payment through banks and a file matching the payroll, under various names. **End of service** is an employer-paid statutory benefit rather than a state pension, with its own formula. And **employment is document-driven**, tied to residency and work permits, with a nationalization quota attached.
+
+What differs, and differs enough that nothing should be carried across without checking: the contribution rates and the wage base they apply to, the cap, the file format, the gratuity formula and its reductions, the quota system's mechanics, and the authority a file goes to. A group operating in three Gulf states has three legislative data groups (Chapter 1), three element libraries, three statutory test packs and three sets of filings — and the only thing that genuinely transfers is the project's experience of doing it once.
+
+Chapter 18 does the UAE in detail, including the ways it is *not* like Saudi Arabia.
+
+## Designing for a multi-country Gulf group
+
+Three decisions recur on regional projects and are worth settling early.
+
+**One instance or several.** One instance with several LDGs is almost always right, and it means one person record for somebody who moves between countries (Chapter 3), one set of structures, and one reporting layer. The cost is that every country's configuration lives beside every other's, so naming conventions and ownership matter more.
+
+**Where the shared services sit.** A group running payroll for several countries from one centre needs security scoped per country (Chapter 15) and personas designed per country (Chapter 22), because the statutory work is different even where the process is the same.
+
+**Who owns the platform relationships.** The government-relations function is a stakeholder in the HR system design in a way that has no Egyptian or European equivalent, and it is almost never invited to the workshops. Inviting it is one of the cheapest risk reductions available on a Gulf project.
+
+## Common mistakes
+
+- Treating GOSI as one rate. Nationals and expatriates differ, and the 2024 reform split nationals into two schedules.
+- Failing to capture and migrate each national's GOSI registration date, which is what selects the schedule.
+- Ignoring the SAR 45,000 wage ceiling and the basic-plus-housing base.
+- Holding salary as one figure, so the contributable wage cannot be derived.
+- Forgetting that Qiwa, Mudad and GOSI must show the same basic salary.
+- Treating a salary change as finished when the payroll is right.
+- Leaving the WPS file to the end of the project, and discovering the bank's test cycle.
+- Describing a late WPS file as administrative rather than as a visa and retention risk.
+- Treating nationality as demographic data rather than compliance data.
+- Building a Nitaqat calculator from weights found on a vendor blog.
+- Keeping residency documents in flexfields instead of document records, and having no expiry process.
+- Applying the EOSB resignation reduction mechanically, over the statutory exceptions.
+- Presenting the post-2025 resignation position as settled when practitioners read it two ways.
+- Getting the gratuity formula right and the service date or the wage base wrong.
+- Running a settlement process that takes longer than the statutory payment window.
+- Assuming one Gulf country's rules carry across to the next.
+
+## Sources
+
+- Mercans, "GOSI Contributions in Saudi Arabia: 2026 Rates, Rules & Compliance Guide". https://mercans.com/glossary/gosi-contributions/
+- Mercans statutory alert, "Saudi Arabia: GOSI Contribution Rates & Saned Unemployment Fund 2026". https://mercans.com/resources/statutory-alerts/saudi-arabia-gosi-contribution-rates-saned-unemployment-fund-2026/
+- Mercans, "Saudization (Nitaqat): 2026 Quotas, Bands, Compliance Rules & Penalties", for the band structure and the Qiwa documentation requirement. https://mercans.com/glossary/saudization-nitaqat/
+- Snad, "Mudad and the Wage Protection System (WPS): 2026 Employer Guide". https://www.snad.io/en/blog/mudad-wps-hamayat-ujur-saudi
+- Ministry of Human Resources and Social Development (Saudi Arabia), *Labor Law* (Royal Decree M/51), official English translation — Articles 84 to 88. https://www.hrsd.gov.sa/sites/default/files/2023-02/Labor.pdf
+- Ministry of Human Resources and Social Development, "Calculating End-of-Service Award" and "End-of-Service Award Regulations", for the pro-rating of part years and what counts as wage. https://www.hrsd.gov.sa/en/knowledge-centre/articles/316
+- Teamed, "End-of-service award in Saudi Arabia: Articles 84 to 88 explained", for the post-2025 reading that practitioners differ on. https://www.teamed.global/gulf-employment-law/saudi-end-of-service-award
+- Qiwa (Ministry of Human Resources and Social Development) — the platform itself, for what employers file. https://qiwa.sa
+</script>
+
+<script type="text/markdown" class="src-deep">
+---
 id: hdl
 minutes: 34
 ---
@@ -5801,6 +5986,154 @@ And plan for the periodic review. Who holds what drifts — manual provisioning,
 - Oracle, *Securing HCM* — "Best Practices for User and Role Provisioning in HCM". https://docs.oracle.com/en/cloud/saas/human-resources/ochus/best-practices-for-user-and-role-provisioning-in-hcm.html
 - Oracle, *Securing HCM Questions and Answers* — "Which are the role types in HCM Cloud?". https://docs.oracle.com/en/cloud/saas/human-resources/faqas/which-are-the-role-types-in-hcm-cloud.html
 - Oracle, *Using Common Features for HCM* — the Security Console, copying a delivered role, and the simulation view. https://docs.oracle.com/en/cloud/saas/human-resources/faucf/index.html
+</script>
+
+<script type="text/markdown" class="src-deep">
+---
+id: uae
+minutes: 38
+---
+
+The UAE employs more Oracle HCM consultants than anywhere else in the region, and almost nothing in a Saudi implementation transfers to it unchanged. The gratuity formula is different, the wage-protection file is different, the pension covers a different population under a different authority, and the nationalization programme counts differently. A consultant who has done one Gulf country and assumes the second is a variation of it will design the wrong thing twice before anyone notices. This chapter is the UAE half of Chapter 17.
+
+> **Every figure here moves, and the sources disagree more than usual.** The rules below were checked in 2026 against PwC, Mercans and law-firm summaries; the authorities are MOHRE for labour matters, GPSSA for pensions and Nafis for Emiratisation, and the official Arabic text governs. Free zones — the DIFC and ADGM especially — run their own employment regimes, which this chapter only sketches. Verify before configuring anything.
+
+## Every contract is fixed-term now
+
+Federal Decree-Law No. 33 of 2021 replaced the 1980 labour law and removed the distinction a generation of HR managers grew up with: there is no unlimited contract in the private sector any more. Every contract is fixed-term, renewable, and the renewals are where the administrative work lives.
+
+That is a configuration statement, not a legal footnote. Contract end dates become data the system has to hold and act on, which means contract-expiry alerting is not an optional extra in a UAE implementation the way it is in an Egyptian one, and the lifecycle events of Chapter 8 acquire a route that Egypt does not have: expiry without termination. A client still using "limited" and "unlimited" in a requirements workshop is describing the superseded law, and the useful response is to ask when their contracts were last reissued rather than to configure the vocabulary they used.
+
+The operational shape this creates is a renewal cycle running permanently in the background. Every employee has a date; every date needs a decision in advance; every decision produces either a renewal or an exit. The system's contribution is the alert and the task (Chapter 14), and the design question is the lead time — long enough for a manager to decide and for the paperwork to be done, which in practice is measured in months rather than weeks because the visa and permit renewal runs alongside it.
+
+## Work models, probation and notice
+
+The 2021 law also recognised a wider set of working arrangements than the one it replaced — alongside full-time employment, arrangements such as part-time, temporary and flexible work are contemplated, which is why a UAE implementation meets more assignment categories than an Egyptian one. For configuration this lands on the assignment category and the work schedule (Chapters 3 and 6) rather than on anything exotic.
+
+Probation is capped at six months. The notice rules around it are reported inconsistently in the English-language material: a law-firm alert from the time of the reform describes a minimum notice during probation measured in days, while later guides quote a post-probation range measured in months. Those are most likely different situations rather than a contradiction — notice during probation and notice after it — but a consultant configuring a termination flow should take the figures from MOHRE or the client's counsel rather than from a guide, and should establish which period each number applies to.
+
+What the system needs out of this is modest and specific: a probation end date that drives an alert and a confirmation transaction (Chapter 8), and notice periods held in a form that the termination transaction and the final settlement can read.
+
+## The leave entitlements
+
+The statutory floor is worth knowing because it sets the plan design (Chapter 6), and because UAE company policies frequently exceed it in ways that have to be configured deliberately rather than assumed.
+
+**Annual leave** is 30 calendar days a year once a year of service is complete, with an accrual of two days a month for an employee who has between six and twelve months of service. Public holidays sit outside the balance, which is the same work-schedule and calendar-event design as everywhere else.
+
+The phrase to notice is *calendar days*. A 30-calendar-day entitlement is not a 30-working-day entitlement, and a plan built in working days will be generous by roughly the number of weekends in the leave taken. This is one of the most common UAE absence defects and it is invisible until somebody compares a balance against the contract.
+
+**Sick leave** is up to 90 days a year, paid on a tier: full pay for the first 15 days, half pay for the next 30, and unpaid for the remaining 45. The entitlement begins after probation. Notification within a short window and a medical report from the treating facility are part of the obligation, which makes this a qualification plan with certification requirements (Chapter 6) rather than a simple band plan.
+
+**Maternity leave** is 45 days at full pay and 15 at half pay, with further unpaid leave available, and protections around dismissal in the period following. **Paternity leave** is five days.
+
+The design mapping is the same exercise as Chapter 10 performs for Egypt: annual leave is an accrual plan in calendar days with a pro-rated first year, sick leave is a qualification plan with three payment bands and a certification requirement, maternity and paternity are qualification plans with occurrence handling, and the unpaid portions need somewhere to be recorded.
+
+## The gratuity is not the Saudi one
+
+The end-of-service gratuity under Article 51 is **21 days of basic wage for each of the first five years of service, and 30 days for each year after that**, payable to anyone with at least one year of continuous service and capped at two years' total wage. Unpaid absence does not count toward service, and the settlement falls due within fourteen days of the contract ending.
+
+Three of those details differ from Saudi Arabia in ways that change the calculation, not just the number. The UAE accrues on **basic wage**, where the Saudi award in Chapter 17 is computed on the last wage as defined by that law — so the component split of the salary (Chapter 5) decides the UAE liability directly. The UAE applies a **cap** of two years' pay, which Saudi Arabia does not. And the UAE pays the full award on resignation after one year, where the Saudi scale reduces it below ten years of service. An EOSB element built for one country and reused in the other is wrong in at least three places.
+
+Two further details decide whether a UAE gratuity calculation is right in practice.
+
+**Unpaid absence does not count toward service**, which means the service figure fed into the formula is not simply the difference between two dates. Unpaid leave has to be tracked in a way the calculation can read and subtract — which is an argument for recording it properly in a no-entitlement plan (Chapter 6) rather than as an informal arrangement between a manager and an employee.
+
+And the **basic wage** the accrual runs on is the basic at the relevant time, which makes the salary component design the single most consequential piece of configuration for this number. A client who holds one salary figure can produce a plausible gratuity and cannot defend it.
+
+[[lab:gratuity]]
+
+## The alternative savings scheme
+
+Since 2023 employers may also join a voluntary **alternative end-of-service savings scheme**, paying monthly contributions into a regulated fund instead of accruing a lump sum on their own books. Where a client has joined it, the payroll design changes shape entirely: a monthly contribution element replaces an accrual and liability calculation, and the final settlement no longer carries the gratuity at all. Ask which model the client is on before designing either.
+
+The question is not only "which model" but "from when, and for whom". A client who joins part-way through has employees with accrued entitlement under the old arrangement and contributions under the new one, which means both designs have to exist and the boundary date has to be held. And a scheme that applies to some categories of employee and not others makes it an eligibility question as well.
+
+The reason this matters more than it first appears is that it changes what the final settlement contains, what the liability report says, and what the finance team expects to see every month. All three are things the consultant builds.
+
+## GPSSA covers nationals; expatriates have the gratuity instead
+
+Pension contributions through the General Pension and Social Security Authority apply to UAE nationals, and to other GCC nationals under the Gulf insurance-protection extension that Chapter 17 describes from the Saudi side. Expatriates are not in the pension system at all — the gratuity is their end-of-service provision, which is why the two subjects sit in one chapter here and in two places in a European implementation.
+
+There are two contribution regimes, split by when the worker was first registered. Workers registered before November 2023 sit on the older scheme; those entering the workforce from the end of October 2023 fall under Federal Decree-Law No. 57 of 2023, whose total contribution is higher and whose split between employee and employer differs. Published summaries disagree on both the exact cutoff date and the current percentages, and a government subsidy can reduce the employer share at lower salaries, so the rates belong in a dated global value read from GPSSA's own published schedule rather than hard-coded into a formula — the mistake Chapter 12's lab is built around.
+
+What matters structurally is the same point Chapter 17 makes about Saudi Arabia: nationality and registration date are payroll-driving attributes, not demographics. They decide which schedule applies, and a person record missing either produces a contribution that is quietly wrong rather than an error.
+
+The government subsidy deserves one more sentence because it is unusual and easy to miss: where it applies, the employer's share is reduced at lower salary levels, which means the employer contribution is not a flat percentage of the wage across the whole population. A formula written as a single rate will be wrong for the people it is meant to help.
+
+## The Wage Protection System, UAE edition
+
+The UAE runs its own Wage Protection System through MOHRE and the Central Bank. Salaries are paid through approved agents and reported in a Salary Information File whose layout is a UAE layout — it is not the file Saudi Arabia's Mudad platform accepts, and the two countries' records are not interchangeable.
+
+This is the single most common cross-Gulf mistake in a payroll design: treating "the Gulf WPS" as one requirement. It is one idea implemented separately per country, with its own file, its own agent, its own identifiers and its own rejection behaviour. A multi-country Gulf go-live needs one bank-file build and test cycle per country, with the real bank, every time (Chapter 5).
+
+The identifiers are where the file most often fails, and they are worth checking during design rather than during testing. The file keys on employer and employee identifiers issued by the labour authority, not on the employee number the HR system uses, which means those identifiers have to be held on the record and migrated — the same lesson the Egyptian social-insurance number teaches in Chapter 9, in a different alphabet.
+
+## Emiratisation, and what it asks of the data
+
+**Emiratisation** is the UAE's nationalization programme, administered with the Nafis platform. Private-sector companies above the size threshold must raise the share of UAE nationals in skilled roles by a set amount each year, with monthly financial penalties for each unfilled position, escalating annually. Penalties for artificially satisfying the quota — hiring a national who does not genuinely work — are heavier again and sit under a separate decision.
+
+For the consultant the mechanics matter less than what they require of the record: a trustworthy national identifier, an accurate nationality, a job that is correctly classified as skilled, and a reporting line that can produce the ratio on demand. Those are Chapter 2 and Chapter 13 problems wearing a compliance hat, and they are the ones to raise in design rather than in the month the first report is due.
+
+Three structural points are consistent across the material and safe to design around. The target is measured on **skilled roles** rather than on total headcount, which makes job classification a compliance input. Progress is measured against **half-year milestones** rather than annually, so a client has two deadlines a year rather than one. And there are separate, smaller obligations for companies below the main size threshold in designated sectors, expressed as a required number of nationals rather than a percentage.
+
+## What the published Emiratisation figures disagree about
+
+Almost every specific number in the English-language guidance differs between sources, and a consultant should treat all of them as needing confirmation from MOHRE or Nafis.
+
+The **annual increase** is described both as two percentage points a year split into two half-year steps, and as a target expressed as a cumulative percentage by a year end. The **mid-year milestone** is given as a specific percentage in one source and as "one percentage point of increase" in another. The **penalty** per unfilled position is most commonly reported at one figure rising by a fixed amount each year, but at least one source gives a different figure and a different start date. The **salary floor** for a national to count toward the quota is reported at two different levels. And the **Nafis support** available — salary top-ups and pension support — is quoted with different caps.
+
+The reason to list the disagreements rather than pick one is practical as well as editorial. A client who is told they are compliant on the basis of a blog figure and is not compliant faces a monthly penalty per position; the cost of being wrong is immediate and recurring. The correct deliverable from the consultant is a system that produces the inputs accurately and a clear statement that the thresholds come from the authority.
+
+## Free zones: a different employment law in the same city
+
+The chapter's caveat says free zones run their own regimes; it is worth saying what that means for a design, because clients rarely raise it and it changes the answer.
+
+Several free zones — the DIFC and ADGM most prominently — operate their own employment law, their own regulator and their own end-of-service arrangements, separate from the federal regime that governs mainland employment. In at least one of them the end-of-service gratuity has been replaced by a funded workplace savings arrangement into which employers contribute monthly, which is a different payroll design in the same way the federal alternative scheme is.
+
+For the structures of Chapter 1 this means a free-zone entity is a separate legal employer with its own registrations, and for payroll it may mean separate elements, separate plans and separate calendars for its population. The question to ask in the first workshop is which law governs each entity's employment contracts, and the person who knows is the client's legal counsel rather than their HR manager.
+
+The specifics of each free zone's regime are beyond this chapter and change; what a consultant needs is the instinct to ask, and the knowledge that "we are in the DIFC" is an answer with configuration consequences rather than an address.
+
+## Where the structure differs
+
+Mainland and free-zone entities answer to different regulators, which usually means separate legal employers, separate registrations and separate wage-protection arrangements, even when the group presents itself as one business. The parent-PSU shape from Chapter 1 is common here: several legal employers, one filing entity, one payroll relationship across them where the statutory unit is shared.
+
+The practical question in the first workshop is therefore not "how many companies do you have" but "how many registrations do you file under, and with whom" — and the answer frequently surprises the client.
+
+## A UAE configuration checklist
+
+Pulling the chapter into the list a consultant would actually work through.
+
+Hold the **contract end date** and alert on it, with a lead time that accommodates the visa renewal running alongside. Hold **nationality** and the **pension registration date** as payroll-driving attributes. Hold the **labour-authority identifiers** for employer and employee, because the wage file keys on them. Split **salary into components** so that basic wage is identifiable, because the gratuity runs on it. Record **unpaid absence** properly, because it reduces gratuity service. Classify **jobs as skilled or otherwise**, because Emiratisation is measured on them. Build **annual leave in calendar days**, sick leave as a three-band qualification plan with certification, and maternity and paternity with their own treatment. Decide which **end-of-service model** the client is on, and whether there is a boundary date between two of them. Build the **wage file** per country with the real bank, early. And establish, per entity, **which law governs** — federal or a free zone's.
+
+Ten items, each of which is cheap to do at design time and expensive to retrofit.
+
+## Common mistakes
+
+- Reusing a Saudi end-of-service element in the UAE. Different accrual, different base, different cap, different resignation treatment.
+- Building annual leave in working days when the entitlement is in calendar days.
+- Ignoring that unpaid absence does not count toward gratuity service.
+- Holding one salary figure, so the gratuity base cannot be identified.
+- Assuming one Gulf WPS file. The UAE and Saudi Arabia have separate systems, formats and agents.
+- Not migrating the labour-authority identifiers the wage file keys on.
+- Treating "limited and unlimited contracts" as current. Every private-sector contract is fixed-term under the 2021 law.
+- Alerting on contract expiry too late for the visa renewal to run alongside it.
+- Putting expatriates into the pension scheme. GPSSA covers nationals; expatriates have the gratuity.
+- Hard-coding pension percentages that change by registration date and by government subsidy.
+- Writing the employer pension contribution as a flat rate where a subsidy reduces it at lower salaries.
+- Designing one end-of-service model without asking whether the client has joined the savings scheme, or when.
+- Quoting Emiratisation targets, penalties or salary floors from a guide rather than from MOHRE or Nafis.
+- Treating Emiratisation as a reporting problem at go-live rather than a data-quality problem in design.
+- Assuming a free-zone entity is governed by the federal labour law.
+
+## Sources
+
+- PwC Worldwide Tax Summaries, United Arab Emirates — "Other taxes", for social-security contributions and the national and GCC populations they cover. https://taxsummaries.pwc.com/united-arab-emirates/individual/other-taxes
+- Mercans, "End of Service Gratuity (EOSG) in the UAE" — the Article 51 accrual, the one-year threshold and the two-year cap. https://mercans.com/glossary/uae-end-of-service-gratuity/
+- Morgan Lewis, "United Arab Emirates Updates Federal Labour Law", for the 2021 reform including maternity leave and the probation notice position at the time. https://www.morganlewis.com/pubs/2021/12/united-arab-emirates-updates-federal-labour-law
+- Zoho, "UAE Leave Entitlements", for the annual-leave accrual before one year and the statutory leave list. https://www.zoho.com/en-ae/payroll/academy/compliance/uae-leave-entitlements.html
+- Federal Decree-Law No. 33 of 2021 on the Regulation of Employment Relationships, and Federal Decree-Law No. 57 of 2023 on pensions — the governing texts, published by the UAE government; the Arabic text governs.
+- MOHRE for labour and wage protection, GPSSA for pension contribution schedules, and Nafis for current Emiratisation targets and penalties — the authorities to verify against before configuring.
 </script>
 
 <script type="text/markdown" class="src-deep">
