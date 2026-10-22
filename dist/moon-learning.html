@@ -2829,6 +2829,188 @@ The opposite failure is self-service switched on everywhere with no change plan.
      ======================================================================== -->
 <script type="text/markdown" class="src-deep">
 ---
+id: absence
+minutes: 34
+---
+
+Absence is the module where a country's labour law turns into configuration. Every leave entitlement in the statute becomes an absence plan with rules, and every rule becomes a test script. The Egyptian annual-leave ladder is the classic accrual exercise; Egyptian sick leave is the classic qualification plan.
+
+> **The Egyptian figures quoted here are statutory.** They are the entitlements under Labour Law No. 14 of 2025, stated in full with their sources in Chapter 10, and checked in 2026. Re-verify against the current text of the statute before configuring any of them.
+
+Absence is also the module where a consultant's work is most visible to ordinary employees. Payroll is judged once a month by whether the number is right; leave is judged every time somebody looks at their balance. A balance that is wrong by half a day is noticed by everyone who has it, and the ticket that follows is rarely about half a day — it is about whether the system can be trusted.
+
+## Types are what people see; plans are the rules
+
+An **absence type** is what the worker actually selects when requesting leave — "Annual Leave", "Sick Leave", "Maternity Leave". It controls display and entry behaviour: whether half days are allowed, whether an end date is required, what documentation is needed. Every type must be associated with at least one plan. Clients describe requirements in terms of types ("we need a Hajj leave"); the consultant translates that into a type plus the plan behind it.
+
+The relationship is not one to one, and that is the point of separating them. One type can draw on more than one plan, which is how an entitlement that comes from two sources — a statutory minimum plus a company supplement — appears to the employee as a single kind of leave. And one plan can sit behind several types where the rules are genuinely the same.
+
+Above types sit **absence categories**, which group them for reporting, and beside them sit **absence reasons**, which record why. Both are cheap to configure during the build and expensive to add afterwards, and both are what make absence analysis possible later: "sick leave is up 12%" is an observation, while "sick leave with reason *work-related injury* is up 12% in one plant" is something a client can act on.
+
+## The six plan types
+
+An **absence plan** is the rules engine behind the type: who is eligible, how entitlement is earned or granted, and how it is paid. Oracle defines six plan types, and naming all six is a small, cheap differentiator, because most beginners know only two:
+
+- **Accrual** — workers accumulate time over a period for paid leave, such as a vacation plan.
+- **Qualification** — workers qualify for an entitlement on an event and receive payments during the absence, with payment percentages that can vary by band.
+- **No entitlement** — tracks absences without maintaining a balance or providing entitlement, typically unpaid leave.
+- **Compensatory** — tracks earned compensatory time that can be taken as time off, instead of overtime pay.
+- **Agreement** — plans built under statutory or collective-agreement rules.
+- **Donation** — tracks donated time that a worker receives.
+
+The practical skill is mapping a client's sentence to the right one quickly. "They build up twenty-one days a year" is accrual. "They get ninety days at 75% when they are ill" is qualification. "They can take it unpaid, we just need it recorded" is no entitlement. "They work a public holiday and get a day back" is compensatory. Getting this right in the first workshop saves rebuilding a plan later, because the plan type is not something that can be changed once a plan is populated.
+
+## Accrual plans: the term and the method
+
+An **accrual plan** accumulates leave over time, with rules for accrual rate, ceilings and carryover. Two decisions shape everything else.
+
+The **accrual term** is the period over which entitlement accumulates and at the end of which carryover happens. The delivered choices are a calendar year, an anniversary year — running from each worker's own hire or adjusted date — and a rolling term, which has no fixed start and instead calculates over the previous twelve months. Calendar year is the simplest to explain and to reconcile; anniversary year matches how many Gulf policies are actually written; rolling is what a client means when they say "in any twelve-month period", which is a phrase worth listening for because it changes the plan type of answer.
+
+The **accrual method** is front-loaded or incremental. Front-loaded grants the whole term's entitlement at the start; incremental earns it period by period. The difference is invisible to a worker who stays all year and very visible to one who leaves in March — front-loaded means they have already been granted days they have not earned, and the policy has to say whether those are recovered at termination. That is a client decision with a money consequence, and it belongs in writing before the plan is built.
+
+**Accrual bands** grant different rates to different populations, usually by length of service, because almost every real leave policy is tiered. Egyptian annual leave — 15 days in the first year, 21 from the second, 30 for workers with ten years of service or aged over 50, with higher entitlements again for persons with disabilities and for hazardous or remote work (Chapter 10) — is implemented directly as accrual bands.
+
+The boundary cases are the test cases, and they are where a plan is proved or found wanting: the person who crosses ten years mid-year and the person who turns fifty mid-year. Both need an answer to the same question — does the higher band apply from the date they cross it, from the start of the term, or from the next term — and the answer is a policy reading of the statute rather than a system default. Write the three test cases before building the plan, and have the client confirm the expected number for each.
+
+## Ceiling, carryover, expiry and vesting
+
+Four limits shape what a balance is allowed to do, and they are frequently confused with one another.
+
+A **ceiling** is the maximum a worker can hold. On an incremental plan the limit is applied in each accrual period, which means a worker at the ceiling simply stops accruing until they take leave — not that the excess is removed later.
+
+**Carryover** is the maximum unused time that moves into the next accrual term. It is calculated by its own process at the end of the term, which works out how much is carried, when it is effective from and when it expires.
+
+**Expiry** is what happens to carried time that is not used in time: it is forfeited. The arithmetic is worth stating because it is the one employees dispute. If ten days are carried with an expiry date, and the worker takes six days of leave before that date, six of the carried days are treated as used and the remaining four are lost. The rule is not "oldest first across the whole year" unless the plan is built to be, and a client who assumes one behaviour and gets the other has a balance they cannot explain to their own staff.
+
+**Vesting** is a waiting period during which time accrues but cannot yet be used. It is how a probation rule is expressed properly — the entitlement builds from day one but cannot be taken until the period is served — rather than by delaying enrolment, which would quietly lose the entitlement.
+
+Employers cap carryover to control liability and to encourage people to take leave, and carryover and expiry rules are a frequent source of client disagreement — pin them down in writing early. Egyptian law also imposes its own constraints (Chapter 10), and where a company policy is less generous than the statute, the statute wins and the plan has to reflect it.
+
+## Part-time, joiners and the other proportions
+
+Three populations break a plan that was designed only for a full-year, full-time employee.
+
+A **part-time** worker's entitlement is usually proportionate, and the proportion comes from FTE or from the work schedule. The design question is whether the entitlement is expressed in days or in hours, and for a workforce with varied schedules, hours are almost always the honest unit — five "days" means something different to someone working three days a week, and a plan in days will be argued about forever.
+
+A **mid-year joiner** needs a pro-rated first term, and a front-loaded plan needs an explicit rule for what they get on arrival. A **mid-year leaver** is the mirror image and the one with money attached, because the balance at termination becomes cash (below).
+
+And **unpaid leave** inside a term raises the question of whether accrual continues during it. Statutes differ, company policies differ, and the two frequently disagree. This is one to ask rather than assume.
+
+## Qualification plans
+
+A **qualification plan** is used where entitlement is not earned day by day but triggered by an event and paid at rates that vary over the absence. Egyptian sick leave is the textbook case: 75% of the insurable wage for the first 90 days and 85% thereafter, up to 180 days in a calendar year, subject to medical certification. Those percentages are configured as qualification bands. Maternity leave is the other standard example, with its own cap on occurrences.
+
+Two mechanics distinguish a qualification plan from an accrual one and are worth being precise about. The entitlement is measured against a **window** — a calendar year, a rolling period, or the life of the employment — and the window is what makes "180 days in a calendar year" enforceable. And the **bands** are read by duration into the absence rather than by service, so a single long absence can move through two or three payment rates while it is happening.
+
+The thing that goes wrong is the interaction between the two. A worker who takes 100 days of sick leave, returns for a month and then takes another 100 within the same window is a case the configuration has to answer: do the bands restart, and does the window cap apply across both absences? The statute has a view; the client's HR policy may have a different one; and the plan will implement whichever one it is told to. Asking the question at design time is the whole job.
+
+## The plans nobody configures until they are asked for
+
+A **no-entitlement plan** exists because unpaid absence still needs to be recorded — for attendance, payroll deduction and reporting — even though nothing is earned or granted. It is the right home for unpaid leave, unauthorised absence, and anything the business wants to see on a calendar without attaching a balance to it.
+
+A **compensatory plan** comes up whenever a client asks about time off in lieu. The design question is the expiry: compensatory time with no expiry is a liability that grows forever, and clients almost always intend an expiry without having written one down.
+
+**Agreement** and **donation** plans are rarer in this region, but knowing they exist is what lets a consultant answer a collective-agreement question or a leave-donation request with "that is a plan type" rather than a flexfield.
+
+## Eligibility profiles
+
+An **eligibility profile** is a reusable set of criteria — grade, job, department, location, length of service — that decides whether a person qualifies for a plan: "employees in the Egypt legal employer with more than ten years of service" as the criterion for the 30-day band. Eligibility profiles appear in absence, benefits and compensation, so learning them once pays off three times.
+
+The design advice is to keep them few and name them for what they mean rather than for where they are used. A profile called "Egypt employees over ten years' service" can be reused by the next plan that needs it; one called "Annual leave band 3" cannot, because nobody will trust that it means what it says.
+
+## How an absence is actually recorded
+
+A plan is only half the design. The other half is what happens when somebody asks for a day off.
+
+An absence record carries a type, dates, a duration and a status, and it moves through approval like any other transaction (Chapter 19). Who may request it, who approves it and who can record or correct one on a worker's behalf is the three-seats question of Chapter 22. The duration is where the configuration shows: it is calculated against the worker's **work schedule**, so a five-day absence spanning a weekend is not five days of leave, and a public holiday inside a leave period is not deducted from the balance — provided the calendar is configured (Chapter 10). A client whose schedules are wrong will report leave balances that are wrong in the same direction every time.
+
+Work schedules deserve more attention than they get on a regional project, for two reasons. The Gulf weekend has moved within living memory and is not the same across the region, so one group can need several schedules for what the business thinks of as "normal hours". And shift workers, rotations and compressed weeks each change what a day of leave costs, which means the schedule is part of the absence design rather than a piece of setup somebody does later.
+
+Two further settings matter in practice. Certification requirements hold an absence — or its payment — until a document is supplied, which is how Egyptian sick leave's medical certificate is enforced rather than hoped for. And the entry rules on the type decide whether half days are allowed, whether an end date is mandatory, and how far in the past or future a request can be made, which is the quiet cause of most "the system let them do that" tickets.
+
+Certification is worth one more sentence because clients under-use it. The configuration decides not only that a document is required but what happens when it does not arrive — the absence can be left pending, or its payment reduced or stopped. A client who has been chasing sick notes by email for years is usually delighted to discover the second option exists, and it changes the behaviour of the workforce within a quarter.
+
+## The processes that keep balances true
+
+Accrual balances are not recalculated continuously; they are maintained by processes, and knowing which ones exist is the difference between explaining a balance and guessing at it.
+
+*Calculate Accruals and Balances* runs on a schedule and grants the period's entitlement to each enrolled worker. The carryover calculation runs at the plan's term end and works out what is carried, from when, and when it expires. The absence liability and accrual balances can be valued for Finance, which is how the leave the company owes becomes a number on a balance sheet rather than an estimate.
+
+Two operational points follow. These processes belong on a schedule from day one, not run by hand, because a missed run shows up as a balance that stopped moving — which users report as a bug. And the term-end run is the busiest moment in the absence year: carryover, expiry and the new term's accrual all land together, and it is worth rehearsing once in a test environment before it happens for real.
+
+## Reading a disputed balance
+
+The practical consequence is that a balance a user disputes has a history: the plan's enrolment date, the accrual runs since, the carryover event at the term end, and any manual adjustment. Checking those four in order answers the question. Adjusting the balance to the number the user expected, without reading them, hides the defect and guarantees its return next year.
+
+Add two more checks for the cases those four do not explain. Look at the work schedule, because a balance that is wrong by exactly the number of weekends in a period is a schedule problem. And look at the band the person is on, because a balance that is wrong by exactly the difference between two bands is a service-date problem — which is really a Chapter 3 problem wearing an absence costume.
+
+## Where absence meets payroll
+
+Absence is not a closed system: entitlement that is paid, unpaid or encashed has to reach payroll, and the connection is deliberate configuration rather than a side effect.
+
+Absence elements carry the payment into the run — full pay, a reduced percentage for a qualification band, or an unpaid deduction — and a **rate definition** (Chapter 5) supplies the money the percentage applies to. Getting that base wrong is the most common absence-payroll defect in the region: Egyptian sick leave is paid on the insurable wage, not on gross, so a plan pointed at the wrong rate pays the right percentage of the wrong number and reconciles to nothing.
+
+The integration is worth testing end to end rather than in halves. The test that proves it is a single worker, a single absence that crosses a band boundary, taken through a payroll run, with the payslip compared against a hand calculation the client agrees with in advance. If that one case is right, the configuration is right; if it is tested only as "the absence recorded correctly" and "payroll ran", nothing has been proved.
+
+## Encashment and the final settlement
+
+**Leave encashment** pays out unused leave in cash instead of time off. It occurs at termination as part of the final settlement and periodically where policy or law allows. It is the link between absence and payroll: an absence balance becomes a payroll element on termination.
+
+The other direction matters at exit. The balance at the termination date becomes the leave payout in the final settlement (Chapter 8), which is why an absence design that leaves balances approximate produces a settlement that is disputed.
+
+Two details decide whether that settlement is calm. The **rate** the balance is cashed at is a policy question — basic only, or basic plus allowances — and in the Gulf it frequently differs from the rate used for gratuity, which surprises people. And the **timing** matters: the balance has to be final before the settlement is calculated, which means the accrual run for the final period has to happen first. A settlement calculated before the last accrual is short by a few days, every time, for everybody.
+
+## The liability number Finance wants
+
+Unused leave is money the company owes, and at some point the finance director will ask what it is worth.
+
+The valuation is a rate times a balance, and both halves are arguable: which rate, and whether the balance includes carried time that is about to expire. The useful thing a consultant can do is make the calculation explicit and repeatable rather than letting it become a spreadsheet somebody maintains privately. It is also an argument for keeping carryover and expiry rules tight, because a liability that grows every year is usually a sign that leave is not actually being taken — which is a workforce problem the number is quietly reporting.
+
+## Regional shapes worth anticipating
+
+A few requirements come up on nearly every Egyptian or Gulf project and are easier to plan for than to retrofit.
+
+**Hajj leave** is a once-in-service entitlement, which means the plan has to track whether it has ever been taken rather than a per-year balance — a different shape from anything else in the design.
+
+**Ramadan hours** reduce the working day for part of the year in much of the Gulf, which is a work schedule question rather than an absence one, but it lands on absence because it changes what a day of leave is worth during that period.
+
+**Public holidays** are declared, sometimes at short notice, and sometimes differently for public and private sectors. The calendar needs an owner and a procedure for updating it mid-year, and a client without one will have leave durations that are wrong for the weeks around every announcement.
+
+And across the Gulf, **annual leave entitlements and sick leave bands differ per country** while the company policy is often written once for the group. Where the two disagree, the statute of the country of employment governs, and the plan design has to be per legislation even when the policy document is not.
+
+[[lab:leave]]
+
+## Common mistakes
+
+- Knowing only accrual and qualification plans. There are six.
+- Choosing the wrong plan type for a requirement, and finding it cannot be changed once the plan is in use.
+- Building a flat annual entitlement when the law is tiered by service.
+- Not writing the band-boundary test cases before building the plan.
+- Front-loading entitlement without deciding what happens when somebody leaves in March.
+- Leaving carryover and expiry rules undocumented.
+- Assuming carried days are used in a different order from the way the plan actually consumes them.
+- Expressing part-time entitlement in days when the workforce works varied schedules.
+- Delaying enrolment to model a probation rule, instead of using a vesting period.
+- Forgetting that casual leave in Egypt is counted within annual leave, not on top of it.
+- Designing plans without configuring work schedules, so every duration is wrong by the same amount.
+- Leaving the holiday calendar without an owner in a region where holidays are announced at short notice.
+- Requiring certification without configuring what happens when it never arrives.
+- Running the accrual processes by hand, and reporting a stalled balance as a bug.
+- Adjusting a disputed balance instead of reading how it was built.
+- Pointing an absence payment at gross pay where the statute says insurable wage.
+- Calculating a final settlement before the last accrual run.
+- Leaving balances approximate, then defending them in a final settlement.
+
+## Sources
+
+- Oracle, *Implementing Absence Management* — "Types of Absence Plans". https://docs.oracle.com/en/cloud/saas/human-resources/faiam/types-of-absence-plans.html
+- Oracle, *Implementing Absence Management* — the "Accrual Absence Plans" chapter, for accrual terms, methods, ceilings, carryover, expiry and vesting. https://docs.oracle.com/en/cloud/saas/human-resources/faiam/index.html
+- Oracle, *Fast Formula* — the "Formulas for Absence Management" chapter, for what the carryover calculation returns. https://docs.oracle.com/en/cloud/saas/human-resources/oapff/index.html
+- Oracle, *Absence Management* datasheet. https://www.oracle.com/a/ocom/docs/applications/human-capital-management/absence-management-ds.pdf
+</script>
+
+<script type="text/markdown" class="src-deep">
+---
 id: dating
 minutes: 30
 ---
@@ -3581,6 +3763,271 @@ One person record. Three work relationships over nine years, two of them closed.
 
 <script type="text/markdown" class="src-deep">
 ---
+id: org
+minutes: 62
+---
+
+Every Oracle HCM implementation starts here, because nothing else can be configured until these objects exist. No worker can be hired, no element defined, no payroll run, no report filtered, until the structures in this chapter are in place. That order is not a preference — the application enforces it, and a project that rushes this stage pays for it for years.
+
+The single hardest idea in this chapter is also the most important one: Oracle deliberately keeps two pictures of the same company. The **legal** picture answers the questions a government asks — who is registered, who employs, who pays, who reports. The **operational** picture answers the questions a manager asks — who runs what, who sits where, who may see whose data. In real companies the two rarely line up, and Oracle's structure exists precisely so they don't have to.
+
+A consultant who holds those two pictures apart can run a requirements workshop. One who does not will keep asking a client "is that a company or a department?" and getting an answer that means neither.
+
+[[fig:legal-vs-operational]]
+
+## How to run the discovery, before any of this is configured
+
+The configuration in this chapter is a day's work for someone who knows it. The discovery that tells you what to configure takes two weeks and is the part that goes wrong.
+
+Ask for documents rather than diagrams. The commercial registers, the tax cards, the social-insurance registration certificates, the trade licences, and — in the Gulf — the establishment registrations the labour ministry holds. Each of those pieces of paper corresponds to an object in this chapter, and the pile of paper is the only authoritative statement of how many of each there are. An org chart is a statement about management, which is the other picture entirely.
+
+Then ask four questions, in this order, and write the answers down.
+
+**Who signs the employment contracts?** That is the list of legal employers, and it is frequently shorter than the list of companies.
+
+**Who files with the tax authority and the social-insurance authority, and under which number?** That is the list of payroll statutory units and, through the registration numbers, the tax reporting units. It is frequently different from the list of employers.
+
+**Who shares a job catalogue, a grade structure and an approval chain?** That is the business unit design, and it is a question about operations rather than registration.
+
+**Who needs to see whose data?** That is what the trees will have to support, and it is the question that is never asked until the security phase, by which point the structure is built.
+
+The deliverable from all of this is a one-page map: every legal entity, its classifications, its parent where it has one, the LDG it sits in, and the business units beside it. If that page cannot be drawn, the configuration is not ready to start — and drawing it is a far cheaper way to discover a disagreement between the finance director and the HR director than finding it in week nine.
+
+## One enterprise, many legal entities
+
+The **enterprise** is the single top node of the whole structure. There is exactly one per implementation, and it is not a legal concept. It never appears on a government form, never signs a contract, never files a return. It is a container for settings that apply to everybody regardless of which company employs them.
+
+What actually lives on it is worth knowing, because these are decisions a consultant is asked about in the first week. The Manage Enterprise HCM Information task holds person-number generation, which has three methods: Manual, where the number is typed in; Automatic prior to submission, the delivered default, which issues the number as the record is created and therefore leaves a gap in the sequence when a transaction is cancelled; and Automatic upon final save, which issues it only once the transaction is approved, so the sequence has no gaps and no number is visible during entry. Both automatic methods draw from the same enterprise sequence, whose starting number is itself a setting. The same task holds worker-number settings, the default enterprise-wide **employment model**, position synchronization defaults, and global behaviours such as how a person's name is displayed.
+
+The person-number choice is worth one more sentence of advice, because clients ask which to pick and the trade-off is real. Gapless sequences look tidy and matter to auditors in some jurisdictions; the cost is that nobody sees the number while the transaction is in flight, which recruiters and onboarding teams find awkward. Gaps in a sequence are harmless and occasionally have to be explained. Where a client is migrating and wants to keep legacy employee numbers, the answer is usually manual numbering for the migrated population and automatic afterwards, with the sequence started above the highest legacy number.
+
+The employment-model setting deserves a paragraph of its own. It decides whether a worker in this enterprise can hold one assignment or several at the same time, and whether contracts are tracked as separate objects. The two-tier single-assignment model — one work relationship, one assignment — covers the overwhelming majority of implementations and is what to assume unless a client says otherwise. Two-tier multiple-assignment is for organizations where one person genuinely does two jobs concurrently under the same employer: a nurse who also teaches, a plant worker who covers a second line. The setting is made at the enterprise but can be overridden on an individual legal employer, which is how a group runs a simple model everywhere and a multiple-assignment model in the one subsidiary that needs it. Changing it later, after workers exist, is painful. Asking the question early is free.
+
+For a holding company with a factory and a trading arm, the enterprise is the group. The registered companies underneath are something else.
+
+Those registered companies are **legal entities**: organizations recognized by law that can own assets, sign contracts, incur liabilities, employ people and be sued. In Egypt each one has its own commercial register number and tax card. In Saudi Arabia each has its own commercial registration. Oracle creates them through the Legal Entity Configurator, a set of tasks shared with Financials rather than owned by HCM, which is why the task list sits under Define Common Applications Configuration rather than a purely HR menu.
+
+That shared ownership has a project consequence worth planning for. If Financials is being implemented at the same time, these objects have two sets of stakeholders and one set of values, and the two streams must agree. If Financials is already live, the legal entities already exist and the HCM work is to classify them rather than to create them — which is faster, and which means any disagreement about the structure is a conversation with Finance rather than a decision HR can make alone.
+
+The first real job on any project is to work out how many legal entities there actually are. The commercial registers give the definitive answer. The org chart does not, the letterhead does not, and the client's own finance team frequently does not either — groups acquire companies and keep running them as one business long after the paperwork says otherwise. Ask for the register documents, count them, and build from that.
+
+## Geographies: the dependency nobody plans for
+
+Before an address can be entered reliably, the application needs to know what a valid address in that country looks like, and that is a separate piece of setup that regularly surprises teams in week one.
+
+Geography setup has three layers and they are strictly ordered: a country's **structure** defines the levels an address has, the **hierarchy** holds the actual values at those levels, and **validation** says which levels are checked and how hard. The structure must exist before the hierarchy, and the hierarchy before validation. Validation requires at least one level to be enabled, and the strictness is a choice — at the error level, only a fully valid address with all mandatory elements can be saved at all.
+
+Three practical points follow. Oracle-licensed reference data can be imported for supported countries, but the import is disabled once any geography data exists for that country, which means a team that hand-built a hierarchy has closed off the easier route. A list of values should only be enabled for a level where there is actually enough data behind it, or users are offered an empty picker. And where addresses were created before validation was configured, there is a task to validate existing addresses against the master geographies after the fact — which is the right thing to run after a migration rather than discovering the mismatches one ticket at a time.
+
+The regional note: coverage and quality vary by country, and Egyptian and Gulf address structures are not the ones the defaults were designed around. Decide early how strict validation should be. Erroring on invalid addresses sounds right and produces a help desk full of people who cannot save a record because their village is not in the hierarchy.
+
+## What makes a legal entity real
+
+A legal entity in Oracle is not just a name. Three other objects have to exist first, and a consultant who does not know them will be blocked on day one of configuration.
+
+A **legal address** is the registered address of an organizational unit. Oracle requires legal addresses to exist before legal entities, because the entity is registered *somewhere* and the application will not let that be blank. These are maintained separately from the ordinary work **location** records used for employees, and the two are easy to confuse: one is where the company is registered, the other is where people physically work. They may be the same building. They are not the same object.
+
+A **legal jurisdiction** is the combination of a geographic area and a law that applies within it — Egypt income tax, Saudi social insurance, a specific municipal levy. Oracle ships predefined jurisdictions for the legislations it supports and lets you create more. Every legal entity is registered against an *identifying jurisdiction*, and the registration number entered there is the one that appears on statutory output. In Egypt that is the tax registration; in Saudi Arabia it is the commercial registration number.
+
+A **legal authority** is the government body that governs a jurisdiction — the Egyptian Tax Authority, NOSI, GOSI, the Ministry of Human Resources. Authorities are what registrations point at.
+
+The practical sequence is therefore: addresses, then jurisdictions and authorities, then the legal entity, then its registrations, then its HCM-specific information. Skipping ahead produces a validation error rather than a broken configuration, which is a mercy — but it also means a consultant who does not know the order spends an afternoon guessing.
+
+Registrations are worth dwelling on because they are what statutory output reads. A legal entity has an identifying registration against its identifying jurisdiction, and it may have further registrations against other jurisdictions — one company, registered for tax with one authority and for social insurance with another, under two different numbers. Collecting those numbers accurately, from the certificates rather than from a spreadsheet, is unglamorous and is the difference between a statutory file the authority accepts and one it rejects for a reason nobody can diagnose.
+
+## Legal employer: the classification that lets you hire
+
+A legal entity on its own employs nobody. To hire anyone into it, the entity must be classified as a **legal employer**. Oracle makes "employer" a classification you switch on rather than something every legal entity is assumed to be, because some entities exist only to hold property, own a licence or issue invoices. A property-holding company in a group has a commercial register and a tax card and has never had a payslip run against it.
+
+Every worker belongs to exactly one legal employer at a time, through their work relationship (Chapter 3). This is the most consequential link in the employment data model. Change the legal employer and you have changed who legally employs the person — the old employment ends and a new one begins, which in Egypt means a settlement, a new social-insurance registration and a fresh service date unless service is explicitly bridged. Change their department and nothing legal has happened at all. The system treats these as completely different events, and it is right to.
+
+> **Interview classic.** "What is the difference between a legal entity and a legal employer?" A legal employer is a classification applied to a legal entity that enables it to employ workers. Not every legal entity is a legal employer. Treating the two as synonyms is the most common miss in this whole area.
+
+There is a second, quieter consequence. Because the legal employer can override enterprise-level settings — the employment model, and a set of localization defaults — it is also the level at which a group with genuinely different operating companies expresses that difference. A consultant who reaches for a new business unit when the answer is a new legal employer has usually misread the requirement.
+
+## Who pays, and who reports
+
+Two more classifications sit on the legal entity, and both are about payroll.
+
+A **payroll statutory unit (PSU)** is a legal entity responsible for paying workers and remitting payroll tax and social insurance to the authorities. It is the level at which a person's payroll records are grouped for statutory calculation and reporting — in Egypt, the entity that files with NOSI and the Egyptian Tax Authority; in Saudi Arabia, the entity that files with GOSI. Oracle's guidance is to create at least one legal entity designated as a PSU for every legislative data group, which is another way of saying: for each country you pay people in, somebody has to be the filer.
+
+Oracle's documentation puts the parent relationship plainly. When a legal entity is identified as a legal employer but *not* as a PSU, it must be given a parent PSU, and its legal reporting units are then created as tax reporting units under that parent rather than under itself. This is how a group centralises statutory filing: several employers, one filer.
+
+[[fig:parent-psu]]
+
+The PSU choice has a consequence that reaches all the way into Chapter 3 and is worth connecting here. The payroll relationship is keyed on the payroll statutory unit, so whether two employments share a PSU decides whether they share one set of payroll balances and one statutory ceiling. A group that centralises filing under one PSU has, without necessarily intending to, decided that somebody employed by two of its companies has a single social-insurance ceiling across both. That may be exactly right legally, or exactly wrong. It is a question for the client's statutory adviser, and it is decided here rather than in the payroll chapter.
+
+Beneath the PSU sits the **tax reporting unit (TRU)**, the reporting face of the PSU toward tax and social-insurance authorities. Oracle describes the TRU as the HCM form of a legal reporting unit, existing to group workers for tax and social-insurance reporting. When a legal entity is identified as a PSU, its legal reporting unit is carried across into HCM as a TRU automatically — which is why consultants often find a TRU they did not consciously create.
+
+A single PSU may need to report under more than one registration number, and the TRU is the level that hangs on. This is not a theoretical case in the region. An Egyptian company with branches registered at different social-insurance offices files separately for each; a Saudi group with several commercial registrations is assessed for Saudization against each registered establishment rather than against the group as a whole. Each of those registration numbers is a candidate TRU. The design question is answered by collecting registration certificates, not by drawing boxes.
+
+A worker is linked to a TRU through their statutory deductions calculation card (Chapter 5), not directly on the assignment. That indirection catches people out: a worker can be in the right legal employer, the right payroll and the right department, and still be missing from a statutory report because the card carries no TRU.
+
+Because that link is per person rather than structural, it is also a migration deliverable. The TRU association for every employee is a column in the conversion file, derived from which branch or establishment each person is registered at — a fact that usually lives in the client's social-insurance filings rather than in their HR system. Finding the owner of that mapping early is worth doing; it is the single most common reason a first statutory report comes out with the wrong population.
+
+The practical design question on a multi-company client is therefore: which legal entities are PSUs, and which are legal employers reporting under a parent PSU? A group with three registered companies in Egypt may well have three PSUs. Do not assume one per country.
+
+## The hard boundary: legislative data groups
+
+A **legislative data group (LDG)** is a partition that isolates payroll and related legislative data. Each LDG belongs to exactly one legislation and carries one currency, and Oracle's instruction is to create one for each country the enterprise operates in, then associate each PSU with it.
+
+All payroll configuration lives inside exactly one LDG: elements, balances, balance dimensions, fast formulas, element eligibility, payroll definitions, rate definitions, calculation value definitions, organization payment methods. Egyptian payroll rules cannot leak into Saudi payroll rules, because as far as the application is concerned the Egyptian objects do not exist in the Saudi world. An element defined in the Egypt LDG is not hidden from the Saudi LDG. It is absent from it. It must be built again.
+
+This produces the most common support question in the first month of a multi-country project: "why can't I see my element?" The answer is almost always the LDG context selected at the top of the page.
+
+The partition is a feature, not a limitation. It is what makes it safe for one instance to run Egyptian and Saudi payroll side by side, with completely different statutory logic, without any possibility of one country's rule firing against the other's population. The cost is duplication: two countries means two element libraries, two sets of formulas, two balance structures. Estimating a multi-country payroll project as though configuration is reused once is the classic way to lose money on it.
+
+The honest estimating rule is that the second country costs perhaps 60–70% of the first and the third rather less, because the design thinking is reused even though the objects are not. What is never reused is the testing: every country's payroll has to be parallel-run on its own, against its own legacy, by people who understand its statute.
+
+One more consequence, and it is the expensive one: an LDG cannot be meaningfully changed once payroll data exists inside it. The currency and legislation chosen at the start are effectively permanent. Getting the country list right before configuration starts is worth an extra workshop.
+
+[[fig:ldg-wall]]
+
+The country list is also a commercial question, not only a technical one. "We might open in Qatar next year" is a sentence that should produce a plan for adding an LDG later, not an LDG created speculatively now — an empty LDG costs nothing to carry and nothing to create later, and creating one for a country the client never enters leaves a confusing artefact behind.
+
+## The operational picture: business units
+
+The **business unit (BU)** is an operational grouping used for processing transactions, sharing reference data such as jobs and grades, and controlling data access. It is not a legal registration and carries no statutory meaning whatever.
+
+A shared-services centre may serve three legal entities. A single legal entity may contain several business units. Neither arrangement is unusual and neither is wrong. Clients decide based on how they actually run the business, and they conflate "how are we registered" with "how do we operate" constantly. Keeping the two apart is the consultant's job, and the useful question in a workshop is not "is this a business unit?" but "does this group of people need its own set of jobs, its own approvals, and its own view of the data?"
+
+## Reference data sets, and why the BU matters more than it looks
+
+The business unit's real power is reference data sharing, and this is the part of Chapter 1 most often skipped in training.
+
+Oracle lets you group set-enabled configuration data — jobs, grades, locations, departments — into **reference data sets**, then assign those sets to business units. At transaction time the application filters what can be selected based on the business unit involved. Assign a job to the Common Set and every business unit can use it. Assign it to a specific set attached to one business unit, and only that unit sees it.
+
+The consequence is that business unit design silently decides how much duplication the client will live with. A global group that wants one job catalogue everywhere puts jobs in the Common Set and is done. A group whose manufacturing arm and consulting arm share nothing puts them in separate sets and accepts that "Manager" now exists twice. Getting this wrong in either direction is painful: over-sharing produces a job list of four hundred entries where a hiring manager needs six, and under-sharing produces four hundred entries that are the same six repeated.
+
+The mechanism underneath is worth one sentence because it demystifies the behaviour. A set assignment is made per *object type* per business unit — jobs, grades, locations and departments are assigned separately — so a client can share one catalogue and partition another. That flexibility is the reason the design question has to be asked object by object rather than answered once.
+
+Positions are the exception worth remembering. They attach to a business unit directly rather than through a set. If a client asks why their position list does not behave like their job list, that is why.
+
+[[fig:reference-data-sets]]
+
+## Divisions, departments and locations
+
+A **division** is the top of the management hierarchy — above the business unit, not below it — aligned to a product line or a geography and used for management reporting rather than transaction processing. One division can span several business units and several legal entities, which is how a group answers "how did the Middle East business perform" when the Middle East is not a legal entity and never will be. Oracle's own worked example builds divisions for the US, Europe and the Middle East across five countries and several legal entities, a shape that maps neatly onto how regional groups in Cairo and Riyadh describe themselves. Oracle treats division → business unit → department as recommended practice rather than something the application enforces, so it is worth confirming which way a client's existing structure actually runs before assuming it.
+
+Below the business unit, the **department** is the box on the org chart that a worker actually sits in. It is the natural unit for headcount reporting and manager hierarchies, and it exists independently of whoever currently manages it — which is why a manager change never requires a new department. Departments can carry a cost centre, which is the hook payroll costing later uses to send an employee's cost to the right place in the general ledger.
+
+That cost centre link is worth treating as a joint deliverable with Finance rather than as an HR field. The value entered has to be a real segment value in the chart of accounts, it has to stay in step as Finance restructures, and when it is wrong the symptom appears a month later as a costing exception nobody in HR can interpret (Chapter 21). The useful discipline is a single mapping document, owned jointly, reconciled whenever either side changes.
+
+A **location** is a physical work site with an address. It matters more than it looks, because statutory jurisdiction, working-time rules, allowance eligibility and public-holiday calendars are frequently driven by where the person physically works rather than by who employs them. In the Gulf especially, location often decides allowance eligibility — a site allowance for a remote plant, a housing differential between cities. Locations are set-enabled like jobs and grades, so the same sharing rules apply.
+
+Two habits keep locations useful. Create them at the granularity the business actually distinguishes — one per building where allowances or calendars differ, not one per floor — and inactivate rather than delete the ones that close, so that history still resolves. A location list that has grown to several hundred entries, most of them dead, is a reliable sign that nobody owns it.
+
+## Trees: how the structure becomes security and org charts
+
+The objects above are a list until something arranges them into a shape. That something is an **organization tree**.
+
+Oracle supports department trees, organization trees and position trees. A tree takes the flat set of departments (or organizations, or positions) and expresses the parent–child relationships between them, in versions that carry their own effective dates. Two things consume them. The org chart the business sees is drawn from a tree. More importantly, security profiles scope data by tree node: "this HR specialist can see everyone in the Manufacturing department and everything below it" is a statement about a tree, not about a list of departments.
+
+This is the quiet link between Chapter 1 and Chapter 15. A structure that is correct but flat gives the security model nothing to grip. When a client asks for departmental HR access and the department tree has never been built, the request cannot be satisfied no matter how the roles are configured.
+
+Trees are versioned and must be published before use, which is a recurring source of "I made the change and nothing happened". The sequence to remember is that a new version is created, edited, audited and then published — and that the audit step is doing real work, because a tree with a cycle or an orphan is exactly the kind of structure that produces strange security results rather than an honest failure.
+
+Plan tree maintenance as an operational procedure, not a one-off build. Every reorganization is a new tree version, and the question of who creates it, who checks it and when it is published belongs in the client's runbook beside the payroll calendar.
+
+## Loading the structure rather than typing it
+
+On a group of any size, these objects arrive by bulk load rather than by hand, and the dependency order in this chapter becomes a file order (Chapter 11).
+
+The sequence is the same as the build order: addresses and geographies first, then legal entities and their registrations, then the HCM classifications, then business units, then departments and locations, then the trees. Loading a department that names a business unit which does not exist yet fails at load rather than at import, which is the usual experience of getting the order wrong.
+
+The thing worth saying to a project manager is that these loads are small and fiddly rather than large and slow — a few hundred rows, each of which has to be exactly right, with a dependency chain that punishes guessing. Budget care rather than hours.
+
+## What the structure does to every report afterwards
+
+A last reason to get this right: these objects are the filters on nearly every report the business will ever run.
+
+Legal employer, business unit, division, department and location are the dimensions a headcount report is sliced by, and a structure that does not match how the business thinks produces reports nobody uses. If the client describes performance by region and there is no division for region, every report will be assembled by hand. If departments are too coarse, no manager can see their own team; if they are too fine, the chart is unreadable.
+
+The test to apply at the end of the design workshop is simple and rarely done: take the five reports the client says they look at monthly, and check that each one can be produced by filtering on objects that exist in the design. Where one cannot, the structure is missing something, and it is cheaper to find that out now.
+
+## Three shapes you will actually meet
+
+**The single-entity Egyptian company.** One commercial register, one tax card, one legal entity that is both legal employer and PSU, one Egypt LDG, one TRU, one business unit, departments under it. Most of this chapter collapses to a single line each. The work is in the department tree and the locations.
+
+**The Egypt-plus-Saudi group.** Two LDGs, and everything payroll-shaped doubles. Legal entities in each country, each a legal employer; whether each is also a PSU depends on who files. Saudization is assessed per Saudi establishment, so the number of Saudi TRUs follows the number of registrations rather than the number of companies. Divisions give the group a "Middle East" view that no legal entity provides. This is the shape most regional implementations take.
+
+**The shared-services group.** Several legal employers, one PSU doing the filing, one business unit running transactions for all of them. This is where the legal and operational pictures separate most visibly, and where a consultant who has only seen the first shape gets confused: the same person is employed by company A, paid by filer B, and processed by service centre C, and all three are correct at once.
+
+And a fourth that regional consultants meet often enough to prepare for: **the group with an entity in a free zone**. Several Gulf jurisdictions have financial or economic free zones whose employment rules are not the same as the surrounding country's — different labour law, different end-of-service arrangements, sometimes a different authority to register with. The structural answer is a separate legal entity with its own registrations, and the configuration answer may be separate plans, elements and calendars for its population. The question to ask early is which law governs the employment contract, and the person who knows is the client's legal counsel. Chapter 18 picks this up for the UAE specifically.
+
+## What is expensive to change later
+
+Not every decision in this chapter carries the same weight, and knowing which ones bind is what separates a consultant from someone reading a setup guide.
+
+[[fig:change-cost]]
+
+Cheap to change: departments, divisions, locations, tree structure, most reference data. These move with ordinary effective-dated updates.
+
+Expensive: the business unit design, because reference data sets attach to it and moving them means re-pointing every job, grade and location.
+
+Effectively permanent: the legislative data group's legislation and currency, and the legal employer a worker sits in. The first cannot be altered once payroll data exists. The second changes only by ending one employment and starting another — a global transfer, which is the worked example Chapter 3 walks through, and which has real consequences for service dates, accrued leave and end-of-service liability.
+
+The way to use this list in practice is to spend the design time in proportion to it. A day arguing about department naming is a day wasted; an hour too few on the PSU and TRU map is an hour that costs a quarter.
+
+## The configurator, and when to use it
+
+Oracle ships the **Enterprise Structures Configurator**, an interview-style wizard that asks about the enterprise, its countries and its operating shape, then creates legal entities, classifies them as legal employers and PSUs, and creates a legislative data group for each country in one pass. It produces a technical summary of what it intends to do before committing, and the structure can be reviewed and rolled back before it is loaded.
+
+It is genuinely useful for a greenfield build and genuinely dangerous as a substitute for understanding, because it makes defensible default choices that a consultant then has to explain — or unpick — six months later.
+
+The sensible way to use it is as a fast first draft on a simple structure, with the technical summary read line by line before anything is committed, and the result compared against the one-page map from the discovery. Where the two disagree, the map is right and the wizard's assumption has to be changed. Where there is no map, the wizard has just made the client's structural decisions for them.
+
+## The order you build it in
+
+Stated as a sequence, because the dependencies are real and the application enforces most of them:
+
+- Geography structures, hierarchies and validation for each country.
+- Legal addresses, jurisdictions and authorities.
+- Legislative data groups, one per country.
+- Legal entities, with their registrations.
+- Legal entity HCM information: legal employer, PSU, parent PSU where the entity is an employer only.
+- Tax reporting units, beyond those created automatically with the PSU.
+- Divisions, then business units and the reference data sets assigned to them.
+- Departments and locations.
+- Trees, then published.
+
+[[lab:org]]
+
+## Common mistakes
+
+- Describing the enterprise as "the company". The company is a legal entity; the enterprise is the whole group.
+- Drawing the structure from an org chart instead of from the registration certificates.
+- Starting configuration before the one-page map of entities, classifications and LDGs exists.
+- Leaving geography setup until addresses are needed, then discovering the import route is already closed.
+- Setting address validation to error in a country whose reference data is thin.
+- Assuming a legal entity can hire. It cannot until it is classified as a legal employer.
+- Assuming one PSU per country. Map legal entities to PSUs deliberately, from the registration certificates.
+- Centralising filing under one PSU without noticing it also merged two employments' statutory ceilings.
+- Forgetting that the TRU association is per person, on the calculation card, and therefore a migration column.
+- Expecting to reuse one element library across countries. Each LDG is its own world, and the duplication has to be estimated for.
+- Creating an LDG for a country the client has not entered yet.
+- Calling a business unit "just another word for department". A BU is a processing and access construct; departments sit below it.
+- Designing business units without deciding the reference data sets, then discovering the job list cannot be shared.
+- Treating the department's cost centre as an HR field rather than a joint mapping with Finance.
+- Confusing a legal address with a work location. One is where the company is registered, the other is where people sit.
+- Building the structure and never building the trees, then being unable to scope security to a department.
+- Editing a tree and never publishing it.
+- Letting the Enterprise Structures Configurator make the design decisions, then having to defend them.
+
+## Sources
+
+- Oracle, *Implementing Global Human Resources* — the "Enterprise Structures: Initial Configuration" chapter. https://docs.oracle.com/en/cloud/saas/human-resources/faigh/index.html
+- Oracle, *Implementing Global Human Resources* — "Person Number Generation Methods". https://docs.oracle.com/en/cloud/saas/human-resources/faigh/person-number-generation-methods.html
+- Oracle, *Using Common Features for HCM* — "How do I manage geography validation?", for the structure, hierarchy and validation order and what each validation level does. https://docs.oracle.com/en/cloud/saas/human-resources/faucf/geography-validation.html
+- Oracle, *Using Common Features for HCM* — "What are the best practices for managing geography mismatches?", for validating addresses created before validation was configured. https://docs.oracle.com/en/cloud/saas/human-resources/faucf/best-practices-for-managing-geography-mismatches.html
+- Oracle, *Implementing Payroll for Canada* — "What's a tax reporting unit?"; the classification topic is written once and applies to every localization. https://docs.oracle.com/en/cloud/saas/human-resources/fapcd/what-s-a-tax-reporting-unit.html
+- Oracle, *Using Common Features* — "How Business Units Work with Reference Data Sets". https://docs.oracle.com/en/cloud/saas/human-resources/faucf/how-business-units-work-with-reference-data-sets.html
+- Maverick Solutions, "Effectively using legislations and legislative data groups in Oracle Cloud HCM Payroll". https://mavericksolutions.com/2021/06/15/legislations-and-legislative-data-groups-in-oracle-cloud-hcm-payroll/
+- Apps2Fusion, "Legal Entity and Legal Employer in Fusion Application". https://apps2fusion.com/old/oracle-fusion-online-training/1519-legal-entity-and-legal-employer-in-fusion-application
+</script>
+
+<script type="text/markdown" class="src-deep">
+---
 id: payroll
 minutes: 48
 ---
@@ -3810,6 +4257,150 @@ The one piece of advice that pays for itself: run the entire cycle in a non-prod
 - Oracle, *Balance Operations* — "Steps to Initialize Balances", for the batch files, the Load Initial Balances process and the rule that balances cannot be initialised after processing has begun. https://docs.oracle.com/en/cloud/saas/human-resources/fahbo/steps-to-initialize-balances.html
 - Oracle, *Implementing Global Payroll* — "Overview of Payroll Costing". https://docs.oracle.com/en/cloud/saas/human-resources/faigp/overview-of-payroll-costing.html
 - Oracle, *Implementing Global Payroll* — "Payroll Relationship Rules". https://docs.oracle.com/en/cloud/saas/human-resources/faigp/payroll-relationship-rules.html
+</script>
+
+<script type="text/markdown" class="src-deep">
+---
+id: workforce
+minutes: 30
+---
+
+If Chapter 1 is the compliance skeleton, this is the work skeleton: how an organization defines what work exists, at what level, and in which seat. One distinction in this chapter — job versus position — is the most frequently tested concept in Oracle HCM interviews, and the fastest way to look unprepared in front of a trainer is to treat the two as synonyms.
+
+It is also a chapter where the configuration decision and the client's operating reality have to be matched honestly. Positions are more powerful than jobs and considerably more work to keep true. Most of the trouble on position-based implementations is not technical: it is that the structure was designed for an organization that approves headcount by seat, and handed to one that does not.
+
+## Job: what the work is
+
+A **job** is a generic definition of a role, independent of the organization chart. It carries attributes such as a grade range, required qualifications and a job family. Most roles repeat across an organization, so defining "Accountant" once and reusing it everywhere avoids duplicating the same definition dozens of times. The Finance department in Cairo, the plant in 10th of Ramadan City and the Alexandria branch can all use the same job. In a job-based (non-position) organization, the assignment carries job, department and location as separate fields; this is the common pattern in Egyptian private companies.
+
+Jobs are set-enabled (Chapter 1), which means the jobs a transaction can select depend on the reference data sets assigned to its business unit. A client who wants one job catalogue across the group puts jobs in the Common Set; a client whose divisions genuinely use different catalogues accepts duplicate maintenance in exchange for separation. That choice is made once and lived with.
+
+Jobs are date-effective like everything else, which has a consequence worth knowing: a job can be valid from a date and not before, and an assignment cannot name a job that is not valid on its own effective date. The error this produces during a migration — a perfectly reasonable job, rejected on a record dated two years before anyone created it — is confusing until you remember that reference data has dates too.
+
+## Designing the job catalogue
+
+The question nobody asks early enough is **how many jobs there should be**, and it has a large effect on how useful the system is three years later.
+
+Too few, and the catalogue stops meaning anything: an organization with "Manager", "Officer" and "Specialist" as its three jobs cannot report on what anybody does, cannot build a career path, and cannot attach qualifications to a role. Too many, and the catalogue becomes a list of individuals — a job per person, named after the person's exact title, which is the failure mode when a catalogue is built by asking everybody what their title is.
+
+The useful test for whether two titles should be one job: would the organization recruit for them with the same advert and the same requirements? If yes, they are one job with two people in it, and whatever distinguishes them is a grade, a department or a position. The client's titles can still live on the assignment or the position; they do not need to become the catalogue.
+
+Three further design habits earn their keep. Give jobs stable codes that are not the title, because the title will change and the code should not. Decide whether the catalogue is global or per country before building it, because merging two catalogues afterwards is a data migration. And agree who owns it — the catalogue decays immediately if nobody has to approve a new job.
+
+## Position: a specific seat
+
+A **position** is a specific, individual seat: a job tied to a particular department and location, which exists whether or not anyone currently fills it. "Accountant #3, Finance Department, Alexandria Plant" carries its own headcount budget, reporting line and FTE. When the incumbent leaves, the position remains and becomes vacant — and a vacancy is a real, reportable thing.
+
+Organizations that budget headcount need to track seats independently of people. Position management is therefore standard in government, oil and gas, banking and most Gulf entities. It brings vacancy reporting and stricter headcount control, at the cost of more setup and maintenance. A consultant aiming at the Gulf market should learn position management properly rather than treating it as an optional extra.
+
+[[lab:jobpos]]
+
+## What a position actually carries
+
+A position is not just a job with a department attached. The attributes that matter are the ones that make it a budgeted seat.
+
+**Headcount and FTE** are the control. A position configured for a single incumbent takes an FTE of 1 or less — 0.5 meaning half-time — and a headcount of 1. A shared position can hold several incumbents up to its FTE limit, which is how a client models three people job-sharing two full-time seats. The hierarchy view shows, for each position, how many incumbents it has and how much FTE is still open, and that open-FTE figure is the thing recruitment and finance actually look at.
+
+**Incumbent validation**, where it is switched on, warns when a position's open FTE or headcount would be exceeded. It is a warning rather than a block in the general case, which is deliberate: real organizations overfill a seat during a handover, and a hard stop would make a normal event impossible. A client who wants it to be a hard stop is asking for a different conversation about approvals rather than about position setup.
+
+The other attributes — job, department, location, grade, manager, working hours — are the ones that can flow down to the assignment, which is the next section.
+
+## Choosing between them, out loud
+
+The decision is not about tidiness, and a consultant who can run it as four questions will sound like someone who has made it before.
+
+Does the client budget and approve headcount by seat? Positions carry that; jobs do not. Do they need to see that a seat exists while it is empty — for recruitment, for a vacancy report, for a finance review? Only positions make a vacancy visible. Do approvals or succession depend on the seat rather than the person (Chapters 19 and 20)? A position hierarchy and a succession plan are both plans for seats. And is there an owner for the maintenance, because every reorganization becomes position work?
+
+Three yeses and an owner mean positions. One yes and no owner means jobs, and the client is better served by a clear job catalogue than by a position structure that decays within a year.
+
+The decision is not all-or-nothing across a group, either. Position management is enabled at enterprise level and can be set differently per legal employer, with the legal employer's setting taking precedence. A group whose Saudi entity is position-managed because the regulator and the budget require it, and whose Egyptian trading arm is job-based because it is thirty people and reorganises constantly, is a perfectly coherent design — and a much better one than forcing both into the same shape.
+
+## Position synchronization
+
+Where positions are used, **position synchronization** decides how much of the position flows down to the assignment: job, department, location, grade, manager, FTE, working hours, and mapped flexfields. With it on, the position is the master — changing the position updates every assignment attached to it — and the configuration question is which attributes are synchronized and whether an individual assignment may override them.
+
+This is where position-based clients get into trouble. Synchronization turned on with no override produces a reorganization that rewrites a thousand assignments correctly and instantly; the same setting makes a one-off exception impossible without changing the position. Turned off, the position becomes decorative and the two structures drift apart until nobody trusts either. The question to settle in design is which attributes are the position's and which belong to the person in it.
+
+There is a delivered middle path, and most clients want it once it is explained: an option that allows an individual assignment to be excluded from synchronization. The useful way to frame it in a workshop is to go attribute by attribute and ask whether an exception is conceivable. Department and location almost never need an exception — the seat is where it is. Grade and working hours frequently do, because a particular person negotiated something. Manager usually follows the hierarchy. Walking that list takes twenty minutes and prevents a year of argument.
+
+One operational detail: changes made in bulk do not synchronize by themselves. After positions or the hierarchy are loaded or changed through HCM Data Loader, the *Synchronize Person Assignments from Position* process has to be run for assignments to pick the changes up. A reorganization loaded on a Friday and not synchronized is a reorganization that has not happened yet, and the symptom — the position says one thing, the assignment says another — reads like a bug.
+
+## The position hierarchy, and how a manager is found
+
+A position hierarchy is a reporting structure made of seats rather than people, and where it is used to derive the line manager the resolution rule is worth knowing precisely, because it explains some odd results.
+
+The application looks at the parent position for an incumbent to use as the manager. If the parent position is vacant, it looks at the grandparent, and keeps climbing until it finds somebody. If a parent position has several incumbents, the one with the longest tenure in that position becomes the manager.
+
+Both rules produce surprises in practice. A vacancy two levels up silently reassigns a team to a director they have never met, which is correct behaviour and still worth warning the client about. And the longest-tenure rule means that a shared position with two co-heads picks one of them deterministically but not necessarily the one the organization considers senior.
+
+Hierarchy edits have their own rule: removing a position moves its children up a level rather than orphaning them. That is usually what is wanted during a restructure and occasionally not, so the safer habit during a large reorganization is to build the new hierarchy, check it, and move people — rather than deleting from the middle of the old one and letting the tree re-form.
+
+Chapter 15 covers what this means for security, which is the other reason the hierarchy matters: a manager-based security profile grants access through exactly these resolved relationships, so a hierarchy nobody maintains becomes an access problem rather than a reporting one.
+
+## Maintaining positions through a reorganization
+
+The thing that kills position implementations is not the initial build. It is the third reorganization, eighteen months later, done by a team that was not on the project.
+
+Three habits make that survivable. Keep position codes meaningful and stable, so a seat can be recognised across a restructure rather than being deleted and recreated — a recreated position loses its history and its vacancy becomes invisible. Make dated position changes rather than corrections, for the same reason every other object in this system prefers them: a department that moved on 1 April should show as having moved on 1 April, not as always having been where it is now. And write down the operating procedure: who creates a position, who approves it, what happens when a seat is abolished while somebody is sitting in it.
+
+That last case is the one with no clean answer and it is worth settling in advance. The options are to end-date the position and move the person to another one, to keep the position open until the person leaves, or to allow the overfill and accept the warning. Each is defensible; what is not defensible is deciding it differently every time, which is how a position structure stops reconciling to the budget it exists to control.
+
+## Grades, steps and rates
+
+A **grade** is a level in the hierarchy, used to control compensation ranges and eligibility for benefits or allowances — "G1" through "G12", or "Junior / Senior / Lead / Principal". They drive eligibility constantly: "only G7 and above get the car allowance" is a sentence a consultant hears and then configures. Grade is not the same as salary. Grade is a level; money attaches to it through **grade rates** and the salary basis (Chapter 5), and the two are linked but distinct objects.
+
+A **grade step** is an increment within a single grade, used where progression happens in defined steps rather than across a continuous range. Steps are grouped into grade ladders. Grade G5 might have steps 1 through 8, each with a defined rate; an annual increment moves a person from step 3 to step 4 without changing their grade. Government and unionized pay scales work this way, which makes steps highly relevant in the Gulf public sector and in Egyptian government-linked entities. If a client has a step-based scale and the design uses a plain grade rate range, the design is wrong.
+
+The distinction to hold is that a **grade ladder** sequences grades or steps for progression, while a **grade rate** attaches money to them. A ladder without rates describes a career path with no pay attached; rates without a ladder describe pay with no progression. Step-based public sector clients need both, and they need the progression to be something the system can run rather than something HR does in a spreadsheet each January.
+
+Rates carry a currency and a date, and both matter in the region. A Gulf group paying in several currencies needs rates per legislative data group rather than one global ladder, and a client whose scale is revised annually needs dated rates rather than overwritten ones — otherwise last year's salary review can no longer be explained.
+
+That dating point deserves emphasis because it is cheap to get right and expensive to fix. A client who overwrites the grade rate table every January has, by the third year, a system that cannot answer "what was the band for G7 in 2024" — which is exactly the question an auditor, a tribunal or a disgruntled employee eventually asks. Dated rates cost nothing extra at build time.
+
+## Job families and profiles
+
+A **job family** groups related jobs — all finance jobs, all engineering jobs — for career-path design, reporting and shared eligibility rules. A **job profile** is the content side of a job: the competencies, qualifications and responsibilities attached to it, which Talent and Recruiting read (Chapter 20). Both are recognition-level for a Core HR build and become central the moment a client adds those modules, which is a good reason to create them deliberately rather than leaving the catalogue flat.
+
+The argument for doing this during a Core HR implementation, when the client sees no immediate benefit, is that the alternative is doing it later across a populated system. Attaching a family to four hundred existing jobs is a bulk update; creating four hundred jobs with families already on them is free. The same is true of job classifications and of anything else the later modules will read.
+
+## Nationalization and the job catalogue
+
+One regional note makes them more than theory. Nationalization reporting in Saudi Arabia and the UAE counts nationals in *skilled* roles, and what counts as skilled is read from the job's classification. A job catalogue built without that in mind produces a compliance report that has to be rebuilt later, person by person.
+
+The practical instruction is to raise this in the job catalogue workshop, not in the reporting workshop, and to get the client's own compliance or government-relations function to confirm how each job family maps to the classifications the regulator uses. That function exists in every Gulf group of any size, it is rarely invited to an HR system workshop, and it is the only part of the business that knows the answer.
+
+## What this costs to maintain
+
+A closing honesty, because it is the part a client is least often told.
+
+A job catalogue needs an owner and perhaps an hour a month. A position structure needs an owner, a documented procedure, a place in the approval chain for new seats, and real attention at every reorganization — which in a Gulf group of size is several times a year. It repays that with vacancy reporting, budget control and a succession structure that survives people leaving.
+
+Clients who are told this and choose positions do well. Clients who are sold positions as a feature and discover the maintenance afterwards end up with a structure that is wrong within a year, and then with reports nobody believes. Saying it out loud during design is the consulting part of the job.
+
+## Common mistakes
+
+- Defining a job as a specific seat. That is a position.
+- Building a job catalogue out of people's titles, and ending up with one job per person.
+- Letting the job catalogue have no owner, so it grows by accident.
+- Choosing positions for tidiness, with nobody owning the maintenance.
+- Forcing one answer across a group when position management can be set per legal employer.
+- Turning position synchronization on without deciding what an assignment may override.
+- Loading positions in bulk and not running the synchronization process afterwards.
+- Being surprised that a vacancy two levels up changed who a team reports to.
+- Deleting and recreating a position during a restructure, and losing its history and its vacancy.
+- Saying "grade equals salary". Grade is a level; rate ranges and the salary basis carry the money.
+- Designing a continuous rate range for a client whose scale is actually step-based.
+- Overwriting grade rates each year, so last year's review cannot be explained.
+- Leaving job classification vague where nationalization reporting depends on it.
+
+## Sources
+
+- Oracle, *Implementing Global Human Resources* — the Jobs and Positions and the Grades, Grade Rates and Grade Ladders chapters. https://docs.oracle.com/en/cloud/saas/human-resources/faigh/index.html
+- Oracle, *Using Global Human Resources* — "How Position Synchronization Impacts Assignments", for the synchronized attributes, the assignment override and the process to run after a bulk change. https://docs.oracle.com/en/cloud/saas/human-resources/fawhr/how-position-synchronization-impacts-assignments.html
+- Oracle, *Using Common Features for HCM* — "Considerations for Using Position or Position Hierarchy for Synchronizing Assignment Manager", for how a manager is resolved up the hierarchy. https://docs.oracle.com/en/cloud/saas/human-resources/faucf/considerations-for-using-position-or-position-hierarchy-for.html
+- Oracle, *HCM Data Loading Business Objects* — "Guidelines for Loading Positions", for headcount, FTE and incumbent rules. https://docs.oracle.com/en/cloud/saas/human-resources/fahbo/guidelines-for-loading-positions.html
+- Oracle, *Implementing Global Human Resources* — "Employment Model", for positions and assignments in the employment hierarchy. https://docs.oracle.com/en/cloud/saas/human-resources/faigh/employment-model.html
+- Oracle, *Using Common Features for HCM* — reference data sets and how set-enabled objects are shared. https://docs.oracle.com/en/cloud/saas/human-resources/faucf/index.html
 </script>
 
 <!-- ========================================================================
