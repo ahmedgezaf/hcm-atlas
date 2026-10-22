@@ -187,9 +187,9 @@ Before promising a client either behaviour, find out which rule their legislativ
 
 When employment ends, the payroll relationship carries dates of its own, and two of them decide whether the person can still be paid.
 
-The **last standard process date** is the point after which no ordinary payroll run will pick the person up. The **final close date** is the point after which nothing at all will — no supplementary run, no late correction, no final settlement.
+The **last standard process date** is the point after which no ordinary payroll run will pick the person up; it defaults to the period end of the payroll the termination falls in, and can be set later when the termination is entered. The **final close date** is the point after which nothing at all will — no supplementary run, no late correction, no final settlement — and its default is the end of time, so the person's payroll records only actually close once somebody sets it.
 
-Setting the final close date too early is how a legitimate late payment becomes impossible to pay without reopening the record. In the Gulf this is not hypothetical: gratuity calculations get revised, a final leave balance is recalculated after the leaver has gone, an annual bonus is declared in March for people who left in February. Leave room, and make it a standing instruction to whoever processes terminations rather than a decision taken per leaver.
+That default matters, because it means the damage is done by setting the date rather than by leaving it. Setting the final close date too early is how a legitimate late payment becomes impossible to pay without reopening the record. In the Gulf this is not hypothetical: gratuity calculations get revised, a final leave balance is recalculated after the leaver has gone, an annual bonus is declared in March for people who left in February. Leave room, and make it a standing instruction to whoever processes terminations rather than a decision taken per leaver.
 
 ## Concurrent employment
 
