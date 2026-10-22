@@ -15,8 +15,8 @@ demo and a DAX filter-context explorer.
 Every HCM chapter can be read at two depths. A **Standard / In depth** switch
 in the reader swaps the chapter for a longer version of itself — the same
 ground, taken further into the mechanism, the edge cases and what actually
-happens on a project. All twenty-two HCM chapters have one: ~32,000 words of
-standard text become ~82,000. It is one setting for the whole site, search
+happens on a project. All twenty-two HCM chapters have one: ~33,000 words of
+standard text become ~83,000. It is one setting for the whole site, search
 reaches into both versions, and a chapter that has no long version yet says so.
 
 The labs are the point of it: a payroll chain you break link by link and watch a
@@ -77,7 +77,7 @@ python scripts/import_portable.py path/to/moon-learning.html --apply  # write it
 | --- | --- |
 | **Overview** | Every collection with its size and how far through it you are. |
 | **Home** | Per collection: progress dashboard, a per-chapter progress chart, then the whole subject on one screen — every block opens a chapter, split Functional / Technical. |
-| **Chapters** | 31 chapters, ~40,200 words — plus ~82,500 words of in-depth versions for all 22 HCM chapters |
+| **Chapters** | 31 chapters, ~40,200 words — plus ~84,400 words of in-depth versions for all 22 HCM chapters |
 | **Figures** | 20 inline SVG diagrams |
 | **Labs** | 36 interactive pieces |
 | **Glossary** | 261 terms |

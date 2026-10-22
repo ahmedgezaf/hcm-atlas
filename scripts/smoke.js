@@ -273,6 +273,26 @@ const check = (name, pass, detail = '') => results.push({ name, pass, detail });
       if (past) offscreen.push(`${t} (${past})`);
     }
   }
+  // The sweep above reads the standard body of every chapter. An in-depth body
+  // is longer, embeds the same labs and figures, and is what a reader who
+  // turned the switch on actually sees on a phone — so it gets the same pass.
+  const deepNarrow = await narrow.evaluate(async () => {
+    const bad = [];
+    const was = S.depth;
+    S.depth = 1;
+    for (const c of CH.filter(x => x.deep)) {
+      location.hash = c.domain + '/chapters/' + c.id;
+      await new Promise(r => setTimeout(r, 90));
+      render();
+      await new Promise(r => setTimeout(r, 60));
+      const w = document.documentElement.scrollWidth;
+      if (w > 360) bad.push(c.id + ' in depth (' + w + 'px)');
+    }
+    S.depth = was;
+    return bad;
+  });
+  deepNarrow.forEach(d => overflowing.push(d));
+
   check('no sideways scroll at 360px', overflowing.length === 0,
     overflowing.length ? overflowing.slice(0, 3).join(', ') : `${targets.length} views`);
   check('every lab mounts at 360px', empty.length === 0,

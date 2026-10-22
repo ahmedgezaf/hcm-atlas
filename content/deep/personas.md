@@ -71,6 +71,52 @@ Three things make the difference between adoption and a backlog.
 
 **Measure it.** The share of absence requests entered by employees rather than by HR, the median time an approval waits, the number of transactions sitting in the console — three numbers, available from the system, that say whether the design is working. A client who watches them for the first quarter fixes the problems while anyone still cares.
 
+## One hire, four seats, in order
+
+Following a single event through the seats is the quickest way to see whether a design is coherent, and it is a good exercise to run with a client in a workshop.
+
+A requisition is approved and an offer accepted (Chapter 20). **Recruiting** creates a pending worker, which means the first version of the person record was keyed by somebody whose job is hiring, not payroll.
+
+**HR** completes what the hire needs and recruiting did not supply — the payroll, the tax reporting unit, the statutory identifiers, element entries (Chapter 8). This is the step that is invisible to everybody else and the one that decides whether the first payslip is right.
+
+The **new joiner** receives an onboarding journey: documents to upload, policies to acknowledge, bank details to enter. The bank details matter more than the rest, because without a personal payment method the prepayment fails.
+
+The **manager** receives their own journey tasks — equipment, access, an introduction — and from the start date sees the person in My Team.
+
+Then the ordinary life of the record begins: the employee requests leave, the manager approves it, HR corrects what goes wrong, and payroll reads all of it.
+
+Four seats, one record, and three handovers where data quality is lost. A design that has walked this path with the client has usually found at least one field that nobody owns.
+
+## Notifications, and the seat that is not looking at the screen
+
+Most people in a workforce are not in the system on any given day. They are reached by notification or not at all, which makes the notification design part of the self-service design rather than an afterthought.
+
+Three audiences, three different needs. An **employee** needs confirmation that something happened — a request approved, a payslip available — and almost nothing else. A **manager** needs to be asked to act, with enough information to act from the message itself (Chapter 19). **HR** needs exceptions: what failed, what is stuck, what is approaching a deadline.
+
+Getting this wrong in the generous direction is as damaging as getting it wrong in the silent one. A system that emails managers about every transaction in their team trains them to ignore its emails, and the one that needed action is ignored with the rest.
+
+The rule worth applying: every notification should have an action or a reassurance. If it has neither, it is a report somebody can look at when they choose.
+
+## Mobile, and the workforce that has no desk
+
+For a large part of a regional workforce the phone is the only device, which changes what a good design looks like rather than simply shrinking it.
+
+The transactions that matter on a phone are few: request leave, check a balance, see a payslip, approve something. Those should be short, work on a small screen and survive a poor connection. Everything else can reasonably be a desktop task.
+
+Two practical consequences. The field-reduction work of the design studio (Chapter 14) pays twice on mobile, because a twenty-field form that is awkward on a laptop is unusable on a phone. And the notification design above is really a mobile design, because that is where the notification is read.
+
+Where a workforce genuinely has no device, the honest answers remain the ones in the section above — kiosk, team leader, HR acting on behalf — and the thing not to do is design for self-service and hope.
+
+## Language, and what the Arabic actually means here
+
+A regional implementation meets language in two places and they are different problems.
+
+The **interface** can be presented in Arabic, and some users will want it. What that gives is Oracle's own Arabic labels, which — as this atlas's glossary notes — are not always the words a project team uses in a workshop. A user trained in English on a system they then use in Arabic has two vocabularies for the same field.
+
+**Content** is the second place: the names of absence types, elements, departments and journeys are data rather than product labels, and they appear in whatever language they were created in. A client who wants an Arabic experience needs those named in Arabic or translated, and that is a content decision with a maintenance tail.
+
+The useful question in design is not "do you want Arabic" but "who reads which screens, in which language, and who maintains the names" — and the answer is frequently that administrators work in English and employees should see Arabic, which is a specific and achievable goal rather than a blanket one.
+
 ## Privacy between the seats
 
 One design question deserves separating from the rest because it is a legal matter as much as a usability one: what a manager should be able to see.
@@ -104,6 +150,11 @@ The support model follows the same shape: employee questions are a help-desk scr
 - Granting managers broad visibility because it is easier than designing it.
 - Letting medical certification be visible to everyone who can see the absence.
 - Ignoring the payroll cutoff when designing absence approvals.
+- Never walking one hire through every seat, so the fields nobody owns stay unowned.
+- Notifying managers about everything, and training them to ignore the one that mattered.
+- Sending a notification that carries neither an action nor a reassurance.
+- Designing for mobile by shrinking a desktop form instead of shortening it.
+- Answering "do you want Arabic" without asking who reads which screens and who maintains the names.
 - Planning one support queue for three audiences with completely different questions.
 
 ## Sources

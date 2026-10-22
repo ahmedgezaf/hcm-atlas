@@ -80,6 +80,58 @@ A fuller negative list, from the ones that actually occur: the worker whose mana
 
 Each has a right answer and none of them have a default one. Settling them during design takes an hour. Meeting them in production takes a week and a difficult conversation.
 
+## A catalogue of patterns worth recognising
+
+Most client requirements are one of a small number of shapes. Recognising the shape is faster than designing from scratch, and naming it in a workshop is a sign of experience.
+
+**The threshold.** Route to one extra level when an amount exceeds a figure — a salary increase above a percentage, a bonus above a value. The design questions are whose figure it is compared against (the individual's salary, the budget, an absolute amount) and whether the threshold is per transaction or cumulative over a period, because clients usually mean the second and say the first.
+
+**The correction bypass.** A transaction entered with a reason code meaning "fixing a mistake" skips the approvals that the original change already went through. Sensible, and it needs a control: if the bypass reason is available to everybody, it is the route every transaction will take.
+
+**The self-approval block.** A transaction about the approver, or raised by them, must route somewhere else. Every client wants this once it is pointed out, and almost none state it as a requirement.
+
+**The dual control.** Two people must approve, and they must be different people — the shape behind bank-detail changes and anything with a fraud exposure. It is a parallel participant with an additional rule rather than a serial chain.
+
+**The notify-only.** Somebody needs to know and does not decide. Routing them as an approver to achieve this is the most common design error in this chapter: it puts a decision in the hands of someone who has none, and stops the transaction when they are on holiday.
+
+**The gate.** A transaction cannot proceed until something outside the system has happened — a signed document, a completed check. The honest implementation is usually a journey task (Chapter 14) that the process waits on, rather than an approver standing in for a condition.
+
+**The regional variant.** The same transaction approves differently per country, because the statutory or cultural expectation differs. Expressed as a condition on legal employer rather than as a separate transaction.
+
+## Transactions that never pass through approvals at all
+
+A point that reliably surprises a client in testing: changes made in **bulk** do not route the way a screen transaction does.
+
+A mass update loaded through HCM Data Loader (Chapter 11) writes directly, and that is the whole point of it — nobody wants ten thousand records sitting in an approval queue. So does a change made by an integration through REST, and so does a correction made by a privileged user through an administrative route.
+
+That is correct behaviour and it is a control gap the client should know about rather than discover. Two things make it manageable: restrict who can load, and make loads visible — a log of what was loaded, by whom, when and why, kept outside the system if necessary, because this is the route by which a salary can change without an approval and the auditor will ask about it.
+
+The design conversation worth having is which of the client's routine processes are bulk by nature — an annual increase, a restructure, a mass transfer — and what the governance around each is, since the approval rules will not be providing it.
+
+## Reading the history
+
+Every completed transaction carries its approval history: who was asked, when, what they did, and any comment they left. That record is the answer to "who approved this", which is one of the two questions an auditor asks about any change — the other being "should they have".
+
+Two practical uses beyond audit. It is the fastest way to understand a rule that is behaving unexpectedly, because the history shows the path actually taken rather than the path the configuration implies. And it is how a dispute about a change is settled, which matters most for exactly the transactions people dispute: salary, termination, and anything with money attached.
+
+Comments are worth encouraging in the notification design, because an approval with a reason is worth considerably more than an approval without one, and the cost of asking is a single field.
+
+## When approvals are the performance problem
+
+Long approval chains have costs beyond the waiting.
+
+Each level adds a notification, a wait, and a chance of the transaction stalling. A five-level chain where each approver takes two days is a two-week transaction, which for a hire means a start date missed. Clients who complain that the system is slow are frequently describing a process that is slow, and the remedy is a shorter chain rather than a faster server.
+
+There is also a real processing cost at volume: a bulk-initiated set of transactions that each spawn an approval chain is a large amount of workflow, and that is another argument for loading rather than transacting where the change is genuinely administrative.
+
+The design heuristic: every approval level should be able to answer "what would this person reject, and how often do they?" If the answer is "nothing" and "never", the level is a notification pretending to be a control, and removing it makes the process faster and the remaining approvals more meaningful.
+
+## Moving approval rules between environments
+
+Approval configuration is setup data and has to travel with everything else (Chapter 16), and it is one of the pieces that is routinely forgotten at the first environment move — with a characteristic symptom: transactions in the target environment approve instantly, or not at all, and the configuration looks correct because people are reading the HCM side rather than the rules.
+
+Add approval rules to the migration checklist explicitly, test one transaction end to end in every environment after a move, and remember that an approval path depends on *data* as well as configuration: a rule that routes up a manager hierarchy behaves differently in an environment whose hierarchy is a refreshed copy of production.
+
 ## Where approvals meet the rest of the system
 
 Three connections are worth making explicitly, because they are where approval problems are actually caused.
@@ -108,6 +160,14 @@ Three connections are worth making explicitly, because they are where approval p
 - Never testing the loop, the top of the hierarchy, or the self-approval case.
 - Using force-approve as a routine remedy rather than an exception.
 - Leaving Transaction Console access unassigned until the first stuck transaction.
+- Reading a threshold as per transaction when the client meant cumulative.
+- Making a correction-bypass reason available to everybody.
+- Routing a notify-only stakeholder as an approver, and stopping the process when they travel.
+- Standing an approver in for a condition that a journey task should carry.
+- Not telling the client that bulk loads bypass approvals entirely.
+- Keeping no record of who loaded what, when and why.
+- Keeping an approval level that has never rejected anything.
+- Leaving approval rules off the environment migration checklist.
 
 ## Sources
 
