@@ -333,7 +333,10 @@ pre.code{background:var(--navy);color:var(--navy-ink);border-radius:8px;padding:
 
 /* ---- READER */
 .reader{display:grid;grid-template-columns:1fr 230px;gap:40px;align-items:start}
-.reader-toc{position:sticky;top:24px;display:grid;gap:4px;font-size:13.5px}
+/* An in-depth chapter can run to nineteen sections, which is taller than a
+   laptop viewport. The contents scroll inside themselves rather than
+   hiding their last entries behind the fold. */
+.reader-toc{position:sticky;top:24px;display:grid;gap:4px;font-size:13.5px;max-height:calc(100vh - 48px);overflow-y:auto;overscroll-behavior:contain}
 .reader-toc a{color:var(--muted);text-decoration:none;padding:5px 10px;border-left:2px solid var(--line);display:block}
 .reader-toc a:hover,.reader-toc a.on{color:var(--ink);border-color:var(--p)}
 .reader-toc .tt{font-size:11px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);font-weight:700;padding:4px 10px 6px}
