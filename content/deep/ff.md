@@ -1,6 +1,6 @@
 ---
 id: ff
-minutes: 32
+minutes: 33
 ---
 
 Statutory rules vary too much across countries to hard-code, so Oracle exposes a rule layer. **Fast Formula** is a simple expression language for calculations, validations and rules, written in near-English rather than a full programming language. In payroll it computes rates and amounts; in absence it drives accrual rules; elsewhere it handles eligibility and defaulting. Because Oracle ships no maintained Egyptian localization, Egyptian social-insurance and tax calculations are built here — and it may be the functional consultant who writes them.

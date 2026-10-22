@@ -1,6 +1,6 @@
 ---
 id: modules
-minutes: 36
+minutes: 34
 ---
 
 This atlas teaches three modules: core HR, absence and payroll. They are what a junior functional consultant in Egypt is hired to do, and depth in them is worth more than breadth across the suite. But a client's HR director will list Recruiting, Benefits and Goals in the same sentence as payroll, a screening call will ask which modules you have worked with, and a workshop will reach a point where somebody says "that comes from Recruiting" and the room moves on.

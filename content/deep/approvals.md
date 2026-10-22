@@ -1,6 +1,6 @@
 ---
 id: approvals
-minutes: 30
+minutes: 32
 ---
 
 Every chapter before this one ends at submit. This one covers what happens next, which is where a surprising share of a project's first live month actually goes. Approval routing is named in requirements workshops constantly, configured late, tested by the person who built it, and then found to be wrong by a manager who never received a notification. "How would you configure approvals for a promotion?" is also a standard interview question, and a candidate who can name where the rules live and what an approver type needs in order to resolve sounds like someone who has shipped one.

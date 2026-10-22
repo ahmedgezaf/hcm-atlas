@@ -1,6 +1,6 @@
 ---
 id: absence
-minutes: 34
+minutes: 35
 ---
 
 Absence is the module where a country's labour law turns into configuration. Every leave entitlement in the statute becomes an absence plan with rules, and every rule becomes a test script. The Egyptian annual-leave ladder is the classic accrual exercise; Egyptian sick leave is the classic qualification plan.

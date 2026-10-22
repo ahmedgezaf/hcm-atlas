@@ -1,6 +1,6 @@
 ---
 id: hrfunction
-minutes: 28
+minutes: 25
 ---
 
 A consultant does not need HR theory, but does need to speak HR's language fluently enough that an HR director never has to slow down. This chapter covers the metrics that appear in every reporting conversation and the way large HR functions are organized, which explains who owns which decision.

@@ -1,6 +1,6 @@
 ---
 id: uae
-minutes: 38
+minutes: 31
 ---
 
 The UAE employs more Oracle HCM consultants than anywhere else in the region, and almost nothing in a Saudi implementation transfers to it unchanged. The gratuity formula is different, the wage-protection file is different, the pension covers a different population under a different authority, and the nationalization programme counts differently. A consultant who has done one Gulf country and assumes the second is a variation of it will design the wrong thing twice before anyone notices. This chapter is the UAE half of Chapter 17.

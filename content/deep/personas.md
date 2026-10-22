@@ -1,6 +1,6 @@
 ---
 id: personas
-minutes: 28
+minutes: 27
 ---
 
 Most of this atlas describes records: the person, the assignment, the absence, the element entry. Real projects are judged on something else — who touches those records, from which screen, and what happens next. A leave request that is configured perfectly but can only be entered by HR is a design that has quietly moved the HR team's workload in the wrong direction. Self-service is the part of Global HR that decides this, and it is where most of a client's users will ever meet the system.

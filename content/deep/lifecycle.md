@@ -1,6 +1,6 @@
 ---
 id: lifecycle
-minutes: 34
+minutes: 33
 ---
 
 Every event in an employee's working life is, in Oracle, a dated transaction against the assignment, with an approver and a downstream payroll consequence. Thinking in those terms is the consultant's default mental mode. This chapter follows a worker from hire to exit and, because the rules are statutory, uses Egypt's Labour Law No. 14 of 2025 (in force since 1 September 2025) as the worked example; Chapter 10 has the fuller statutory detail and Chapter 17 the Gulf equivalents.

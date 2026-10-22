@@ -1,6 +1,6 @@
 ---
 id: gulf
-minutes: 36
+minutes: 34
 ---
 
 A Saudi implementation runs on government platforms that have no Egyptian equivalent, and Oracle's generic Gulf localization does not reach them. This chapter covers the systems, the numbers that matter, and the ways a Saudi implementation differs structurally from an Egyptian one.

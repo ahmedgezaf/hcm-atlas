@@ -1,6 +1,6 @@
 ---
 id: payroll
-minutes: 48
+minutes: 56
 ---
 
 Payroll in Oracle is a chain of objects, each depending on the one before it. A consultant who can recite the chain and explain what breaks when a link is missing can debug most payroll problems without opening a log. The chain runs: element → element eligibility → element entry → payroll run → balance → prepayment → payment → costing.

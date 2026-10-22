@@ -1,6 +1,6 @@
 ---
 id: reporting
-minutes: 32
+minutes: 35
 ---
 
 There is no SQL Developer connection to a SaaS pod. When someone asks how to get data out of Oracle HCM, the complete answer names four paths and a reason for each: OTBI for ad-hoc analysis, BI Publisher for formatted output and complex SQL, HCM Extract for scheduled or large-volume outbound files, and REST for real-time integration.
@@ -130,6 +130,18 @@ The shape of it is conventional: resources for workers, assignments, absences an
 REST is the right answer for real-time, low-volume, record-at-a-time integration: create a worker when a candidate is hired, read a person's details when an identity system provisions an account, update an absence from a mobile app. It is the wrong answer for bulk: ten thousand records through a record-at-a-time API is slow, fragile and hard to restart, which is what HDL and Extract exist for.
 
 For change-driven integration without polling, there are also atom feeds, which publish events — a hire, a termination, an assignment change — that a subscriber can consume. Where a client asks "how does the identity system know somebody left", that is usually the better answer than a nightly extract.
+
+## Where the functional consultant stops
+
+The honest boundary for a functional consultant: HDL, simple formulas, OTBI and basic BIP are routinely expected. Oracle Integration Cloud (OIC) integrations and complex BIP development are where the genuine hand-off to a technical team happens.
+
+It is worth being able to place that line precisely, because it is the difference between a consultant who is useful on an integration and one who has promised something they cannot deliver.
+
+On the near side: choosing the right path of the four, specifying what an integration must send and when, writing a data model with a secured list view, building a template, defining an extract and its criteria, and reading a REST response well enough to say whether the problem is the data or the call. All of that is functional work, and a consultant who can do it is the person the technical team wants in the room.
+
+On the far side: building and operating the integration layer itself — orchestration, error handling, retries, queuing, credential management, monitoring — and the BI Publisher work that is really software development rather than reporting. Those need an owner with a release process, and a functional consultant who takes them on has quietly acquired a second job.
+
+The sentence that keeps the boundary clean in a workshop: "I can tell you exactly what has to go in the file and when; building the pipe that carries it is an integration task and needs an owner." That names the work, assigns it, and does not pretend.
 
 ## Choosing, as a decision tree
 

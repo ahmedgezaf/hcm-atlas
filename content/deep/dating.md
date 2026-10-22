@@ -1,6 +1,6 @@
 ---
 id: dating
-minutes: 30
+minutes: 45
 ---
 
 Oracle HCM is a date-effective system. Almost nothing is ever deleted; changes are recorded with the date on which they become true in the real world. People coming from transactional systems trip over this more than anything else, and it has direct payroll consequences — which is why this short chapter sits underneath every record in the atlas.

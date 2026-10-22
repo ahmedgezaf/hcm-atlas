@@ -1,6 +1,6 @@
 ---
 id: method
-minutes: 30
+minutes: 25
 ---
 
 This is the vocabulary of how projects are delivered. Trainers and interviewers use it constantly, and using it correctly makes a consultant sound like someone who has been on a project rather than someone who has read about one. Oracle's current methodology for Fusion Cloud projects is the **Oracle True Cloud Method**, successor to older methodologies such as AIM — whose document codes still appear in conversation: BR100 for setup documents, MD050 for functional designs, TE040 for test scripts.

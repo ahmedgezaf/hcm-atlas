@@ -1,6 +1,6 @@
 ---
 id: egypt-leave
-minutes: 34
+minutes: 35
 ---
 
 Labour Law No. 14 of 2025 replaced the 2003 law and took effect on 1 September 2025. Its leave provisions are the direct input to absence-plan design (Chapter 6). This chapter states the entitlements and the design implications; the exit and probation rules live in Chapter 8.

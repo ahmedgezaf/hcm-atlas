@@ -1,6 +1,6 @@
 ---
 id: model
-minutes: 58
+minutes: 74
 ---
 
 This is the single most important structure in the product. Payroll, absence, security and reporting all read from it. If a new consultant learns only one chapter cold, it should be this one.

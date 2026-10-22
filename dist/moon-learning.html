@@ -2830,7 +2830,7 @@ The opposite failure is self-service switched on everywhere with no change plan.
 <script type="text/markdown" class="src-deep">
 ---
 id: absence
-minutes: 34
+minutes: 35
 ---
 
 Absence is the module where a country's labour law turns into configuration. Every leave entitlement in the statute becomes an absence plan with rules, and every rule becomes a test script. The Egyptian annual-leave ladder is the classic accrual exercise; Egyptian sick leave is the classic qualification plan.
@@ -3012,7 +3012,7 @@ And across the Gulf, **annual leave entitlements and sick leave bands differ per
 <script type="text/markdown" class="src-deep">
 ---
 id: approvals
-minutes: 30
+minutes: 32
 ---
 
 Every chapter before this one ends at submit. This one covers what happens next, which is where a surprising share of a project's first live month actually goes. Approval routing is named in requirements workshops constantly, configured late, tested by the person who built it, and then found to be wrong by a manager who never received a notification. "How would you configure approvals for a promotion?" is also a standard interview question, and a candidate who can name where the rules live and what an approver type needs in order to resolve sounds like someone who has shipped one.
@@ -3191,7 +3191,7 @@ Three connections are worth making explicitly, because they are where approval p
 <script type="text/markdown" class="src-deep">
 ---
 id: costing
-minutes: 34
+minutes: 35
 ---
 
 Chapter 5 ends the payroll cycle at the bank file, and for the payroll team that is the end. For Finance it is the start. Every amount the run calculated — each earning, each deduction, each employer contribution — has to land in a general-ledger account, against the right company, cost centre and natural account, so that the month-end close shows what people cost and where. That is **costing**, and it is the part of a payroll design that the payroll team does not see until Finance rejects the journal.
@@ -3386,7 +3386,7 @@ A **multi-country group** has a cost allocation flexfield per legislative data g
 <script type="text/markdown" class="src-deep">
 ---
 id: dating
-minutes: 30
+minutes: 45
 ---
 
 Oracle HCM is a date-effective system. Almost nothing is ever deleted; changes are recorded with the date on which they become true in the real world. People coming from transactional systems trip over this more than anything else, and it has direct payroll consequences — which is why this short chapter sits underneath every record in the atlas.
@@ -3589,7 +3589,7 @@ What this amounts to is: the data, as of the date; then the configuration that r
 <script type="text/markdown" class="src-deep">
 ---
 id: egypt-leave
-minutes: 34
+minutes: 35
 ---
 
 Labour Law No. 14 of 2025 replaced the 2003 law and took effect on 1 September 2025. Its leave provisions are the direct input to absence-plan design (Chapter 6). This chapter states the entitlements and the design implications; the exit and probation rules live in Chapter 8.
@@ -3768,7 +3768,7 @@ A configuration workbook written like that can be re-verified in an afternoon wh
 <script type="text/markdown" class="src-deep">
 ---
 id: egypt-payroll
-minutes: 36
+minutes: 35
 ---
 
 Oracle does not deliver a pre-built, maintained Egyptian payroll localization the way it does for some markets. The implementation partner builds the statutory rules — in elements, balances and Fast Formulas (Chapter 12). A consultant who knows the Egyptian mechanics is therefore useful on day one in a way that one who only knows the product is not.
@@ -3957,7 +3957,7 @@ The second is that legacy payrolls in any country drift from the statute, and in
 <script type="text/markdown" class="src-deep">
 ---
 id: extend
-minutes: 32
+minutes: 29
 ---
 
 Every client needs a field Oracle did not ship, an option Oracle did not put in a dropdown, and a screen that behaves slightly differently for one group of users. In a SaaS product none of that can be done by changing code. Oracle's answer is a set of configuration tools that survive upgrades, and the correct response to most "can you add…" requests is one of them — said with the name of the tool, which is what separates a consultant from a note-taker.
@@ -4110,7 +4110,7 @@ The ladder, from cheapest to most expensive to own: change a lookup; add or hide
 <script type="text/markdown" class="src-deep">
 ---
 id: ff
-minutes: 32
+minutes: 33
 ---
 
 Statutory rules vary too much across countries to hard-code, so Oracle exposes a rule layer. **Fast Formula** is a simple expression language for calculations, validations and rules, written in near-English rather than a full programming language. In payroll it computes rates and amounts; in absence it drives accrual rules; elsewhere it handles eligibility and defaulting. Because Oracle ships no maintained Egyptian localization, Egyptian social-insurance and tax calculations are built here — and it may be the functional consultant who writes them.
@@ -4310,7 +4310,7 @@ And if the requirement is a calculation the product already performs, the delive
 <script type="text/markdown" class="src-deep">
 ---
 id: gulf
-minutes: 36
+minutes: 34
 ---
 
 A Saudi implementation runs on government platforms that have no Egyptian equivalent, and Oracle's generic Gulf localization does not reach them. This chapter covers the systems, the numbers that matter, and the ways a Saudi implementation differs structurally from an Egyptian one.
@@ -4495,7 +4495,7 @@ Three decisions recur on regional projects and are worth settling early.
 <script type="text/markdown" class="src-deep">
 ---
 id: hdl
-minutes: 34
+minutes: 46
 ---
 
 In Oracle HCM, "functional" consultants are expected to be mildly technical. On real projects, bulk data loads land on strong functional people, and many avoid them. **HCM Data Loader (HDL)** is Oracle's bulk loading tool: nobody hand-enters ten thousand employees, so data migration and mass updates run through it. Comfort with HDL makes a consultant useful immediately.
@@ -4715,7 +4715,7 @@ Three situations call for something else. A handful of records is faster to corr
 <script type="text/markdown" class="src-deep">
 ---
 id: hrfunction
-minutes: 28
+minutes: 25
 ---
 
 A consultant does not need HR theory, but does need to speak HR's language fluently enough that an HR director never has to slow down. This chapter covers the metrics that appear in every reporting conversation and the way large HR functions are organized, which explains who owns which decision.
@@ -4860,7 +4860,7 @@ And finally, agree where the number lives. A definition that exists only in a co
 <script type="text/markdown" class="src-deep">
 ---
 id: lifecycle
-minutes: 34
+minutes: 33
 ---
 
 Every event in an employee's working life is, in Oracle, a dated transaction against the assignment, with an approver and a downstream payroll consequence. Thinking in those terms is the consultant's default mental mode. This chapter follows a worker from hire to exit and, because the rules are statutory, uses Egypt's Labour Law No. 14 of 2025 (in force since 1 September 2025) as the worked example; Chapter 10 has the fuller statutory detail and Chapter 17 the Gulf equivalents.
@@ -5009,7 +5009,7 @@ Working through that grid once, with the client, produces a design document that
 <script type="text/markdown" class="src-deep">
 ---
 id: method
-minutes: 30
+minutes: 25
 ---
 
 This is the vocabulary of how projects are delivered. Trainers and interviewers use it constantly, and using it correctly makes a consultant sound like someone who has been on a project rather than someone who has read about one. Oracle's current methodology for Fusion Cloud projects is the **Oracle True Cloud Method**, successor to older methodologies such as AIM — whose document codes still appear in conversation: BR100 for setup documents, MD050 for functional designs, TE040 for test scripts.
@@ -5156,7 +5156,7 @@ That is not modesty. It is the only arrangement that survives the consultant lea
 <script type="text/markdown" class="src-deep">
 ---
 id: model
-minutes: 58
+minutes: 74
 ---
 
 This is the single most important structure in the product. Payroll, absence, security and reporting all read from it. If a new consultant learns only one chapter cold, it should be this one.
@@ -5485,7 +5485,7 @@ One person record. Three work relationships over nine years, two of them closed.
 <script type="text/markdown" class="src-deep">
 ---
 id: modules
-minutes: 36
+minutes: 34
 ---
 
 This atlas teaches three modules: core HR, absence and payroll. They are what a junior functional consultant in Egypt is hired to do, and depth in them is worth more than breadth across the suite. But a client's HR director will list Recruiting, Benefits and Goals in the same sentence as payroll, a screening call will ask which modules you have worked with, and a workshop will reach a point where somebody says "that comes from Recruiting" and the room moves on.
@@ -5666,7 +5666,7 @@ The honest version of this chapter in an interview is one sentence: these are th
 <script type="text/markdown" class="src-deep">
 ---
 id: org
-minutes: 62
+minutes: 56
 ---
 
 Every Oracle HCM implementation starts here, because nothing else can be configured until these objects exist. No worker can be hired, no element defined, no payroll run, no report filtered, until the structures in this chapter are in place. That order is not a preference — the application enforces it, and a project that rushes this stage pays for it for years.
@@ -5931,7 +5931,7 @@ Stated as a sequence, because the dependencies are real and the application enfo
 <script type="text/markdown" class="src-deep">
 ---
 id: payroll
-minutes: 48
+minutes: 56
 ---
 
 Payroll in Oracle is a chain of objects, each depending on the one before it. A consultant who can recite the chain and explain what breaks when a link is missing can debug most payroll problems without opening a log. The chain runs: element → element eligibility → element entry → payroll run → balance → prepayment → payment → costing.
@@ -6164,7 +6164,7 @@ The one piece of advice that pays for itself: run the entire cycle in a non-prod
 <script type="text/markdown" class="src-deep">
 ---
 id: personas
-minutes: 28
+minutes: 27
 ---
 
 Most of this atlas describes records: the person, the assignment, the absence, the element entry. Real projects are judged on something else — who touches those records, from which screen, and what happens next. A leave request that is configured perfectly but can only be entered by HR is a design that has quietly moved the HR team's workload in the wrong direction. Self-service is the part of Global HR that decides this, and it is where most of a client's users will ever meet the system.
@@ -6332,7 +6332,7 @@ The support model follows the same shape: employee questions are a help-desk scr
 <script type="text/markdown" class="src-deep">
 ---
 id: reporting
-minutes: 32
+minutes: 35
 ---
 
 There is no SQL Developer connection to a SaaS pod. When someone asks how to get data out of Oracle HCM, the complete answer names four paths and a reason for each: OTBI for ad-hoc analysis, BI Publisher for formatted output and complex SQL, HCM Extract for scheduled or large-volume outbound files, and REST for real-time integration.
@@ -6463,6 +6463,18 @@ REST is the right answer for real-time, low-volume, record-at-a-time integration
 
 For change-driven integration without polling, there are also atom feeds, which publish events — a hire, a termination, an assignment change — that a subscriber can consume. Where a client asks "how does the identity system know somebody left", that is usually the better answer than a nightly extract.
 
+## Where the functional consultant stops
+
+The honest boundary for a functional consultant: HDL, simple formulas, OTBI and basic BIP are routinely expected. Oracle Integration Cloud (OIC) integrations and complex BIP development are where the genuine hand-off to a technical team happens.
+
+It is worth being able to place that line precisely, because it is the difference between a consultant who is useful on an integration and one who has promised something they cannot deliver.
+
+On the near side: choosing the right path of the four, specifying what an integration must send and when, writing a data model with a secured list view, building a template, defining an extract and its criteria, and reading a REST response well enough to say whether the problem is the data or the call. All of that is functional work, and a consultant who can do it is the person the technical team wants in the room.
+
+On the far side: building and operating the integration layer itself — orchestration, error handling, retries, queuing, credential management, monitoring — and the BI Publisher work that is really software development rather than reporting. Those need an owner with a release process, and a functional consultant who takes them on has quietly acquired a second job.
+
+The sentence that keeps the boundary clean in a workshop: "I can tell you exactly what has to go in the file and when; building the pipe that carries it is an integration task and needs an owner." That names the work, assigns it, and does not pretend.
+
 ## Choosing, as a decision tree
 
 The question to ask first is not which tool but **which direction and what shape**.
@@ -6524,7 +6536,7 @@ The consulting contribution here is small and disproportionately valuable: at th
 <script type="text/markdown" class="src-deep">
 ---
 id: security
-minutes: 32
+minutes: 30
 ---
 
 Security determines who can see and do what. A consultant needs conceptual fluency rather than deep architecture skill, but the vocabulary appears in almost every requirements workshop, and one distinction carries most of it: function versus data scope. The second half of this chapter is the part that earns its keep on a live project — how a role actually reaches a user, and what to check when someone opens a page and finds it empty.
@@ -6714,7 +6726,7 @@ And plan for the periodic review. Who holds what drifts — manual provisioning,
 <script type="text/markdown" class="src-deep">
 ---
 id: uae
-minutes: 38
+minutes: 31
 ---
 
 The UAE employs more Oracle HCM consultants than anywhere else in the region, and almost nothing in a Saudi implementation transfers to it unchanged. The gratuity formula is different, the wage-protection file is different, the pension covers a different population under a different authority, and the nationalization programme counts differently. A consultant who has done one Gulf country and assumes the second is a variation of it will design the wrong thing twice before anyone notices. This chapter is the UAE half of Chapter 17.
