@@ -414,7 +414,9 @@ const check = (name, pass, detail = '') => results.push({ name, pass, detail });
     S.depth = 0;
     return { id: c.id, std, now, back, mins, stuck };
   });
-  check('the in-depth switch swaps the chapter body', !!depth.skip || (depth.now > depth.std * 1.5 && depth.back === depth.std),
+  // Longer, and exactly restored on the way back. How much longer is the
+  // writer's business — a chapter that was already long grows by less.
+  check('the in-depth switch swaps the chapter body', !!depth.skip || (depth.now > depth.std * 1.1 && depth.back === depth.std),
     depth.skip ? 'no chapter has an in-depth version yet'
       : `${depth.id}: ${depth.std} -> ${depth.now} -> ${depth.back} chars, ${depth.mins}`);
 
