@@ -155,19 +155,42 @@ const check = (name, pass, detail = '') => results.push({ name, pass, detail });
   // every rendered heading must be in the index. Lab titles are H2s too, so
   // this is what catches positional ids drifting out of step.
   const deep = await page.evaluate(async () => {
-    const byCh = {};
-    buildIndex().filter(r => r.nav.sec).forEach(r => { (byCh[r.nav.ch] = byCh[r.nav.ch] || []).push(r.nav.sec); });
+    // Indexed once per body: a chapter with an in-depth version has section
+    // rows for both, and the in-depth ones are only in the page when the
+    // reader's depth setting is on. So the walk is done in both modes.
+    const byCh = { 0: {}, 1: {} };
+    buildIndex().filter(r => r.nav.sec).forEach(r => {
+      const m = byCh[r.nav.depth ? 1 : 0];
+      (m[r.nav.ch] = m[r.nav.ch] || []).push(r.nav.sec);
+    });
     const bad = [];
-    for (const c of CH) {
-      location.hash = 'chapters/' + c.id;
-      await new Promise(r => setTimeout(r, 90));
-      const dom = [...document.querySelectorAll('.prose h2')]
-        .filter(h => !h.closest('.sources') && !h.closest('.lab')).map(h => h.id);
-      const want = byCh[c.id] || [];
-      want.forEach(id => { if (!dom.includes(id)) bad.push(c.id + ' -> missing ' + id); });
-      dom.forEach(id => { if (!want.includes(id)) bad.push(c.id + ' -> unindexed ' + id); });
+    let links = 0;
+    const was = S.depth;
+    for (const mode of [0, 1]) {
+      S.depth = mode;
+      for (const c of CH) {
+        if (mode && !c.deep) continue;
+        location.hash = 'chapters/' + c.id;
+        await new Promise(r => setTimeout(r, 90));
+        render();
+        await new Promise(r => setTimeout(r, 30));
+        const dom = [...document.querySelectorAll('.prose h2')]
+          .filter(h => !h.closest('.sources') && !h.closest('.lab')).map(h => h.id);
+        // In depth, a section the two bodies share is indexed on the standard
+        // row only, so both lists count as what this body should reach.
+        const want = mode
+          ? [...(byCh[1][c.id] || []), ...(byCh[0][c.id] || [])]
+          : (byCh[0][c.id] || []);
+        const label = c.id + (mode ? ' (in depth)' : '');
+        (mode ? byCh[1][c.id] || [] : want).forEach(id => {
+          if (!dom.includes(id)) bad.push(label + ' -> missing ' + id);
+        });
+        dom.forEach(id => { if (!want.includes(id)) bad.push(label + ' -> unindexed ' + id); });
+        links += dom.length;
+      }
     }
-    return { bad, links: Object.values(byCh).reduce((a, v) => a + v.length, 0), chapters: CH.length };
+    S.depth = was;
+    return { bad, links, chapters: CH.length, deepCh: CH.filter(c => c.deep).length };
   });
   const mismatches = deep.bad;
   check('every section deep link resolves', mismatches.length === 0,
@@ -345,6 +368,55 @@ const check = (name, pass, detail = '') => results.push({ name, pass, detail });
   check('an interview round runs to a summary', /^\d+ of 10$/.test(summary.trim()) && weak > 0,
     `${summary.trim()}, ${weak} chapters to reread`);
   await study.close();
+
+  // ---- the in-depth edition: one setting, two bodies, one set of slugs each.
+  const depth = await page.evaluate(async () => {
+    const c = CH.find(x => x.deep);
+    if (!c) return { skip: true };
+    S.depth = 0;
+    location.hash = 'chapters/' + c.id;
+    await new Promise(r => setTimeout(r, 120));
+    render();
+    await new Promise(r => setTimeout(r, 60));
+    const std = document.querySelector('#prose').innerText.length;
+    const btn = [...document.querySelectorAll('[data-depth]')].find(b => b.dataset.depth === '1');
+    if (!btn) return { noControl: true };
+    btn.click();
+    await new Promise(r => setTimeout(r, 120));
+    const now = document.querySelector('#prose').innerText.length;
+    const mins = document.querySelector('.ch-head .meta span').textContent;
+    const stuck = S.depth;
+    // and back, so the run leaves the setting as it found it
+    [...document.querySelectorAll('[data-depth]')].find(b => b.dataset.depth === '0').click();
+    await new Promise(r => setTimeout(r, 120));
+    const back = document.querySelector('#prose').innerText.length;
+    S.depth = 0;
+    return { id: c.id, std, now, back, mins, stuck };
+  });
+  check('the in-depth switch swaps the chapter body', !!depth.skip || (depth.now > depth.std * 1.5 && depth.back === depth.std),
+    depth.skip ? 'no chapter has an in-depth version yet'
+      : `${depth.id}: ${depth.std} -> ${depth.now} -> ${depth.back} chars, ${depth.mins}`);
+
+  const deepHit = await page.evaluate(async () => {
+    const c = CH.find(x => x.deep);
+    if (!c) return { skip: true };
+    S.depth = 0;
+    // A section that only the in-depth body has must still be reachable from
+    // search, which means the hit has to turn the setting on by itself.
+    const rows = buildIndex().filter(r => r.nav.sec && r.nav.depth && r.nav.ch === c.id);
+    if (!rows.length) return { none: true };
+    P.rows = rows; P.sel = 0;
+    palGo(0);
+    await new Promise(r => setTimeout(r, 200));
+    const found = !!document.getElementById(rows[0].nav.sec);
+    const on = !!S.depth;
+    S.depth = 0; render();
+    return { sec: rows[0].nav.sec, found, on };
+  });
+  check('a search hit inside an in-depth section opens it', !!deepHit.skip || (deepHit.found && deepHit.on),
+    deepHit.skip ? 'no chapter has an in-depth version yet'
+      : deepHit.none ? 'FAIL: the in-depth body contributed no section rows'
+        : `${deepHit.sec}${deepHit.on ? ', depth on' : ', depth stayed off'}`);
 
   check('no runtime errors', errors.length === 0, errors.join(' | '));
   await browser.close();

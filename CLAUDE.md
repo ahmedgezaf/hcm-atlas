@@ -9,6 +9,7 @@ bundler and no `node_modules`. Keep it that way unless the user asks otherwise.
 ```
 content/domains.json        the collections: id, name, tagline, blurb, hue
 content/chapters/NN-id.md   one chapter each: frontmatter + Markdown
+content/deep/<id>.md        optional in-depth version of that chapter
 content/glossary.json       every term, its definition, its chapter
 content/questions.json      drill questions with model answers
 content/images/             optional chapter cover photos
@@ -107,6 +108,49 @@ Use `full`, not `wide`, unless that is what you mean.
 
 `## Common mistakes` and `## Sources` are styled specially by their exact
 headings. Every chapter needs both. `[[lab:id]]` embeds a lab inline.
+
+## The in-depth edition
+
+A chapter can be written twice. `content/deep/<id>.md` holds the in-depth
+version of the chapter whose id it names, and a **Standard / In depth** switch
+in the reader swaps between them. The switch is the site's setting, not one
+chapter's: it lives in `S.depth`, so turning it on turns it on everywhere, and
+a chapter with no in-depth version says so rather than hiding the control.
+
+```markdown
+---
+id: hdl
+minutes: 34
+---
+
+Opening paragraph - the same shape as a chapter, no H1.
+```
+
+Only `id:` and `minutes:` go in the frontmatter. Everything else that
+identifies the chapter - its number, collection, track, title, hue, terms and
+labs - already lives in `content/chapters/`, and repeating it here would be two
+places to forget.
+
+The in-depth body is a **replacement, not an appendix**: it carries everything
+the standard chapter says and goes further, so a reader who turns the switch on
+is not reading the short version twice. It needs its own `## Common mistakes`
+and `## Sources`, and it may embed the same labs and figures - a figure counts
+as embedded if either body embeds it, and both bodies are validated for unknown
+labs, figures and figures belonging to another chapter.
+
+Everything downstream knows about both bodies. Search indexes each one and
+numbers their heading slugs separately, exactly as the reader does, so a
+section that only the in-depth chapter has is reachable from search - and
+opening that row turns the setting on. A section the two bodies share is
+indexed once, on the standard row. Reading time, the chapter list and the
+listen estimate all follow whichever body is being shown. The editable edition
+carries the in-depth chapters as their own content section and imports them
+back to `content/deep/`, and `--check-portable` holds them to the same
+rendering proof as any other chapter - which means **the same Markdown subset
+applies**: no tables, no numbered lists, no links.
+
+Writing one is a long job, so the collection is expected to be partly done. The
+build prints how many chapters have one.
 
 ## Adding a term
 

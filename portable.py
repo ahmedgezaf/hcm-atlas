@@ -32,6 +32,14 @@ def check(content_dir, src_dir, parse_frontmatter, render_chapter_html):
     for path in sorted((content_dir / "chapters").glob("*.md")):
         meta, body = parse_frontmatter(path.read_text(encoding="utf-8"), path.name)
         chapters.append({"id": meta["id"], "body": body, "py": render_chapter_html(body)})
+    # An in-depth body is chapter prose like any other, and the editable edition
+    # renders it with the same JS renderer, so it is held to the same proof.
+    deep_dir = content_dir / "deep"
+    if deep_dir.exists():
+        for path in sorted(deep_dir.glob("*.md")):
+            body = path.read_text(encoding="utf-8").split("---", 2)[2].strip()
+            chapters.append({"id": path.stem + " (in depth)", "body": body,
+                             "py": render_chapter_html(body)})
 
     runner = (src_dir / "portable-md.js").read_text(encoding="utf-8") + """
 const fs = require('fs');
@@ -232,6 +240,13 @@ def render(root, inline_includes, title, description, fonts, favicon):
         _script_safe(text, f"content/chapters/{path.name}")
         chapter_blocks.append(f'<script type="text/markdown" class="src-chapter">\n{text}\n</script>')
 
+    deep_dir = content / "deep"
+    deep_blocks = []
+    for path in sorted(deep_dir.glob("*.md")) if deep_dir.exists() else []:
+        text = path.read_text(encoding="utf-8").replace("\r\n", "\n").strip()
+        _script_safe(text, f"content/deep/{path.name}")
+        deep_blocks.append(f'<script type="text/markdown" class="src-deep">\n{text}\n</script>')
+
     app = inline_includes((src / "app.js").read_text(encoding="utf-8"))
     loader = (src / "portable-md.js").read_text(encoding="utf-8") + "\n" + LOADER
     styles = (src / "styles.css").read_text(encoding="utf-8")
@@ -263,10 +278,15 @@ def render(root, inline_includes, title, description, fonts, favicon):
         rule(2, "CHAPTERS", "One block per chapter. Order here does not matter; num: sets the order."),
         "\n\n".join(chapter_blocks), "\n",
 
-        rule(3, "GLOSSARY", "Every term. Its id must also appear in its chapter's terms: line."),
+        (rule(3, "IN-DEPTH CHAPTERS",
+              "The longer version of a chapter, shown when the reader turns In depth on. "
+              "id: names the chapter it belongs to; minutes: is its own reading time.")
+         + "\n\n".join(deep_blocks) + "\n") if deep_blocks else "",
+
+        rule(4, "GLOSSARY", "Every term. Its id must also appear in its chapter's terms: line."),
         f'<script type="application/json" id="src-glossary">\n{glossary}\n</script>\n',
 
-        rule(4, "DRILL QUESTIONS", "Every question, with the answer a good candidate would give."),
+        rule(5, "DRILL QUESTIONS", "Every question, with the answer a good candidate would give."),
         f'<script type="application/json" id="src-questions">\n{questions}\n</script>\n',
 
         "\n<!-- " + "#" * 72 + "\n     ENGINE  ·  everything below makes the site work. Rarely edited.\n     "
@@ -310,8 +330,8 @@ LOADER = r"""
     }
   }
   var domains = json('src-domains', 'CONTENT 1 · COLLECTIONS');
-  var glossary = json('src-glossary', 'CONTENT 3 · GLOSSARY');
-  var questions = json('src-questions', 'CONTENT 4 · DRILL QUESTIONS');
+  var glossary = json('src-glossary', 'CONTENT 4 · GLOSSARY');
+  var questions = json('src-questions', 'CONTENT 5 · DRILL QUESTIONS');
   var chapters = [];
   var REQUIRED = ['id', 'num', 'domain', 'track', 'title', 'subtitle', 'hue', 'minutes'];
   document.querySelectorAll('script.src-chapter').forEach(function (el, i) {
@@ -332,6 +352,23 @@ LOADER = r"""
   });
   chapters.sort(function (a, b) { return a.num - b.num || a._i - b._i; });
   chapters.forEach(function (c) { delete c._i; });
+  /* The in-depth bodies. Each names the chapter it belongs to and nothing else;
+     everything that identifies that chapter is already in its own block. */
+  document.querySelectorAll('script.src-deep').forEach(function (el, i) {
+    try {
+      var parsed = mdFrontmatter(el.textContent.trim()), meta = parsed.meta;
+      if (!meta.id) throw new Error('its settings are missing "id:"');
+      if (!meta.minutes || isNaN(meta.minutes)) throw new Error('its settings are missing "minutes:"');
+      var owner = chapters.filter(function (c) { return c.id === meta.id; })[0];
+      if (!owner) throw new Error('no chapter has the id "' + meta.id + '"');
+      if (owner.deep) throw new Error('chapter "' + meta.id + '" already has an in-depth version');
+      owner.deep = mdRender(parsed.body);
+      owner.deepMin = meta.minutes;
+    } catch (e) {
+      var hint = (el.textContent.match(/^id:\s*(\S+)/m) || [])[1];
+      problems.push('CONTENT 3 · in-depth block ' + (i + 1) + (hint ? ' (id: ' + hint + ')' : '') + ': ' + e.message);
+    }
+  });
   var data = {
     domains: domains,
     chapters: chapters,
@@ -362,14 +399,16 @@ CHECKER = r"""
       if (c.track !== 'functional' && c.track !== 'technical') P.push('Chapter ' + c.id + ': track must be functional or technical');
       c.labs.forEach(function (l) { if (!labIds.has(l)) P.push('Chapter ' + c.id + ': labs: names "' + l + '", which does not exist'); });
       c.terms.forEach(function (t) { if (!termIds.has(t)) P.push('Chapter ' + c.id + ': terms: names "' + t + '", which is not in the GLOSSARY'); });
-      Array.from(c.html.matchAll(/data-lab="([a-z0-9-]+)"/g)).forEach(function (m) {
-        if (!labIds.has(m[1])) P.push('Chapter ' + c.id + ': [[lab:' + m[1] + ']] does not exist');
-      });
-      Array.from(c.html.matchAll(/data-fig="([a-z0-9-]+)"/g)).forEach(function (m) {
-        embedded.add(m[1]);
-        var f = FIGS.find(function (x) { return x.id === m[1]; });
-        if (!f) P.push('Chapter ' + c.id + ': [[fig:' + m[1] + ']] does not exist');
-        else if (f.ch !== c.id) P.push('Chapter ' + c.id + ': figure "' + m[1] + '" belongs to chapter "' + f.ch + '"');
+      [[c.html, ''], [c.deep || '', ' (in depth)']].forEach(function (pair) {
+        Array.from(pair[0].matchAll(/data-lab="([a-z0-9-]+)"/g)).forEach(function (m) {
+          if (!labIds.has(m[1])) P.push('Chapter ' + c.id + pair[1] + ': [[lab:' + m[1] + ']] does not exist');
+        });
+        Array.from(pair[0].matchAll(/data-fig="([a-z0-9-]+)"/g)).forEach(function (m) {
+          embedded.add(m[1]);
+          var f = FIGS.find(function (x) { return x.id === m[1]; });
+          if (!f) P.push('Chapter ' + c.id + pair[1] + ': [[fig:' + m[1] + ']] does not exist');
+          else if (f.ch !== c.id) P.push('Chapter ' + c.id + pair[1] + ': figure "' + m[1] + '" belongs to chapter "' + f.ch + '"');
+        });
       });
       if (!ICONS[c.id]) P.push('Chapter ' + c.id + ': has no icon yet (ENGINE → const ICONS)');
     });

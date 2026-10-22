@@ -2824,7 +2824,231 @@ The opposite failure is self-service switched on everywhere with no change plan.
 </script>
 
 <!-- ========================================================================
-     CONTENT 3  ·  GLOSSARY
+     CONTENT 3  ·  IN-DEPTH CHAPTERS
+     The longer version of a chapter, shown when the reader turns In depth on. id: names the chapter it belongs to; minutes: is its own reading time.
+     ======================================================================== -->
+<script type="text/markdown" class="src-deep">
+---
+id: hdl
+minutes: 34
+---
+
+In Oracle HCM, "functional" consultants are expected to be mildly technical. On real projects, bulk data loads land on strong functional people, and many avoid them. **HCM Data Loader (HDL)** is Oracle's bulk loading tool: nobody hand-enters ten thousand employees, so data migration and mass updates run through it. Comfort with HDL makes a consultant useful immediately.
+
+It is worth being precise about why. A migration is not really a technical problem. The technical part — write a pipe-delimited file, zip it, press a button — can be taught in a morning. The hard part is knowing what the business means by an employee, which of the legacy system's four date columns is the one Oracle calls the hire date, what to do with the three hundred people whose records disagree with themselves, and how to prove to a finance director that the headcount in the new system is the same headcount as in the old one. That is functional work. HDL is simply the place where the functional decisions stop being opinions and start being rows that either load or do not.
+
+This chapter goes through the tool in the order a project meets it: the shape of a load, what is in a file, how a load is actually run, what happens when it fails, and the two areas — keys and date effectivity — where most of the real difficulty lives.
+
+## What the tool actually is
+
+HDL is a staged, file-based loader that sits in front of the same application logic the user interface uses. That last point matters more than anything else in this chapter: HDL is not a back door into the database. A record loaded through HDL is validated by the same rules that would have rejected it on screen. If a grade is not valid for a job on a given date, the screen will not let a user save it and HDL will not load it either. Consultants who expect HDL to be a way around configuration are reliably disappointed, and the disappointment usually arrives on the worst possible day.
+
+The tool lives in the **Data Exchange** work area. That is where files are uploaded, where loads are started, where the results of a load are read, and where the configuration that governs every load is set. A consultant who knows only one navigation path in the technical half of the product should know this one.
+
+The work is done in three stages, and keeping them separate in your head is the single most useful habit the chapter can give you. First the file is **uploaded** — a zip arrives on the server and nothing has been inspected. Then it is **imported** — the lines are read, checked for shape, and written into staging tables that are not HR data. Then it is **loaded** — the staged lines are assembled into whole business objects and offered to the application, which accepts or rejects each one on its merits.
+
+## The shape of a load
+
+A load is one or more `.dat` files, zipped flat with no folders, and uploaded. Each file holds data for a single business object and is named for it: `Worker.dat`, `Job.dat`, `Grade.dat`, `ElementEntry.dat`. The name is not decoration. HDL reads the file name to decide which business object it is looking at, so `workers.dat` or `Worker (1).dat` is not a Worker file and will not be treated as one.
+
+A **business object** in HDL's sense is a tree, not a table. `Worker` is the root, and underneath it sit components: PersonName, PersonNationalIdentifier, PersonEmail, PersonAddress, WorkRelationship, WorkTerms, Assignment and more. All of them live in the one `Worker.dat` file, because they are parts of the same object. This is why a worker file is long and why a single bad line in it can sink a whole person: HDL assembles the components into one object and loads that object, so a rejected child can take its parent down with it.
+
+The components are what the `.dat` file's second column names. Oracle calls that column the **discriminator**, and it is how one file can carry several different shapes of line.
+
+## Inside a .dat file
+
+Every line in the file is pipe-delimited and begins with a keyword.
+
+A **METADATA** line declares the columns for one component: the keyword, then the discriminator, then the attribute names in the order the data lines will supply them. **MERGE** lines carry the data in that same order; MERGE creates the record if it does not exist and updates it if it does. **DELETE** removes a record. **SET** lines, which come before everything else, change how the file is processed.
+
+```
+METADATA|JobFamily|JobFamilyCode|JobFamilyName|EffectiveStartDate|EffectiveEndDate
+MERGE|JobFamily|SALES|Sales|2000/01/01|4712/12/31
+```
+
+That creates a job family coded SALES, effective from 1 January 2000. The end date `4712/12/31` is Oracle's conventional "end of time"; it appears everywhere in the product, in HDL files, in extracts and in the database itself, and it is worth recognising on sight. Dates use `YYYY/MM/DD`.
+
+A file may contain several METADATA lines, but each must be for a different component. Two `Job` METADATA lines in one file is invalid. The METADATA line must appear before the MERGE or DELETE lines it relates to, and every data line must carry exactly the attributes its METADATA line declared, in the same order — so a pipe-count mismatch fails the line even when a human can see what was meant. Attribute names are case-sensitive, and HDL validates every attribute name in the METADATA line rather than quietly ignoring one it does not recognise. Files should be UTF-8 without a byte-order mark; a BOM lands in the first attribute name of the first line and produces an error message that looks like nonsense.
+
+The pipe is the default delimiter rather than a law. `SET FILE_DELIMITER` changes it, and the escape character and the newline marker can be changed the same way. In practice almost nobody changes them, and the one time it is genuinely useful is a free-text field — an address line, a comment — that contains the delimiter itself. The alternative is escaping, which is what the escape character exists for.
+
+## The SET instructions, and why they are a migration lead's business
+
+SET lines are optional, carry no discriminator, and must all appear before the first METADATA line. Each one applies to the file it is in and overrides the enterprise default for that file, so a SET line is a per-file decision rather than a per-record one. There is no object-level scope.
+
+The one that matters most is `SET PURGE_FUTURE_CHANGES`, which is covered under date effectivity below because that is what it governs.
+
+Several others are worth knowing by name. `SET DISABLE_POST_PROCESS_TASKS` stops a named post-load process from running automatically — `RefreshManagerHierarchy` and `UpdatePersonSearchKeywords` in a worker file, `FlattenPositionHierarchy` in a position hierarchy file. `SET INVOKE_POST_PROCESS N` prevents the post-load processes from running at all. `SET ENABLE_AUDIT_DATA` and `SET PURGE_AUDIT_DATA` turn auditing on or off for the file's objects and, in the second case, remove audit records — which exists mainly so that audit trails of personal data can be cleared. The two cannot both be set to `Y` in the same file; to purge audit data while enterprise auditing is on, the documented combination is `ENABLE_AUDIT_DATA N` with `PURGE_AUDIT_DATA Y`.
+
+Two are specific to worker files and save a surprising amount of work: `SET CALCULATE_FTE Y` calculates FTE for every assignment in the file, and `SET CREATE_DEFAULT_WORKING_HOUR_PATTERN Y` creates a default working-hour pattern for them. A migration that does not know about these two tends to discover them after writing a spreadsheet formula to do the same job less well.
+
+`SET ENABLE_INCREMENTAL_LOAD_EVENTS Y` fires the atom feeds and events that the file's changes would otherwise raise. The default is off, and the default is usually right during a migration: a conversion load that fires an event per worker can flood every downstream integration listening to the environment. It is also slower, which Oracle says plainly.
+
+`SET EXTEND_DATA_SET_RETENTION Y` keeps a data set available beyond the default thirty days after its last update, so that it can still be validated or rolled back. It costs processing time, and when several business object files support validate or roll back the instruction only needs to be supplied once.
+
+```
+SET PURGE_FUTURE_CHANGES N
+SET DISABLE_POST_PROCESS_TASKS UpdatePersonSearchKeywords
+METADATA|Worker|PersonNumber|StartDate|...
+MERGE|Worker|...
+```
+
+One caution. Oracle's own SET reference is internally inconsistent in places — the table lists `SET FILE_NEWLINE` while the example on the same page uses `SET FILE_NEW_LINE`, and the table lists `SET ORACLE_SEARCH_UPDATE_MODE` while the surrounding text uses `SET ORA_UPDATE_ORACLE_SEARCH`. The table also gives `SET ENABLE_AUDIT_DATA` a default of `N` while the text says the enterprise-level setting decides it. Where the documentation disagrees with itself, test the spelling in a development environment before putting it in a cutover script, and keep the tested spelling in the runbook.
+
+## Import and load are two different inspections
+
+Those are two separate inspections, and knowing which one rejected a file tells you where to look.
+
+**Import** reads the file and checks its shape — pipe counts, attribute spelling, date format, whether the discriminator is a real component of that object — and puts well-formed lines into staging tables, which are a holding area rather than HR data. **Load** then assembles staged lines into whole business objects and checks what they mean: does the job exist, is the grade valid on that date, does the parent this record points at exist, is this person already employed on that date.
+
+The distinction has a practical consequence. A file that fails import has a formatting problem and has written nothing anywhere. A file that passes import and fails load is well-formed and refers to something that is not there yet, which is almost always a load-order problem — or it is well-formed, refers to real things, and is being refused by a business rule, which is a configuration conversation rather than a data one.
+
+[[fig:import-vs-load]]
+
+[[lab:import-load]]
+
+Staging is not free. The staging tables accumulate, and Oracle's own best-practice advice is to purge stage table data regularly, particularly after large volumes and for data sets nobody intends to look at again. On a long migration with weekly rehearsals, this is a standing item rather than an afterthought.
+
+## Keys: what makes a migration reconcilable
+
+HDL identifies records three ways.
+
+**Source keys** use `SourceSystemOwner` plus `SourceSystemId` to identify a record by its origin in the legacy system; if they are used, both must appear in the METADATA line. The owner value is not free text — it is checked against the `HRC_SOURCE_SYSTEM_OWNER` lookup, so the source system's name has to be added to that lookup, through Manage Common Lookups in Setup and Maintenance, before any file referencing it will load. A file that names an unregistered owner fails, and the error does not say "add a lookup value", so the first encounter with it costs an afternoon. Where no source key is supplied, the default owner is `FUSION`.
+
+**User keys** identify by natural business keys such as `JobFamilyCode` — the values a person would use to describe the record out loud. **Surrogate IDs** are the internal identifiers Oracle generates for itself. A person's Oracle-facing identifier is the **person number**; the source system key is what links that record back to the legacy one.
+
+Oracle's own recommendation is to use source keys for every implementation, and there is a harder reason than tidiness: some objects cannot be updated with a user key at all. Most Worker components are in that category. The clearest illustration is a person's address, where `AddressLine1` is both part of what identifies the record and the thing being changed — so an update by user key has no stable way to say which record it means. Source keys avoid the whole class of problem. They can also be updated later, which rescues the case where a key was auto-generated and the team wants a better one.
+
+The choice matters after the load, not during it. Source keys are what let a team trace every Oracle record to its legacy origin and explain every variance in reconciliation. Getting them right makes reconciliation possible; getting them wrong makes it nearly impossible, and data conversion is routinely the thing that delays a go-live.
+
+The cost of having no stable key shows up the first time a load partially fails. Forty records rejected out of twelve hundred is an ordinary morning; matching those forty back to the rows that produced them is only trivial if every record carries an identifier that is unique in the source and unchanged by the load. Names are not that identifier — two employees share one often enough to break a reconciliation, and names get re-spelled and change with marriage. Employee numbers are not reliably that identifier either, because legacy systems reissue them.
+
+[[lab:source-keys]]
+
+The practical shape of this on a project is a mapping sheet that nobody enjoys maintaining: one row per legacy record, carrying the legacy identifier, the value that went into `SourceSystemId`, and eventually the Oracle person number that came back. It is the artefact that answers "where did this person come from" for the next three years, and the team that keeps it honestly is the team whose month-end reconciles.
+
+## Date-effective loading, which is where most of the difficulty lives
+
+Most HCM objects are date-effective — the same record exists as a chain of dated versions, each valid for a range. Loading them is where HDL stops being a file format and starts requiring thought.
+
+A MERGE line on a date-effective object carries an `EffectiveStartDate` and usually an `EffectiveEndDate`. The start date is the date the change takes effect, and it is also what decides the kind of change being made. If the start date **matches an existing record**, that record is changed in place: a **correction**, with no new version created, and only the attributes supplied are changed. If the start date **does not match** an existing record, a new version is created and the previous one is end-dated to the day before: an **update**. The file does not say which of the two it wants. The dates say it.
+
+That is worth reading twice, because it is the mechanism behind a whole family of migration accidents. A correction that was meant to be an update silently rewrites history. An update that was meant to be a correction leaves a one-day version of the old values sitting in the record, which is invisible on screen until somebody runs a report that happens to be effective on that day.
+
+Attributes that are not supplied are not blanked. They roll forward from the previously dated record, or are inherited from whichever record was active on the effective start date. This is why a correction can be a two-attribute line and still be safe.
+
+`SET PURGE_FUTURE_CHANGES` decides what happens to versions that already exist *after* the one being loaded. The default is `Y`, which replaces any date-effective records falling inside the range given by the start and end dates on the line — later splits are deleted and the record is rebuilt from the file. Oracle's best-practice advice for updates is to include `SET PURGE_FUTURE_CHANGES N` explicitly, which retains existing future-dated changes. The two settings answer genuinely different questions: `Y` means "this file is the truth for this period", and `N` means "insert this change and leave everything after it alone".
+
+With `N`, the `EffectiveEndDate` then carries one of two tokens that say what should happen to those surviving future records. `#RETAIN` keeps their attribute values as they are — the change is inserted historically and the future is untouched. `#ALL` rolls the supplied values forward across every later record — the change applies from here on.
+
+```
+SET PURGE_FUTURE_CHANGES N
+METADATA|Job|JobCode|SetCode|EffectiveStartDate|EffectiveEndDate|Name
+MERGE|Job|SALES|COMMON|2015/01/01|#RETAIN|Sales Consultant
+```
+
+That line inserts a historic name without disturbing a later rename. Swapping `#RETAIN` for `#ALL` would push the new name forward across every later version instead. There is one documented restriction worth carrying: on an object that is already end-dated — one whose last version does not run to `4712/12/31` — an update using `#ALL` together with an end date will fail.
+
+When a whole dated history is being loaded at once, the rules tighten. The records may appear in any order in the file, but the date ranges must be consecutive with no gaps. HDL groups them and loads them as a single object, which means an error on any one record fails the entire object rather than leaving a partial history behind. Only the first dated record is processed as a creation; every later one is treated as an update to it. And where the very first start date itself has to change, `ReplaceFirstEffectiveStartDate` set to `Y` is the documented way to do it, with translated attributes such as `Name` supplied again so that the first-date record is adjusted with it.
+
+Deleting a dated version uses the two dates as a range rather than as a target: the start date names the last record to keep and the end date names the last record to delete. Because the start date given is one that already exists, no new split is created by the deletion itself.
+
+## Multiple changes on one day
+
+Worker employment terms and assignments allow more than one change on the same date, and the file has to describe them unambiguously. Three attributes do that work.
+
+`EffectiveSequence` numbers the changes within a day. It must start at 1 and increase without gaps, a value cannot repeat for the same logical object on the same date, and where there is only one change on a date the sequence is 1. `EffectiveLatestChange` is `Y` on the last change of that date and `N` on the others. And on every record where `EffectiveLatestChange` is `N`, the `EffectiveEndDate` matches the `EffectiveStartDate` — the version lasts for part of a day in the model's eyes, not until the next change.
+
+The trap sits one level up. Assignment and WorkTerms are separate components of the same worker, and when dated splits are supplied for an assignment the same splits have to exist on its work terms record. A file that splits one and not the other is well-formed, imports cleanly, and fails at load with a message about the parent.
+
+## Referencing other objects and ordering the load
+
+To point at a foreign object, the attribute is named with the key type in brackets — `JobFamilyId(SourceSystemId)`, `PersonId(SourceSystemId)`. The bracket is not optional decoration; it tells HDL which of the three identification schemes the value in that column belongs to. That is how child components attach to their parents, and how an assignment finds its job.
+
+Several `.dat` files can go in one zip. HDL imports them in parallel but loads them sequentially, so referenced data must exist before it is referenced: job families before jobs, grades and jobs before assignments, people before work relationships.
+
+Oracle's advice splits by situation, and the split is worth respecting. For a **migration**, put one object type in each zip — jobs in one, grades in another, workers in a third — and load the zips in order, fixing every error in one before starting the next. For an **update** to data that already exists, put all the business object files in the same zip and let HDL process them in dependency order, which it will do without being told.
+
+The reason for the difference is error management rather than mechanics. During a migration the errors are the work, and one object type per file keeps them legible. During an update the volumes are small and the dependencies are the risk.
+
+[[lab:hdl]]
+
+## Running the load, and the parameters worth knowing
+
+A load is submitted from the Data Exchange work area, and its parameters are worth understanding because two of them decide whether a bad file stops early or ploughs on.
+
+The error limits are **percentages, not counts**. The maximum percentage of import errors is the share of a business object's file lines that may be in error before import stops for that object, and the load-side equivalent works the same way for business object instances. Both default to 100 — which is to say, by default nothing stops. On a rehearsal load that is often what you want, because one run then yields the complete list of what is wrong. On a cutover load it is emphatically not what you want, and a lower limit turns "the file was wrong" into a fast failure instead of a long one.
+
+The concurrency parameters are the maximum concurrent threads for import and for load, each defaulting to 8, and the **load group size**, which is how many business objects a single thread takes as one unit of work, defaulting to 100. Only as many threads are created as the group size actually requires, so raising the thread count alone does not necessarily do anything. The ceiling on threads is not unlimited: it is capped by an environment configuration value that Oracle Support supplies, a value above the calculated maximum raises an error, and where the value is left blank the calculated maximum defaults to 1000.
+
+The enterprise defaults behind all of this are set once, in **Configure HCM Data Loader** in Setup and Maintenance, and a load that does not specify a parameter inherits them. The same parameters appear again outside the user interface: the SOAP `importAndLoadData` operation accepts `LoadConcurrentThreads`, `LoadGroupSize`, `ImportMaximumErrors` and `LoadMaximumErrors` as optional name-value pairs, and the REST API exposes `loadConcurrentThreads`, defaulted from the configured maximum. That is how a scheduled integration runs the same load a consultant runs by hand, and it is usually where an integration team takes over.
+
+## Reading a failure
+
+The discipline that separates people who are quick at this from people who are slow at it is simple and unnatural: **read the first error, not the last one, and fix one thing at a time.**
+
+A worker file with a misspelled attribute in the Assignment METADATA line will produce an error for every assignment in the file. The temptation is to read the count — four thousand errors — and conclude that something enormous is wrong. The count is one error, repeated. Sorting the messages and looking at the distinct ones first turns a crisis into a typo.
+
+The second habit is to ask which inspection rejected the file before asking anything else, because the two failure modes have different fixes and the question takes five seconds. Import failures are about shape: a pipe count, a date format, an attribute that does not exist on that component, a file whose name does not match a business object. Load failures are about meaning: a reference to something that has not been loaded yet, a value that fails a business rule, a date that collides with an existing version, a parent whose child could not be built.
+
+The third is to keep a rejected set rather than a rejected count. Every rehearsal should end with a file of the rows that did not load, keyed back to the source. That file, not the success rate, is what gets shorter each week, and it is the only honest answer to "are we ready".
+
+## Post-load processes, and when to switch them off
+
+Loading people does not finish when the rows land. The manager hierarchy has to be refreshed so that the organisation chart and every manager-based security rule see the new reporting lines. Person search keywords have to be rebuilt so that people can be found by name. A position hierarchy has to be flattened so the structure can be queried. Those run automatically after a load.
+
+During a migration this is mostly waste. Loading workers in six tranches and refreshing the manager hierarchy after each one does the same expensive work six times, and the first five results are thrown away by the sixth. The documented way to prevent it is `SET DISABLE_POST_PROCESS_TASKS` naming the process to skip, with the process then run deliberately once at the end. The thing to be careful about is the ending: a migration that disables the refresh and then forgets to run it produces an environment where hierarchy-based security quietly does not work, and that gets diagnosed as a security problem by someone who was not in the room.
+
+## Planning a migration around it
+
+Volume is less of a constraint than people expect — HDL will load very large files — but Oracle's advice is still to split a large load into logical groups, and the reason is human rather than technical. Former employees separate from current ones is the canonical example: the two populations have different data quality, different rules about what is mandatory, and different people who care about them. If a group is still very large, split it again on something that means something.
+
+Around the loading itself, three things decide whether a conversion goes well.
+
+The first is that the extract, the transform and the load are usually owned by different parties — the legacy vendor extracts, the implementation team transforms, HDL loads — and the handover points are where data quality disappears. A dated, versioned extract that can be re-run on demand is worth insisting on early.
+
+The second is rehearsal. A migration that has been loaded once into a test environment has been tested; a migration that has been loaded three times, timed, and reconciled each time has been rehearsed, and cutover is a rehearsal with the clock running. The timing matters as much as the correctness: the cutover window is a fixed number of hours, and a load nobody has timed is a load nobody can schedule.
+
+The third is reconciliation, which is a functional deliverable and not a technical one. Headcount by legal employer, payroll gross by element for the last period, leave balances by plan, active assignments by business unit. Each one agreed with the person who will sign it off *before* the load, so that the number produced afterwards is an answer rather than an argument.
+
+## HSDL: the spreadsheet cousin
+
+**HCM Spreadsheet Data Loader (HSDL)** is a spreadsheet interface over the same loading framework, aimed at business users. A template is defined once by someone who understands the business object, and from then on the people who own the data work in a spreadsheet and press a button, rather than assembling pipe-delimited files.
+
+The division of labour is the point of it. HDL is for bulk migration by the project team; HSDL is for the ongoing, business-user-facing mass updates that follow go-live — the annual salary review, a restructure that moves two hundred people between departments, a batch of new absence entitlements. Handing those to HSDL is also how a project stops being asked to do data entry a year after it finished.
+
+## When not to use HDL
+
+Three situations call for something else. A handful of records is faster to correct on screen, and doing it on screen leaves a normal audit trail rather than a data set. A genuinely continuous feed from another system — a joiner every day from a recruitment platform — belongs in an integration built on the REST or SOAP interfaces rather than in a file somebody has to remember to upload. And anything the business will need to repeat monthly, by themselves, without the project team, is an HSDL template waiting to be written.
+
+## Common mistakes
+
+- Two METADATA lines for the same component in one file.
+- MERGE attributes out of order relative to METADATA.
+- Wrong date format (`MM/DD/YYYY` corrupts silently).
+- Loading children before parents.
+- Choosing user keys for a migration that will need reconciling.
+- Referencing a source system owner that was never added to the `HRC_SOURCE_SYSTEM_OWNER` lookup.
+- Leaving `PURGE_FUTURE_CHANGES` at its default on an update, and deleting the future-dated changes somebody made last week.
+- Supplying a dated split on an assignment without the matching split on its work terms.
+- Reading the error count instead of the distinct errors.
+- Disabling the post-load processes for a migration and never running them at the end.
+- Loading the whole file into production having never timed it.
+
+## Sources
+
+- Oracle, *HCM Integrations* — the "Data File Instructions and Delivery" chapter. https://docs.oracle.com/en/cloud/saas/human-resources/faihm/index.html
+- Oracle, *HCM Data Loader* — "The SET Instruction". https://docs.oracle.com/en/cloud/saas/human-resources/fahdl/the-set-instruction.html
+- Oracle, *HCM Data Loader* — "HCM Data Loader Best Practices". https://docs.oracle.com/en/cloud/saas/human-resources/fahdl/hcm-data-loader-best-practices.html
+- Oracle tutorial, "Making Date-Effective Changes with HCM Data Loader". https://docs.oracle.com/en/cloud/saas/human-resources/tutorial-hdl-date-effective-updates/index.html
+- Oracle, *HCM Data Loader* — "Preparing to Use HCM Data Loader", for the import and load parameters and their defaults. https://docs.oracle.com/en/cloud/saas/human-resources/fahdl/preparing-to-use-hcm-data-loader.html
+- Oracle tutorial, "Create and Maintain Data with HCM Data Loader". https://docs.oracle.com/en/cloud/saas/tutorial-hdl-load-files/
+- Oracle tutorial, "Using the HCM Data Loader REST API". https://docs.oracle.com/en/cloud/saas/human-resources/tutorial-hdl-rest/index.html
+- HCM Tables, "HCM Data Loader (HDL) Complete Guide — .dat File Format, Templates & Troubleshooting". https://hcm-tables.com/blog/hdl-data-loader-guide
+</script>
+
+<!-- ========================================================================
+     CONTENT 4  ·  GLOSSARY
      Every term. Its id must also appear in its chapter's terms: line.
      ======================================================================== -->
 <script type="application/json" id="src-glossary">
@@ -5023,7 +5247,7 @@ The opposite failure is self-service switched on everywhere with no change plan.
 </script>
 
 <!-- ========================================================================
-     CONTENT 4  ·  DRILL QUESTIONS
+     CONTENT 5  ·  DRILL QUESTIONS
      Every question, with the answer a good candidate would give.
      ======================================================================== -->
 <script type="application/json" id="src-questions">
@@ -6760,6 +6984,14 @@ pre.code{background:var(--navy);color:var(--navy-ink);border-radius:8px;padding:
 .chrow .m{display:flex;align-items:center;gap:10px;font-size:12.5px;color:var(--muted);white-space:nowrap}
 .chrow .m .ok{color:var(--good);font-weight:700}
 
+/* The standard / in-depth switch. It is the site's setting, not one
+   chapter's, so it looks like a mode and sits with the other reading facts. */
+.depth{display:inline-flex;border:1px solid var(--line);border-radius:999px;padding:2px;background:var(--surface-2);gap:2px}
+.depth button{font:inherit;font-size:12px;font-weight:700;letter-spacing:.01em;padding:4px 11px;border:0;border-radius:999px;background:none;color:var(--muted);cursor:pointer;white-space:nowrap}
+.depth button:hover{color:var(--ink)}
+.depth button.on{background:var(--p);color:var(--surface)}
+.chrow .m .dp{font-size:11px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;color:var(--p);border:1px solid var(--p);border-radius:999px;padding:1px 7px}
+
 /* ---- READER */
 .reader{display:grid;grid-template-columns:1fr 230px;gap:40px;align-items:start}
 .reader-toc{position:sticky;top:24px;display:grid;gap:4px;font-size:13.5px}
@@ -7328,7 +7560,7 @@ pre.code{background:var(--navy);color:var(--navy-ink);border-radius:8px;padding:
   html,body{background:#fff}
   .app{display:block}
   .topbar,.sections,.reader-bar,.sync,.search-btn,.pal,.toast,.reader-toc,.ch-nav,.notes,.ask-box,.needs-sample,.ch-cover,.listen,
-  .toggle,#addTermBtn,#addTermForm,.drill-top,.grade,.selfans,.labs-nav,.hero-side,.legend,.backup,.ivbar{display:none!important}
+  .toggle,.depth,#addTermBtn,#addTermForm,.drill-top,.grade,.selfans,.labs-nav,.hero-side,.legend,.backup,.ivbar{display:none!important}
   .main{padding:0;max-width:none}
   .reader{display:block}
   .card{box-shadow:none;break-inside:avoid}
@@ -7536,8 +7768,8 @@ if (typeof module !== 'undefined') module.exports = { mdRender, mdFrontmatter, m
     }
   }
   var domains = json('src-domains', 'CONTENT 1 · COLLECTIONS');
-  var glossary = json('src-glossary', 'CONTENT 3 · GLOSSARY');
-  var questions = json('src-questions', 'CONTENT 4 · DRILL QUESTIONS');
+  var glossary = json('src-glossary', 'CONTENT 4 · GLOSSARY');
+  var questions = json('src-questions', 'CONTENT 5 · DRILL QUESTIONS');
   var chapters = [];
   var REQUIRED = ['id', 'num', 'domain', 'track', 'title', 'subtitle', 'hue', 'minutes'];
   document.querySelectorAll('script.src-chapter').forEach(function (el, i) {
@@ -7558,6 +7790,23 @@ if (typeof module !== 'undefined') module.exports = { mdRender, mdFrontmatter, m
   });
   chapters.sort(function (a, b) { return a.num - b.num || a._i - b._i; });
   chapters.forEach(function (c) { delete c._i; });
+  /* The in-depth bodies. Each names the chapter it belongs to and nothing else;
+     everything that identifies that chapter is already in its own block. */
+  document.querySelectorAll('script.src-deep').forEach(function (el, i) {
+    try {
+      var parsed = mdFrontmatter(el.textContent.trim()), meta = parsed.meta;
+      if (!meta.id) throw new Error('its settings are missing "id:"');
+      if (!meta.minutes || isNaN(meta.minutes)) throw new Error('its settings are missing "minutes:"');
+      var owner = chapters.filter(function (c) { return c.id === meta.id; })[0];
+      if (!owner) throw new Error('no chapter has the id "' + meta.id + '"');
+      if (owner.deep) throw new Error('chapter "' + meta.id + '" already has an in-depth version');
+      owner.deep = mdRender(parsed.body);
+      owner.deepMin = meta.minutes;
+    } catch (e) {
+      var hint = (el.textContent.match(/^id:\s*(\S+)/m) || [])[1];
+      problems.push('CONTENT 3 · in-depth block ' + (i + 1) + (hint ? ' (id: ' + hint + ')' : '') + ': ' + e.message);
+    }
+  });
   var data = {
     domains: domains,
     chapters: chapters,
@@ -7587,11 +7836,18 @@ if (typeof module !== 'undefined') module.exports = { mdRender, mdFrontmatter, m
    ===================================================================== */
 const DATA = JSON.parse(document.getElementById('hcm-data').textContent);
 const CH = DATA.chapters; const chById = id => CH.find(c=>c.id===id);
+/* A chapter can carry a second, longer body — the in-depth version, written in
+   content/deep/<id>.md. S.depth picks which one every view reads, so the
+   setting is the site's, not one chapter's. A chapter without one is simply
+   shown as it is; nothing else in the page changes. */
+const deepOn = c => !!(S.depth && c && c.deep);
+const chBody = c => deepOn(c) ? c.deep : c.html;
+const chMins = c => deepOn(c) ? c.deepMin : c.minutes;
 const TERMS = {}; DATA.terms.forEach(t=>TERMS[t.id]=t);
 const allTerms = () => [...DATA.terms, ...S.custom];
 
 /* ---------- state ---------- */
-const S = {known:{},read:{},notes:{},drill:{},due:{},custom:[],customQ:[],updatedAt:0,last:null};
+const S = {known:{},read:{},notes:{},drill:{},due:{},custom:[],customQ:[],updatedAt:0,last:null,depth:0};
 const LS='hcm-atlas-v2';
 try{ const raw=localStorage.getItem(LS); if(raw) Object.assign(S, JSON.parse(raw)); }catch(e){}
 let db=null, saveTimer=null;
@@ -7639,6 +7895,7 @@ const SECTIONS=[['home','Home'],['chapters','Chapters'],['labs','Labs'],['glossa
 let route={view:'overview'}, lastHash='';
 function go(view, extra={}){
   if(extra.dom){ dom=extra.dom; delete extra.dom; }
+  if(extra.depth){ S.depth=1; save(); delete extra.depth; }
   route={view,...extra};
   lastHash=view==='overview'?'overview':[dom,view,extra.ch||extra.lab||'',extra.sec||''].filter(Boolean).join('/');
   location.hash=lastHash; render(); if(!extra.sec) window.scrollTo({top:0});
@@ -7811,22 +8068,31 @@ function renderOverview(v){
 /* ================= CHAPTERS ================= */
 function renderChapters(v){
   if(route.ch) return renderReader(v, chById(route.ch)||CH[0]);
-  const row=c=>`<button class="chrow card" data-h style="--h:${c.hue}" data-ch="${c.id}"><div class="n">${icon(c.id)}<span>${c.num}</span></div><div><h3>${esc(c.title)}</h3><div class="s">${esc(c.sub)}</div></div><div class="m">${S.read[c.id]?'<span class="ok">✓ Read</span>':''}<span>${c.minutes} min</span><span>${c.terms.length} terms</span>${c.labs.length?`<span>${c.labs.length} lab${c.labs.length>1?'s':''}</span>`:''}</div></button>`;
+  const row=c=>`<button class="chrow card" data-h style="--h:${c.hue}" data-ch="${c.id}"><div class="n">${icon(c.id)}<span>${c.num}</span></div><div><h3>${esc(c.title)}</h3><div class="s">${esc(c.sub)}</div></div><div class="m">${S.read[c.id]?'<span class="ok">✓ Read</span>':''}${c.deep?`<span class="dp" title="Has an in-depth version">${deepOn(c)?'In depth':'+ depth'}</span>`:''}<span>${chMins(c)} min</span><span>${c.terms.length} terms</span>${c.labs.length?`<span>${c.labs.length} lab${c.labs.length>1?'s':''}</span>`:''}</div></button>`;
   const group=(track,name,blurb)=>{ const list=CHD().filter(c=>c.track===track); if(!list.length) return '';
     const read=list.filter(c=>S.read[c.id]).length;
-    return `<section class="chgroup"><div class="chgroup-head"><span class="sec-k ${track}">${name}</span><p>${blurb}</p><span class="n num">${read} of ${list.length} read · ${list.reduce((a,c)=>a+c.minutes,0)} min</span></div><div class="chlist">${list.map(row).join('')}</div></section>`; };
-  v.innerHTML=`<div class="view-head"><div><div class="eyebrow">${CHD().length} chapters · about ${CHD().reduce((a,c)=>a+c.minutes,0)} minutes of reading</div><h1>Chapters</h1><p>Read in order the first time — each chapter assumes the ones before it. After that, jump to whatever the project needs.</p></div></div>
+    return `<section class="chgroup"><div class="chgroup-head"><span class="sec-k ${track}">${name}</span><p>${blurb}</p><span class="n num">${read} of ${list.length} read · ${list.reduce((a,c)=>a+chMins(c),0)} min</span></div><div class="chlist">${list.map(row).join('')}</div></section>`; };
+  v.innerHTML=`<div class="view-head"><div><div class="eyebrow">${CHD().length} chapters · about ${CHD().reduce((a,c)=>a+chMins(c),0)} minutes of reading</div><h1>Chapters</h1><p>Read in order the first time — each chapter assumes the ones before it. After that, jump to whatever the project needs.</p></div></div>
   ${['functional','technical'].map(t=>{const L=domById(dom).tracks[t]; return group(t,L.name,L.blurb);}).join('')}`;
   v.querySelectorAll('[data-ch]').forEach(b=>b.addEventListener('click',()=>go('chapters',{ch:b.dataset.ch})));
 }
+/* Standard or in depth. The same chapter, written twice: the second one goes
+   further into the mechanism rather than appending an appendix to the first.
+   Chapters that have no in-depth version yet say so rather than hiding it. */
+function depthControl(c){
+  if(!c.deep) return S.depth?'<span class="small muted" style="margin-left:auto">· no in-depth version of this chapter yet</span>':'';
+  const on=deepOn(c);
+  return `<span class="depth" role="group" aria-label="How much detail"><button type="button" class="${on?'':'on'}" data-depth="0" aria-pressed="${!on}">Standard</button><button type="button" class="${on?'on':''}" data-depth="1" aria-pressed="${on}">In depth</button></span>`;
+}
+
 function renderReader(v,c){
   if(S.last!==c.id){ S.last=c.id; save(); }
   const sib=CHD(); const i=sib.indexOf(c); const prev=sib[i-1], next=sib[i+1];
   const terms=[...c.terms.map(id=>TERMS[id]).filter(Boolean), ...S.custom.filter(t=>t.ch===c.id)];
   v.innerHTML=`<div class="reader" data-h style="--h:${c.hue}"><article>
     <div class="ch-cover">${c.cover?`<img class="cover-img" src="${c.cover}" alt="">`:coverArt(c.num)}<div class="ch-cover-in"><span class="ch-cover-ico">${icon(c.id)}</span><span class="ch-cover-n num">${String(c.num).padStart(2,'0')}</span></div></div>
-    <div class="ch-head"><div class="eyebrow">Chapter ${c.num} of ${sib.length}</div><h1>${esc(c.title)}</h1><p class="sub">${esc(c.sub)}</p><div class="meta"><span>${c.minutes} min read</span><span>·</span><span>${terms.length} key terms</span>${c.labs.length?`<span>·</span><span>${c.labs.length} interactive lab${c.labs.length>1?'s':''}</span>`:''}${speechButton(c)}<label class="toggle" style="margin-left:auto"><input type="checkbox" id="readChk" ${S.read[c.id]?'checked':''}> Mark as read</label></div></div>
-    <div class="prose" id="prose">${c.html}</div>
+    <div class="ch-head"><div class="eyebrow">Chapter ${c.num} of ${sib.length}</div><h1>${esc(c.title)}</h1><p class="sub">${esc(c.sub)}</p><div class="meta"><span>${chMins(c)} min read</span><span>·</span><span>${terms.length} key terms</span>${c.labs.length?`<span>·</span><span>${c.labs.length} interactive lab${c.labs.length>1?'s':''}</span>`:''}${depthControl(c)}${speechButton(c)}<label class="toggle" style="margin-left:auto"><input type="checkbox" id="readChk" ${S.read[c.id]?'checked':''}> Mark as read</label></div></div>
+    <div class="prose" id="prose">${chBody(c)}</div>
     <section class="keyterms"><h2>Key terms in this chapter</h2><div class="kt">${terms.map(t=>`<div class="row">${knownBtn(t.id)}<div><b>${esc(t.name)}${t.ar?` <span class="ar">${esc(t.ar)}</span>`:''}${t.mine?' <span class="mine">yours</span>':''}</b><span>${esc(t.what)}</span></div></div>`).join('')}</div>
     <div style="margin-top:12px"><button class="btn sm" id="addTermBtn">+ Add a term to this chapter</button><div id="addTermForm"></div></div></section>
     <div class="ch-foot">
@@ -7849,6 +8115,11 @@ function renderReader(v,c){
   if(route.sec){ const target=document.getElementById(route.sec); delete route.sec; if(target) requestAnimationFrame(()=>target.scrollIntoView({block:'start'})); }
   // wiring
   $('#listenBtn')?.addEventListener('click',e=>{ const b=e.currentTarget; if(b.classList.contains('on')){ speechStop(); } else { b.classList.add('on'); speechStart(c); } });
+  v.querySelectorAll('[data-depth]').forEach(b=>b.addEventListener('click',()=>{
+    const want=+b.dataset.depth; if(want===(S.depth?1:0)) return;
+    S.depth=want; save(); renderReader(v,c); window.scrollTo({top:0});
+    toast(want?'In depth — every chapter that has one':'Standard length');
+  }));
   $('#readChk').addEventListener('change',e=>{ if(e.target.checked) S.read[c.id]=1; else delete S.read[c.id]; save(); toast(e.target.checked?'Chapter marked as read':'Unmarked'); });
   let nt; $('#chNote').addEventListener('input',e=>{ S.notes[c.id]=e.target.value; clearTimeout(nt); nt=setTimeout(save,400); });
   v.querySelectorAll('[data-ch]').forEach(b=>b.addEventListener('click',()=>go('chapters',{ch:b.dataset.ch})));
@@ -9104,7 +9375,7 @@ function renderAbout(v){
     if(!p||typeof p!=='object'||!('drill' in p)&&!('known' in p)) return stat('That file has no progress in it.');
     ['known','read','notes','drill','due'].forEach(k=>{ S[k]=p[k]&&typeof p[k]==='object'?p[k]:{}; });
     S.custom=Array.isArray(p.custom)?p.custom:[]; S.customQ=Array.isArray(p.customQ)?p.customQ:[];
-    S.last=typeof p.last==='string'?p.last:null;
+    S.last=typeof p.last==='string'?p.last:null; S.depth=p.depth?1:0;
     save(); toast('Progress restored'); render();
   });
 }
@@ -9164,7 +9435,7 @@ function speechButton(c) {
   if (!SPEECH_OK) return '';
   return `<button class="listen" id="listenBtn" aria-label="Read this chapter aloud">
     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9z"/><path d="M16.5 8.5a5 5 0 010 7"/><path d="M19 6a8.5 8.5 0 010 12"/></svg>
-    <span>Listen</span><span class="listen-min">${c.minutes} min</span></button>`;
+    <span>Listen</span><span class="listen-min">${chMins(c)} min</span></button>`;
 }
 
 function speechStart(c) {
@@ -10031,34 +10302,56 @@ function buildIndex() {
   });
 
   CH.forEach(c => {
-    const blocks = flattenChapter(c.html);
-    // Chapter row: its own body is the whole readable text.
-    const whole = blocks.filter(b => !b.sources).map(b => b.el.textContent).join(' ').replace(/\s+/g, ' ').trim();
-    add('chapter', c.title, c.sub, whole, { ch: c.id });
-
     // Section rows, keyed by the same slug renderReader gives the heading, so a
     // hit can scroll straight to it. Labs are indexed separately, and their
     // headings are not chapter sections, so they take no part in the numbering.
-    const taken = new Set();
-    let row = null, text = [];
-    const closeSection = () => {
-      if (!row) return;
-      row.body = text.join(' ').replace(/\s+/g, ' ').trim();
-      row.bl = row.body.toLowerCase();
-      row = null; text = [];
+    // A chapter with an in-depth body is indexed twice: the slugs are numbered
+    // per body, exactly as the reader numbers whichever body it is showing.
+    const readSections = (html, extra) => {
+      const blocks = flattenChapter(html);
+      const taken = new Set();
+      const slugs = [];
+      let row = null, text = [];
+      const closeSection = () => {
+        if (!row) return;
+        row.body = text.join(' ').replace(/\s+/g, ' ').trim();
+        row.bl = row.body.toLowerCase();
+        row = null; text = [];
+      };
+      blocks.forEach(b => {
+        if (b.el.tagName === 'H2') {
+          closeSection();
+          if (b.sources) return;            // the Sources list is not a destination
+          const sec = slugId(b.el.textContent, taken);
+          slugs.push(sec);
+          add('section', b.el.textContent, extra ? c.title + ' · in depth' : c.title, '',
+            Object.assign({ ch: c.id, sec, hue: c.hue }, extra || {}));
+          row = rows[rows.length - 1];
+        } else if (row && !b.sources) {
+          text.push(b.el.textContent);
+        }
+      });
+      closeSection();
+      return { slugs, whole: blocks.filter(b => !b.sources).map(b => b.el.textContent).join(' ').replace(/\s+/g, ' ').trim() };
     };
-    blocks.forEach(b => {
-      if (b.el.tagName === 'H2') {
-        closeSection();
-        if (b.sources) return;              // the Sources list is not a destination
-        add('section', b.el.textContent, c.title, '',
-          { ch: c.id, sec: slugId(b.el.textContent, taken), hue: c.hue });
-        row = rows[rows.length - 1];
-      } else if (row && !b.sources) {
-        text.push(b.el.textContent);
+
+    const std = readSections(c.html, null);
+    const deep = c.deep ? readSections(c.deep, { depth: 1 }) : null;
+    // A section the two bodies share is one destination, not two. The standard
+    // row already reaches it, so drop the duplicate rather than listing it twice.
+    // Done before the chapter row is pushed, while the in-depth rows are still
+    // the last ones in the list.
+    if (deep) {
+      const have = new Set(std.slugs);
+      for (let i = rows.length - 1; i >= 0; i--) {
+        const r = rows[i];
+        if (r.kind !== 'section' || r.nav.ch !== c.id || !r.nav.depth) break;
+        if (have.has(r.nav.sec)) rows.splice(i, 1);
       }
-    });
-    closeSection();
+    }
+    // Chapter row: its own body is the whole readable text, both versions of it,
+    // so a phrase that only the in-depth chapter uses still finds the chapter.
+    add('chapter', c.title, c.sub, deep ? std.whole + ' ' + deep.whole : std.whole, { ch: c.id });
   });
 
   allTerms().forEach(t => {
@@ -10267,7 +10560,7 @@ function palGo(i) {
     if (at >= 0) { D.idx = at; renderDrill($('#view')); }
     return;
   }
-  return go('chapters', n.sec ? { dom: d, ch: n.ch, sec: n.sec } : { dom: d, ch: n.ch });
+  return go('chapters', n.sec ? { dom: d, ch: n.ch, sec: n.sec, depth: n.depth } : { dom: d, ch: n.ch });
 }
 
 /* ---------- wiring ---------- */
@@ -10321,14 +10614,16 @@ route=parseHash(); lastHash=location.hash.slice(1); render();
       if (c.track !== 'functional' && c.track !== 'technical') P.push('Chapter ' + c.id + ': track must be functional or technical');
       c.labs.forEach(function (l) { if (!labIds.has(l)) P.push('Chapter ' + c.id + ': labs: names "' + l + '", which does not exist'); });
       c.terms.forEach(function (t) { if (!termIds.has(t)) P.push('Chapter ' + c.id + ': terms: names "' + t + '", which is not in the GLOSSARY'); });
-      Array.from(c.html.matchAll(/data-lab="([a-z0-9-]+)"/g)).forEach(function (m) {
-        if (!labIds.has(m[1])) P.push('Chapter ' + c.id + ': [[lab:' + m[1] + ']] does not exist');
-      });
-      Array.from(c.html.matchAll(/data-fig="([a-z0-9-]+)"/g)).forEach(function (m) {
-        embedded.add(m[1]);
-        var f = FIGS.find(function (x) { return x.id === m[1]; });
-        if (!f) P.push('Chapter ' + c.id + ': [[fig:' + m[1] + ']] does not exist');
-        else if (f.ch !== c.id) P.push('Chapter ' + c.id + ': figure "' + m[1] + '" belongs to chapter "' + f.ch + '"');
+      [[c.html, ''], [c.deep || '', ' (in depth)']].forEach(function (pair) {
+        Array.from(pair[0].matchAll(/data-lab="([a-z0-9-]+)"/g)).forEach(function (m) {
+          if (!labIds.has(m[1])) P.push('Chapter ' + c.id + pair[1] + ': [[lab:' + m[1] + ']] does not exist');
+        });
+        Array.from(pair[0].matchAll(/data-fig="([a-z0-9-]+)"/g)).forEach(function (m) {
+          embedded.add(m[1]);
+          var f = FIGS.find(function (x) { return x.id === m[1]; });
+          if (!f) P.push('Chapter ' + c.id + pair[1] + ': [[fig:' + m[1] + ']] does not exist');
+          else if (f.ch !== c.id) P.push('Chapter ' + c.id + pair[1] + ': figure "' + m[1] + '" belongs to chapter "' + f.ch + '"');
+        });
       });
       if (!ICONS[c.id]) P.push('Chapter ' + c.id + ': has no icon yet (ENGINE → const ICONS)');
     });

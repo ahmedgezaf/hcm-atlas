@@ -320,6 +320,14 @@ pre.code{background:var(--navy);color:var(--navy-ink);border-radius:8px;padding:
 .chrow .m{display:flex;align-items:center;gap:10px;font-size:12.5px;color:var(--muted);white-space:nowrap}
 .chrow .m .ok{color:var(--good);font-weight:700}
 
+/* The standard / in-depth switch. It is the site's setting, not one
+   chapter's, so it looks like a mode and sits with the other reading facts. */
+.depth{display:inline-flex;border:1px solid var(--line);border-radius:999px;padding:2px;background:var(--surface-2);gap:2px}
+.depth button{font:inherit;font-size:12px;font-weight:700;letter-spacing:.01em;padding:4px 11px;border:0;border-radius:999px;background:none;color:var(--muted);cursor:pointer;white-space:nowrap}
+.depth button:hover{color:var(--ink)}
+.depth button.on{background:var(--p);color:var(--surface)}
+.chrow .m .dp{font-size:11px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;color:var(--p);border:1px solid var(--p);border-radius:999px;padding:1px 7px}
+
 /* ---- READER */
 .reader{display:grid;grid-template-columns:1fr 230px;gap:40px;align-items:start}
 .reader-toc{position:sticky;top:24px;display:grid;gap:4px;font-size:13.5px}
@@ -888,7 +896,7 @@ pre.code{background:var(--navy);color:var(--navy-ink);border-radius:8px;padding:
   html,body{background:#fff}
   .app{display:block}
   .topbar,.sections,.reader-bar,.sync,.search-btn,.pal,.toast,.reader-toc,.ch-nav,.notes,.ask-box,.needs-sample,.ch-cover,.listen,
-  .toggle,#addTermBtn,#addTermForm,.drill-top,.grade,.selfans,.labs-nav,.hero-side,.legend,.backup,.ivbar{display:none!important}
+  .toggle,.depth,#addTermBtn,#addTermForm,.drill-top,.grade,.selfans,.labs-nav,.hero-side,.legend,.backup,.ivbar{display:none!important}
   .main{padding:0;max-width:none}
   .reader{display:block}
   .card{box-shadow:none;break-inside:avoid}

@@ -12,6 +12,12 @@ will actually hear — the formal term, and what people say on the floor.
 labs of its own — a join visualiser, a query-execution stepper, a window-frame
 demo and a DAX filter-context explorer.
 
+Every chapter can be read at two depths. A **Standard / In depth** switch in
+the reader swaps the chapter for a longer version of itself — the same ground,
+taken further into the mechanism, the edge cases and what actually happens on a
+project. It is one setting for the whole site, search reaches into both
+versions, and a chapter that has no long version yet says so.
+
 The labs are the point of it: a payroll chain you break link by link and watch a
 payslip react, a Fast Formula that runs in the page and shows which lines fired,
 an end-of-service calculator where a rehire policy moves the money, a subject-area
@@ -70,7 +76,7 @@ python scripts/import_portable.py path/to/moon-learning.html --apply  # write it
 | --- | --- |
 | **Overview** | Every collection with its size and how far through it you are. |
 | **Home** | Per collection: progress dashboard, a per-chapter progress chart, then the whole subject on one screen — every block opens a chapter, split Functional / Technical. |
-| **Chapters** | 31 chapters, ~40,700 words |
+| **Chapters** | 31 chapters, ~40,200 words, with in-depth versions alongside |
 | **Figures** | 20 inline SVG diagrams |
 | **Labs** | 36 interactive pieces |
 | **Glossary** | 261 terms |
@@ -87,6 +93,7 @@ any terms or questions the reader adds themselves — is stored in the browser.
 content/
   domains.json          the collections
   chapters/NN-id.md     one chapter each: frontmatter + Markdown
+  deep/<id>.md          optional in-depth version of that chapter
   glossary.json         terms, definitions, watch-outs
   questions.json        drill questions with model answers
   images/               optional chapter cover photos (none shipped)

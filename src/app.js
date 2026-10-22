@@ -15,11 +15,18 @@
    ===================================================================== */
 const DATA = JSON.parse(document.getElementById('hcm-data').textContent);
 const CH = DATA.chapters; const chById = id => CH.find(c=>c.id===id);
+/* A chapter can carry a second, longer body — the in-depth version, written in
+   content/deep/<id>.md. S.depth picks which one every view reads, so the
+   setting is the site's, not one chapter's. A chapter without one is simply
+   shown as it is; nothing else in the page changes. */
+const deepOn = c => !!(S.depth && c && c.deep);
+const chBody = c => deepOn(c) ? c.deep : c.html;
+const chMins = c => deepOn(c) ? c.deepMin : c.minutes;
 const TERMS = {}; DATA.terms.forEach(t=>TERMS[t.id]=t);
 const allTerms = () => [...DATA.terms, ...S.custom];
 
 /* ---------- state ---------- */
-const S = {known:{},read:{},notes:{},drill:{},due:{},custom:[],customQ:[],updatedAt:0,last:null};
+const S = {known:{},read:{},notes:{},drill:{},due:{},custom:[],customQ:[],updatedAt:0,last:null,depth:0};
 const LS='hcm-atlas-v2';
 try{ const raw=localStorage.getItem(LS); if(raw) Object.assign(S, JSON.parse(raw)); }catch(e){}
 let db=null, saveTimer=null;
@@ -67,6 +74,7 @@ const SECTIONS=[['home','Home'],['chapters','Chapters'],['labs','Labs'],['glossa
 let route={view:'overview'}, lastHash='';
 function go(view, extra={}){
   if(extra.dom){ dom=extra.dom; delete extra.dom; }
+  if(extra.depth){ S.depth=1; save(); delete extra.depth; }
   route={view,...extra};
   lastHash=view==='overview'?'overview':[dom,view,extra.ch||extra.lab||'',extra.sec||''].filter(Boolean).join('/');
   location.hash=lastHash; render(); if(!extra.sec) window.scrollTo({top:0});
@@ -239,22 +247,31 @@ function renderOverview(v){
 /* ================= CHAPTERS ================= */
 function renderChapters(v){
   if(route.ch) return renderReader(v, chById(route.ch)||CH[0]);
-  const row=c=>`<button class="chrow card" data-h style="--h:${c.hue}" data-ch="${c.id}"><div class="n">${icon(c.id)}<span>${c.num}</span></div><div><h3>${esc(c.title)}</h3><div class="s">${esc(c.sub)}</div></div><div class="m">${S.read[c.id]?'<span class="ok">✓ Read</span>':''}<span>${c.minutes} min</span><span>${c.terms.length} terms</span>${c.labs.length?`<span>${c.labs.length} lab${c.labs.length>1?'s':''}</span>`:''}</div></button>`;
+  const row=c=>`<button class="chrow card" data-h style="--h:${c.hue}" data-ch="${c.id}"><div class="n">${icon(c.id)}<span>${c.num}</span></div><div><h3>${esc(c.title)}</h3><div class="s">${esc(c.sub)}</div></div><div class="m">${S.read[c.id]?'<span class="ok">✓ Read</span>':''}${c.deep?`<span class="dp" title="Has an in-depth version">${deepOn(c)?'In depth':'+ depth'}</span>`:''}<span>${chMins(c)} min</span><span>${c.terms.length} terms</span>${c.labs.length?`<span>${c.labs.length} lab${c.labs.length>1?'s':''}</span>`:''}</div></button>`;
   const group=(track,name,blurb)=>{ const list=CHD().filter(c=>c.track===track); if(!list.length) return '';
     const read=list.filter(c=>S.read[c.id]).length;
-    return `<section class="chgroup"><div class="chgroup-head"><span class="sec-k ${track}">${name}</span><p>${blurb}</p><span class="n num">${read} of ${list.length} read · ${list.reduce((a,c)=>a+c.minutes,0)} min</span></div><div class="chlist">${list.map(row).join('')}</div></section>`; };
-  v.innerHTML=`<div class="view-head"><div><div class="eyebrow">${CHD().length} chapters · about ${CHD().reduce((a,c)=>a+c.minutes,0)} minutes of reading</div><h1>Chapters</h1><p>Read in order the first time — each chapter assumes the ones before it. After that, jump to whatever the project needs.</p></div></div>
+    return `<section class="chgroup"><div class="chgroup-head"><span class="sec-k ${track}">${name}</span><p>${blurb}</p><span class="n num">${read} of ${list.length} read · ${list.reduce((a,c)=>a+chMins(c),0)} min</span></div><div class="chlist">${list.map(row).join('')}</div></section>`; };
+  v.innerHTML=`<div class="view-head"><div><div class="eyebrow">${CHD().length} chapters · about ${CHD().reduce((a,c)=>a+chMins(c),0)} minutes of reading</div><h1>Chapters</h1><p>Read in order the first time — each chapter assumes the ones before it. After that, jump to whatever the project needs.</p></div></div>
   ${['functional','technical'].map(t=>{const L=domById(dom).tracks[t]; return group(t,L.name,L.blurb);}).join('')}`;
   v.querySelectorAll('[data-ch]').forEach(b=>b.addEventListener('click',()=>go('chapters',{ch:b.dataset.ch})));
 }
+/* Standard or in depth. The same chapter, written twice: the second one goes
+   further into the mechanism rather than appending an appendix to the first.
+   Chapters that have no in-depth version yet say so rather than hiding it. */
+function depthControl(c){
+  if(!c.deep) return S.depth?'<span class="small muted" style="margin-left:auto">· no in-depth version of this chapter yet</span>':'';
+  const on=deepOn(c);
+  return `<span class="depth" role="group" aria-label="How much detail"><button type="button" class="${on?'':'on'}" data-depth="0" aria-pressed="${!on}">Standard</button><button type="button" class="${on?'on':''}" data-depth="1" aria-pressed="${on}">In depth</button></span>`;
+}
+
 function renderReader(v,c){
   if(S.last!==c.id){ S.last=c.id; save(); }
   const sib=CHD(); const i=sib.indexOf(c); const prev=sib[i-1], next=sib[i+1];
   const terms=[...c.terms.map(id=>TERMS[id]).filter(Boolean), ...S.custom.filter(t=>t.ch===c.id)];
   v.innerHTML=`<div class="reader" data-h style="--h:${c.hue}"><article>
     <div class="ch-cover">${c.cover?`<img class="cover-img" src="${c.cover}" alt="">`:coverArt(c.num)}<div class="ch-cover-in"><span class="ch-cover-ico">${icon(c.id)}</span><span class="ch-cover-n num">${String(c.num).padStart(2,'0')}</span></div></div>
-    <div class="ch-head"><div class="eyebrow">Chapter ${c.num} of ${sib.length}</div><h1>${esc(c.title)}</h1><p class="sub">${esc(c.sub)}</p><div class="meta"><span>${c.minutes} min read</span><span>·</span><span>${terms.length} key terms</span>${c.labs.length?`<span>·</span><span>${c.labs.length} interactive lab${c.labs.length>1?'s':''}</span>`:''}${speechButton(c)}<label class="toggle" style="margin-left:auto"><input type="checkbox" id="readChk" ${S.read[c.id]?'checked':''}> Mark as read</label></div></div>
-    <div class="prose" id="prose">${c.html}</div>
+    <div class="ch-head"><div class="eyebrow">Chapter ${c.num} of ${sib.length}</div><h1>${esc(c.title)}</h1><p class="sub">${esc(c.sub)}</p><div class="meta"><span>${chMins(c)} min read</span><span>·</span><span>${terms.length} key terms</span>${c.labs.length?`<span>·</span><span>${c.labs.length} interactive lab${c.labs.length>1?'s':''}</span>`:''}${depthControl(c)}${speechButton(c)}<label class="toggle" style="margin-left:auto"><input type="checkbox" id="readChk" ${S.read[c.id]?'checked':''}> Mark as read</label></div></div>
+    <div class="prose" id="prose">${chBody(c)}</div>
     <section class="keyterms"><h2>Key terms in this chapter</h2><div class="kt">${terms.map(t=>`<div class="row">${knownBtn(t.id)}<div><b>${esc(t.name)}${t.ar?` <span class="ar">${esc(t.ar)}</span>`:''}${t.mine?' <span class="mine">yours</span>':''}</b><span>${esc(t.what)}</span></div></div>`).join('')}</div>
     <div style="margin-top:12px"><button class="btn sm" id="addTermBtn">+ Add a term to this chapter</button><div id="addTermForm"></div></div></section>
     <div class="ch-foot">
@@ -277,6 +294,11 @@ function renderReader(v,c){
   if(route.sec){ const target=document.getElementById(route.sec); delete route.sec; if(target) requestAnimationFrame(()=>target.scrollIntoView({block:'start'})); }
   // wiring
   $('#listenBtn')?.addEventListener('click',e=>{ const b=e.currentTarget; if(b.classList.contains('on')){ speechStop(); } else { b.classList.add('on'); speechStart(c); } });
+  v.querySelectorAll('[data-depth]').forEach(b=>b.addEventListener('click',()=>{
+    const want=+b.dataset.depth; if(want===(S.depth?1:0)) return;
+    S.depth=want; save(); renderReader(v,c); window.scrollTo({top:0});
+    toast(want?'In depth — every chapter that has one':'Standard length');
+  }));
   $('#readChk').addEventListener('change',e=>{ if(e.target.checked) S.read[c.id]=1; else delete S.read[c.id]; save(); toast(e.target.checked?'Chapter marked as read':'Unmarked'); });
   let nt; $('#chNote').addEventListener('input',e=>{ S.notes[c.id]=e.target.value; clearTimeout(nt); nt=setTimeout(save,400); });
   v.querySelectorAll('[data-ch]').forEach(b=>b.addEventListener('click',()=>go('chapters',{ch:b.dataset.ch})));
@@ -475,7 +497,7 @@ function renderAbout(v){
     if(!p||typeof p!=='object'||!('drill' in p)&&!('known' in p)) return stat('That file has no progress in it.');
     ['known','read','notes','drill','due'].forEach(k=>{ S[k]=p[k]&&typeof p[k]==='object'?p[k]:{}; });
     S.custom=Array.isArray(p.custom)?p.custom:[]; S.customQ=Array.isArray(p.customQ)?p.customQ:[];
-    S.last=typeof p.last==='string'?p.last:null;
+    S.last=typeof p.last==='string'?p.last:null; S.depth=p.depth?1:0;
     save(); toast('Progress restored'); render();
   });
 }

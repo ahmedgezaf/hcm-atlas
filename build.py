@@ -11,6 +11,8 @@ Python dependency is `markdown`.
 
 Inputs
     content/chapters/NN-id.md   one chapter each, frontmatter + Markdown body
+    content/deep/<id>.md        optional in-depth companion for that chapter,
+                                shown when the reader turns In depth on
     content/glossary.json       [{id, name, chapter, definition, watchOut}]
     content/questions.json      [{chapter, question, answer, terms[]}]
     src/shell.html              page markup (nav rail + main + toast)
@@ -39,6 +41,7 @@ for stream in (sys.stdout, sys.stderr):
 ROOT = pathlib.Path(__file__).parent
 CONTENT, SRC, DIST = ROOT / "content", ROOT / "src", ROOT / "dist"
 IMAGES = CONTENT / "images"
+DEEP = CONTENT / "deep"
 COVER_TYPES = {".jpg": "image/jpeg", ".jpeg": "image/jpeg", ".png": "image/png", ".webp": "image/webp", ".avif": "image/avif"}
 
 TITLE = "Moon Learning"
@@ -121,6 +124,32 @@ def load_cover(name, chapter_id):
     return f"data:{kind};base64,{base64.b64encode(raw).decode('ascii')}"
 
 
+def load_deep():
+    """The in-depth companions. One optional file per chapter id, carrying its
+    own `minutes:` because it is a longer read, and nothing else — everything
+    that identifies the chapter is already in content/chapters/."""
+    if not DEEP.exists():
+        return {}
+    out = {}
+    for path in sorted(DEEP.glob("*.md")):
+        text = path.read_text(encoding="utf-8")
+        if not text.startswith("---"):
+            raise SystemExit(f"content/deep/{path.name}: missing --- frontmatter block")
+        _, fm, body = text.split("---", 2)
+        meta = {}
+        for line in fm.strip().splitlines():
+            key, _, value = line.partition(":")
+            meta[key.strip()] = value.strip()
+        for required in ("id", "minutes"):
+            if required not in meta:
+                raise SystemExit(f"content/deep/{path.name}: frontmatter is missing `{required}`")
+        if meta["id"] in out:
+            raise SystemExit(f"content/deep/{path.name}: a second file for chapter '{meta['id']}'")
+        out[meta["id"]] = {"minutes": int(meta["minutes"]), "body": body.strip(),
+                           "html": render_chapter_html(body.strip()), "file": path.name}
+    return out
+
+
 def load_content():
     files = sorted((CONTENT / "chapters").glob("*.md"))
     if not files:
@@ -136,6 +165,14 @@ def load_content():
             "cover": load_cover(meta["cover"], meta["id"]) if meta.get("cover") else "",
         })
     chapters.sort(key=lambda c: c["num"])
+
+    deep = load_deep()
+    by_id = {c["id"]: c for c in chapters}
+    for cid, d in deep.items():
+        if cid not in by_id:
+            raise SystemExit(f"content/deep/{d['file']}: no chapter has id '{cid}'")
+        by_id[cid]["deep"] = d["html"]
+        by_id[cid]["deepMin"] = d["minutes"]
 
     domains = json.loads((CONTENT / "domains.json").read_text(encoding="utf-8"))
     glossary = json.loads((CONTENT / "glossary.json").read_text(encoding="utf-8"))
@@ -167,15 +204,18 @@ def validate(data):
         for t in c["terms"]:
             if t not in term_ids:
                 problems.append(f"chapter {c['id']}: unknown term '{t}'")
-        for lab in re.findall(r'class="lab-embed" data-lab="([a-z0-9-]+)"', c["html"]):
-            if lab not in lab_ids:
-                problems.append(f"chapter {c['id']}: embeds unknown lab '{lab}'")
-        for fig in re.findall(r'class="fig-embed" data-fig="([a-z0-9-]+)"', c['html']):
-            embedded_figs.add(fig)
-            if fig not in fig_ids:
-                problems.append(f"chapter {c['id']}: embeds unknown figure '{fig}'")
-            elif fig_owner.get(fig) != c['id']:
-                problems.append(f"chapter {c['id']}: figure '{fig}' declares ch='{fig_owner.get(fig)}'")
+        # The standard body and the in-depth one are the same chapter, so a
+        # figure embedded in either counts as embedded, and both are checked.
+        for where, body in (("", c["html"]), (" (in depth)", c.get("deep", ""))):
+            for lab in re.findall(r'class="lab-embed" data-lab="([a-z0-9-]+)"', body):
+                if lab not in lab_ids:
+                    problems.append(f"chapter {c['id']}{where}: embeds unknown lab '{lab}'")
+            for fig in re.findall(r'class="fig-embed" data-fig="([a-z0-9-]+)"', body):
+                embedded_figs.add(fig)
+                if fig not in fig_ids:
+                    problems.append(f"chapter {c['id']}{where}: embeds unknown figure '{fig}'")
+                elif fig_owner.get(fig) != c['id']:
+                    problems.append(f"chapter {c['id']}{where}: figure '{fig}' declares ch='{fig_owner.get(fig)}'")
     for t in data["terms"]:
         if t["ch"] not in chapter_ids:
             problems.append(f"term {t['id']}: unknown chapter '{t['ch']}'")
@@ -277,10 +317,15 @@ def build(target="site"):
     # text mode would otherwise translate every \n into \r\n.
     out.write_text(page, encoding="utf-8", newline="\n")
 
-    words = sum(len(re.sub(r"<[^>]+>", " ", c["html"]).split()) for c in data["chapters"])
+    plain = lambda h: len(re.sub(r"<[^>]+>", " ", h).split())
+    words = sum(plain(c["html"]) for c in data["chapters"])
+    deep = [c for c in data["chapters"] if c.get("deep")]
     print(f"✓ {out.relative_to(ROOT)}  —  {len(page)//1024} KB")
     print(f"  {len(data['chapters'])} chapters · ~{words:,} words · "
           f"{len(data['terms'])} terms · {len(data['questions'])} questions")
+    if deep:
+        dw = sum(plain(c["deep"]) for c in deep)
+        print(f"  in depth: {len(deep)} of {len(data['chapters'])} chapters · ~{dw:,} words")
     if target == "site":
         # The editable edition: the same site with its content left as plain
         # Markdown and JSON, rendered in the browser. See portable.py.

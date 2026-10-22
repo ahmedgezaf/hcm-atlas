@@ -53,7 +53,7 @@ function speechButton(c) {
   if (!SPEECH_OK) return '';
   return `<button class="listen" id="listenBtn" aria-label="Read this chapter aloud">
     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9z"/><path d="M16.5 8.5a5 5 0 010 7"/><path d="M19 6a8.5 8.5 0 010 12"/></svg>
-    <span>Listen</span><span class="listen-min">${c.minutes} min</span></button>`;
+    <span>Listen</span><span class="listen-min">${chMins(c)} min</span></button>`;
 }
 
 function speechStart(c) {

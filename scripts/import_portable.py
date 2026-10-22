@@ -67,6 +67,24 @@ def chapters(html):
     return out
 
 
+def deep_chapters(html):
+    """The in-depth blocks. Each carries only `id:` and `minutes:`, so it is
+    named after the chapter it belongs to rather than numbered."""
+    out = []
+    for m in re.finditer(r'<script type="text/markdown" class="src-deep">\n?(.*?)\n?</script>', html, re.S):
+        text = m.group(1).strip()
+        cid = re.search(r"^id:\s*(\S+)\s*$", text, re.M)
+        if not (text.startswith("---") and cid):
+            snippet = text[:60].replace(NL, " ")
+            raise SystemExit(f"An in-depth block is missing its --- settings or id: — it starts: {snippet!r}")
+        out.append({"id": cid.group(1), "text": text})
+    ids = [c["id"] for c in out]
+    dupes = sorted({i for i in ids if ids.count(i) > 1})
+    if dupes:
+        raise SystemExit(f"Two or more in-depth blocks name the same chapter: {', '.join(dupes)}")
+    return out
+
+
 def extract_cover(ch):
     """A cover inlined as a data URI goes back to content/images as a file."""
     m = re.search(r"^cover:\s*data:(image/[a-z+]+);base64,(\S+)\s*$", ch["text"], re.M)
@@ -100,6 +118,9 @@ def main():
         if cover:
             images[CONTENT / "images" / cover[0]] = cover[1]
 
+    deep_incoming = deep_chapters(html)
+    deep_existing = {p.stem: p for p in (CONTENT / "deep").glob("*.md")} if (CONTENT / "deep").exists() else {}
+
     existing = {}
     for path in (CONTENT / "chapters").glob("*.md"):
         m = re.search(r"^id:\s*(\S+)\s*$", path.read_text(encoding="utf-8"), re.M)
@@ -118,10 +139,16 @@ def main():
             renames.append((old, target))
         if not target.exists() or target.read_text(encoding="utf-8") != text or (old and old != target):
             changes.append((target, text))
+    for ch in deep_incoming:
+        target = CONTENT / "deep" / f"{ch['id']}.md"
+        text = ch["text"] + NL
+        if not target.exists() or target.read_text(encoding="utf-8") != text:
+            changes.append((target, text))
     gone = sorted(set(existing) - {c["id"] for c in incoming})
+    deep_gone = sorted(set(deep_existing) - {c["id"] for c in deep_incoming})
 
     rel = lambda p: p.relative_to(ROOT).as_posix()
-    if not changes and not renames and not gone and not images:
+    if not changes and not renames and not gone and not deep_gone and not images:
         print("Nothing to import — content/ already matches this file.")
         return
     if args.check:
@@ -140,6 +167,9 @@ def main():
     for cid in gone:
         print(f"  {'removed' if args.apply and args.prune else 'NOT IN FILE'}  {rel(existing[cid])}"
               + ("" if args.prune else "   (kept; pass --prune to remove)"))
+    for cid in deep_gone:
+        print(f"  {'removed' if args.apply and args.prune else 'NOT IN FILE'}  {rel(deep_existing[cid])}"
+              + ("" if args.prune else "   (kept; pass --prune to remove)"))
 
     if not args.apply:
         print("\nDry run. Add --apply to write these, then run  python build.py  and  node scripts/smoke.js")
@@ -148,6 +178,7 @@ def main():
     for old, _ in renames:
         old.unlink()
     for path, text in changes:
+        path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(text, encoding="utf-8", newline=NL)
     for path, data in images.items():
         path.parent.mkdir(exist_ok=True)
@@ -155,6 +186,8 @@ def main():
     if args.prune:
         for cid in gone:
             existing[cid].unlink()
+        for cid in deep_gone:
+            deep_existing[cid].unlink()
     print("\nDone. Now run  python build.py  — it will refuse to build if anything references something missing.")
 
 

@@ -42,34 +42,56 @@ function buildIndex() {
   });
 
   CH.forEach(c => {
-    const blocks = flattenChapter(c.html);
-    // Chapter row: its own body is the whole readable text.
-    const whole = blocks.filter(b => !b.sources).map(b => b.el.textContent).join(' ').replace(/\s+/g, ' ').trim();
-    add('chapter', c.title, c.sub, whole, { ch: c.id });
-
     // Section rows, keyed by the same slug renderReader gives the heading, so a
     // hit can scroll straight to it. Labs are indexed separately, and their
     // headings are not chapter sections, so they take no part in the numbering.
-    const taken = new Set();
-    let row = null, text = [];
-    const closeSection = () => {
-      if (!row) return;
-      row.body = text.join(' ').replace(/\s+/g, ' ').trim();
-      row.bl = row.body.toLowerCase();
-      row = null; text = [];
+    // A chapter with an in-depth body is indexed twice: the slugs are numbered
+    // per body, exactly as the reader numbers whichever body it is showing.
+    const readSections = (html, extra) => {
+      const blocks = flattenChapter(html);
+      const taken = new Set();
+      const slugs = [];
+      let row = null, text = [];
+      const closeSection = () => {
+        if (!row) return;
+        row.body = text.join(' ').replace(/\s+/g, ' ').trim();
+        row.bl = row.body.toLowerCase();
+        row = null; text = [];
+      };
+      blocks.forEach(b => {
+        if (b.el.tagName === 'H2') {
+          closeSection();
+          if (b.sources) return;            // the Sources list is not a destination
+          const sec = slugId(b.el.textContent, taken);
+          slugs.push(sec);
+          add('section', b.el.textContent, extra ? c.title + ' · in depth' : c.title, '',
+            Object.assign({ ch: c.id, sec, hue: c.hue }, extra || {}));
+          row = rows[rows.length - 1];
+        } else if (row && !b.sources) {
+          text.push(b.el.textContent);
+        }
+      });
+      closeSection();
+      return { slugs, whole: blocks.filter(b => !b.sources).map(b => b.el.textContent).join(' ').replace(/\s+/g, ' ').trim() };
     };
-    blocks.forEach(b => {
-      if (b.el.tagName === 'H2') {
-        closeSection();
-        if (b.sources) return;              // the Sources list is not a destination
-        add('section', b.el.textContent, c.title, '',
-          { ch: c.id, sec: slugId(b.el.textContent, taken), hue: c.hue });
-        row = rows[rows.length - 1];
-      } else if (row && !b.sources) {
-        text.push(b.el.textContent);
+
+    const std = readSections(c.html, null);
+    const deep = c.deep ? readSections(c.deep, { depth: 1 }) : null;
+    // A section the two bodies share is one destination, not two. The standard
+    // row already reaches it, so drop the duplicate rather than listing it twice.
+    // Done before the chapter row is pushed, while the in-depth rows are still
+    // the last ones in the list.
+    if (deep) {
+      const have = new Set(std.slugs);
+      for (let i = rows.length - 1; i >= 0; i--) {
+        const r = rows[i];
+        if (r.kind !== 'section' || r.nav.ch !== c.id || !r.nav.depth) break;
+        if (have.has(r.nav.sec)) rows.splice(i, 1);
       }
-    });
-    closeSection();
+    }
+    // Chapter row: its own body is the whole readable text, both versions of it,
+    // so a phrase that only the in-depth chapter uses still finds the chapter.
+    add('chapter', c.title, c.sub, deep ? std.whole + ' ' + deep.whole : std.whole, { ch: c.id });
   });
 
   allTerms().forEach(t => {
@@ -278,7 +300,7 @@ function palGo(i) {
     if (at >= 0) { D.idx = at; renderDrill($('#view')); }
     return;
   }
-  return go('chapters', n.sec ? { dom: d, ch: n.ch, sec: n.sec } : { dom: d, ch: n.ch });
+  return go('chapters', n.sec ? { dom: d, ch: n.ch, sec: n.sec, depth: n.depth } : { dom: d, ch: n.ch });
 }
 
 /* ---------- wiring ---------- */
