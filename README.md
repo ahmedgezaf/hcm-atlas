@@ -3,8 +3,8 @@
 **A personal study atlas — one collection per subject, each written to teach.**
 
 Two collections so far. **Oracle HCM** is Fusion HCM Cloud for functional
-consultants in Egypt and the Gulf: twenty-two chapters, thirty-two interactive
-labs, eighteen diagrams, a 195-term bilingual glossary and a drill deck, covering
+consultants in Egypt and the Gulf: twenty-two chapters each written twice — a readable pass and an
+in-depth one — thirty-two interactive labs, eighteen diagrams, a 195-term bilingual glossary and a drill deck, covering
 the three modules juniors are hired for plus the Egyptian and Saudi statutory
 knowledge Oracle does not ship. Every HCM term carries the Arabic a consultant
 will actually hear — the formal term, and what people say on the floor.
@@ -12,11 +12,12 @@ will actually hear — the formal term, and what people say on the floor.
 labs of its own — a join visualiser, a query-execution stepper, a window-frame
 demo and a DAX filter-context explorer.
 
-Every chapter can be read at two depths. A **Standard / In depth** switch in
-the reader swaps the chapter for a longer version of itself — the same ground,
-taken further into the mechanism, the edge cases and what actually happens on a
-project. It is one setting for the whole site, search reaches into both
-versions, and a chapter that has no long version yet says so.
+Every HCM chapter can be read at two depths. A **Standard / In depth** switch
+in the reader swaps the chapter for a longer version of itself — the same
+ground, taken further into the mechanism, the edge cases and what actually
+happens on a project. All twenty-two HCM chapters have one: ~32,000 words of
+standard text become ~82,000. It is one setting for the whole site, search
+reaches into both versions, and a chapter that has no long version yet says so.
 
 The labs are the point of it: a payroll chain you break link by link and watch a
 payslip react, a Fast Formula that runs in the page and shows which lines fired,
@@ -76,7 +77,7 @@ python scripts/import_portable.py path/to/moon-learning.html --apply  # write it
 | --- | --- |
 | **Overview** | Every collection with its size and how far through it you are. |
 | **Home** | Per collection: progress dashboard, a per-chapter progress chart, then the whole subject on one screen — every block opens a chapter, split Functional / Technical. |
-| **Chapters** | 31 chapters, ~40,200 words, with in-depth versions alongside |
+| **Chapters** | 31 chapters, ~40,200 words — plus ~82,500 words of in-depth versions for all 22 HCM chapters |
 | **Figures** | 20 inline SVG diagrams |
 | **Labs** | 36 interactive pieces |
 | **Glossary** | 261 terms |

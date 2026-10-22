@@ -3011,6 +3011,320 @@ And across the Gulf, **annual leave entitlements and sick leave bands differ per
 
 <script type="text/markdown" class="src-deep">
 ---
+id: approvals
+minutes: 30
+---
+
+Every chapter before this one ends at submit. This one covers what happens next, which is where a surprising share of a project's first live month actually goes. Approval routing is named in requirements workshops constantly, configured late, tested by the person who built it, and then found to be wrong by a manager who never received a notification. "How would you configure approvals for a promotion?" is also a standard interview question, and a candidate who can name where the rules live and what an approver type needs in order to resolve sounds like someone who has shipped one.
+
+The reason approvals go wrong so reliably is that they sit at the junction of three things a project keeps in different places: the organisation's hierarchy data, its control policy, and its notification behaviour. Each is owned by somebody different, each is usually fine on its own, and the failure appears only when all three are exercised together — which is to say, in production.
+
+## Where the rules live
+
+Approval rules for HCM transactions are configured through the **Manage Approval Transactions for HCM** task in Setup and Maintenance, which lists every approval-enabled transaction — hire, promotion, transfer, termination, absence, salary change — and lets each one carry its own rules. Underneath it is the same workflow engine that drives the BPM Worklist, and the older path of editing rules directly in BPM still exists, but the HCM task is the supported route for HCM transactions and the one to use.
+
+One rule set belongs to one transaction. That is worth saying plainly, because clients describe approvals as a single policy ("everything goes to the line manager, then HR") and then list four exceptions, each of which is a condition inside one transaction's rule set rather than a new policy. Pinning down which transactions are in scope is the first thing to do, and the list is usually longer than the workshop assumes.
+
+A transaction's rules are made of **conditions** and **participants**. A condition tests attributes of the transaction — the type of change, the amount, the reason, the legal employer, the worker's grade — and decides whether a participant applies. A participant says who is asked and how many of them. A rule set can contain several of each, which is how one transaction routes four different ways depending on what it contains.
+
+## Approver types, and what each one needs to exist
+
+A rule says who approves, as an **approver type** plus a depth. The common ones:
+
+- **Supervisory hierarchy** — the manager chain from the worker, up as many levels as the rule asks for. It needs manager relationships to be complete; a gap stops the chain.
+- **Position hierarchy** — the chain of positions rather than people. It needs positions, and a position hierarchy that is actually maintained.
+- **Job level** — climbs the management chain until it reaches someone at or above a stated level. It needs job levels populated on jobs.
+- **Representative** — the area of responsibility from Chapter 15: the HR representative or other named responsibility for that worker's population.
+- **Approval group** — a named set of people, approving in serial or in parallel.
+- **Application role or named user** — a backstop, and the one to be most careful with, because it hard-codes a person into a process they will eventually leave.
+
+The failure that follows from this list is the common one: routing a promotion up a **position hierarchy** at a client who never built positions leaves the transaction with no path to follow. It does not error in the way a missing element errors. It sits there. Chapter 7's distinction between the solid and the dotted line matters here too — approvals follow the solid line, and a matrix organization that routes to the functional manager has to say so explicitly.
+
+Each approver type is really a **dependency on data somebody else maintains**, and that is the useful way to think about the choice. Supervisory routing depends on the manager field being right on every assignment. Job-level routing depends on job levels being populated across the catalogue — which, at a client who built the catalogue without them, means they are all empty and the rule climbs forever or not at all. Representative routing depends on areas of responsibility being kept current as people move.
+
+Before choosing a type, ask who maintains the data it rests on and whether they know they are now in the approval path. That question has prevented more go-live incidents than any amount of rule testing.
+
+## Serial, parallel, and what "approved" means
+
+Participants run in **serial** — each approver in turn, any rejection ending it — or in **parallel**, where several are asked at once. For a parallel group the question to settle with the client is whether every member must approve or whether the first response decides, because "the finance team approves" means one of those two things and they behave differently when somebody is on leave.
+
+The same question applies to rejection in a parallel group: does one rejection end the transaction, or is it decided by the majority or by a specific person. Clients rarely volunteer an answer and always have an opinion once asked.
+
+Rules can also carry conditions, and this is where a functional consultant spends their configuration time: route to one more level when the salary increase exceeds a threshold, skip HR for a reason code that means a correction, require the compensation team only for off-cycle changes. The ceiling where it stops being a functional job is roughly where the condition stops being expressible in the rule editor and starts needing custom logic — at which point it belongs with a technical colleague rather than in a workbook.
+
+## The approval matrix, as a deliverable
+
+The way to get this right is to produce one artefact early and have the client sign it: a matrix with one row per transaction and columns for who may initiate it, who approves and in what order, what conditions change the route, who is notified without approving, and who may act on behalf (Chapter 22).
+
+That document does three things. It forces the client to decide, in a room, questions they would otherwise answer one at a time over six months. It surfaces the disagreements inside their own organisation — typically about whether a manager's manager really needs to see a routine transfer. And it becomes the test plan, because every row is a case.
+
+The second effect of writing it down is usually a shorter list of approvals than the client first described. Asked transaction by transaction who genuinely needs to approve, organisations frequently discover that two of the four levels they were about to configure exist because of a paper form that no longer exists. Removing those is a real contribution; a four-step approval on a routine change is a design that users will work around.
+
+## Notifications, reminders and the quiet failure
+
+An approval that nobody sees is an approval that does not happen, so the notification design is part of the approval design.
+
+Approvers are reached in two places: the notification list inside the application, and email. Both matter, and in a workforce of managers who live in their inbox the second is the one that works. The content of those notifications is configurable, and the default text is rarely as useful as it could be — an approval request that says what is being asked, for whom, with the before and after values, is approved faster and more accurately than one that says a transaction awaits action.
+
+Two further behaviours belong in the design conversation. **Reminders** for a request that has sat too long, and an **expiry or escalation** path for one that is never answered. Without them, a manager on extended leave is a permanent stop, and the transaction sits in the console until somebody goes looking for it.
+
+And every approver needs a **delegation** route — a way to hand their approvals to a colleague while they are away, which is the same mechanism Chapter 15 describes for role delegation. Clients consistently forget this until the first holiday season.
+
+## Auto-approval is still a configuration
+
+Clients ask for "no approvals" more often than consultants expect, usually for data-migration cutover or for a transaction type they consider administrative. That is **auto-approval**, and it is configured — a rule that approves automatically — rather than an absence of rules. Deleting the rule set instead produces transactions with nowhere to go. It is also worth asking whether they mean no approvals forever or none during cutover, because the second is a temporary rule that somebody must remember to put back.
+
+"Somebody must remember" is doing a lot of work in that sentence, so make it an item on the cutover plan (Chapter 16) with an owner and a date, rather than a note. A system that went live with approvals switched off for migration and never had them switched on is a control finding waiting for an auditor.
+
+## The Transaction Console
+
+The **Transaction Console** is where a transaction that has not landed is found. It lists in-flight, errored and completed transactions, shows where each one is waiting, and allows a privileged user to withdraw a transaction, force it through, or see the error behind a failure. In hypercare it is the first screen to open when someone says a change "did not happen": nine times out of ten the change exists and is sitting in an approval that never reached anybody.
+
+The three things it can do are worth distinguishing, because they are not equivalent. **Withdrawing** removes the transaction, so the change does not happen and the initiator has to start again. **Forcing it through** approves it without the approver, which gets the change made and leaves a record that it bypassed the control — acceptable occasionally, corrosive as a habit. And **reading the error** is what should happen first, because a transaction that failed for a data reason will fail again the next time somebody submits it.
+
+Access to it is itself a design decision. It can withdraw and force-approve transactions, so it belongs with a small, named group — and that group should be agreed before go-live rather than during the first incident.
+
+## Testing approvals properly
+
+An approval path cannot be tested by the person who configured it, because the one thing being tested is whether it reaches somebody else. Real testing needs the actual approver accounts, in the right hierarchy, with notifications switched on, and it needs the negative cases: an approver on leave, an approver who has left the company, a worker whose manager position is vacant. Those are the cases that fail in production, and they are cheap to script in user acceptance testing and expensive to meet in week one.
+
+A fuller negative list, from the ones that actually occur: the worker whose manager is themselves, which happens after a bad data load and makes a chain loop; the worker at the top of the hierarchy, whose manager chain has nowhere to go; the transaction initiated *by* the person who would approve it; the approver whose own record is the subject of the transaction; and the transaction submitted on the day somebody's manager changes.
+
+Each has a right answer and none of them have a default one. Settling them during design takes an hour. Meeting them in production takes a week and a difficult conversation.
+
+## Where approvals meet the rest of the system
+
+Three connections are worth making explicitly, because they are where approval problems are actually caused.
+
+**Hierarchy data** (Chapters 2, 3 and 7). Most approval failures are manager data failures. A routing design is only as good as the structure beneath it, and improving the structure fixes more approval tickets than editing rules does.
+
+**Security** (Chapter 15). An approver who cannot see the worker's record may be unable to act on the notification meaningfully. Approval routing and data security are designed together or they disagree.
+
+**The payroll calendar** (Chapters 5 and 22). An approval that completes after the cut-off is a change that lands a period late. Where that matters — a salary change, a termination, a paid absence — the approval design needs either a short path or a reminder tied to the cut-off date.
+
+## Common mistakes
+
+- Routing up a position hierarchy at a client who manages by job.
+- Choosing an approver type without asking who maintains the data it depends on.
+- Routing by job level at a client whose job levels were never populated.
+- Treating "no approvals" as deleting the rules rather than configuring auto-approval.
+- Switching approvals off for cutover with no owner and no date for switching them back on.
+- Hard-coding a named user as approver, who then leaves.
+- Agreeing "the team approves" without settling whether the first response decides.
+- Leaving rejection behaviour in a parallel group undefined.
+- Configuring four approval levels because a paper form once had four signatures.
+- Leaving the notification text as delivered, so approvers cannot tell what they are approving.
+- Designing no reminders and no escalation, so one person's holiday stops a process.
+- Forgetting delegation until the first holiday season.
+- Testing approvals single-handed, so nothing proves a notification ever arrived.
+- Never testing the loop, the top of the hierarchy, or the self-approval case.
+- Using force-approve as a routine remedy rather than an exception.
+- Leaving Transaction Console access unassigned until the first stuck transaction.
+
+## Sources
+
+- Oracle, *Implementing Global Human Resources* — the approvals chapters, covering the Manage Approval Transactions for HCM task, approver types and rule conditions. https://docs.oracle.com/en/cloud/saas/human-resources/faigh/index.html
+- Oracle, *Using Common Features for HCM* — the Transaction Console, and what withdrawing or forcing a transaction does. https://docs.oracle.com/en/cloud/saas/human-resources/faucf/index.html
+- Oracle, *Securing HCM* — role delegation, which is the same mechanism approvers use when they are away. https://docs.oracle.com/en/cloud/saas/human-resources/ochus/index.html
+</script>
+
+<script type="text/markdown" class="src-deep">
+---
+id: costing
+minutes: 34
+---
+
+Chapter 5 ends the payroll cycle at the bank file, and for the payroll team that is the end. For Finance it is the start. Every amount the run calculated — each earning, each deduction, each employer contribution — has to land in a general-ledger account, against the right company, cost centre and natural account, so that the month-end close shows what people cost and where. That is **costing**, and it is the part of a payroll design that the payroll team does not see until Finance rejects the journal.
+
+Costing is set up inside payroll configuration, but it is a joint design. The account structure belongs to Finance; which salary goes where belongs to HR and the business; how the two meet is the payroll consultant's to configure. A costing workshop without the finance consultant in the room produces a design that has to be rebuilt.
+
+## Who owns what
+
+It is worth stating the ownership explicitly at the start of a project, because the confusion is structural rather than personal.
+
+Finance owns the **chart of accounts** and the accounting rules that turn payroll's output into journal entries. HR and the business own **where people sit** — the departments, positions and cost centres that decide whose cost lands where. The payroll consultant owns the **mapping** between them, and owns nothing on either side of it.
+
+That means a costing design has three sign-offs and a single point of failure: a department created in HR with no cost centre breaks a Finance process that HR will never see. The control that prevents it belongs to neither party alone, which is why it tends not to exist.
+
+## The account structure: the cost allocation key flexfield
+
+Finance already has a chart of accounts: a string of segments such as company, cost centre, natural account and sometimes project or intercompany. Payroll does not invent its own. It mirrors that structure in the **cost allocation key flexfield**, which Oracle describes as the structure for the financial accounting of payroll costs. Each segment of the flexfield represents a part of the account number and is validated by a value set, and there is one flexfield per legislative data group — so an Egyptian and a Saudi payroll can cost against different ledgers.
+
+The rule that matters most is alignment. The natural account segment in payroll must hold the same values as the natural accounts in the general ledger, or the journal that payroll sends is meaningless to the ledger that receives it. This is why the flexfield is designed against the finance team's chart of accounts, segment by segment, rather than drafted by HR and handed over.
+
+Two design questions sit inside that alignment and are worth asking explicitly.
+
+**Which segments does payroll actually need to supply?** Not every segment of the chart is payroll's business. Some are derived by Subledger Accounting from rules Finance owns, some are constant for payroll, and some genuinely vary per employee. Establishing which is which early reduces the flexfield to the segments that matter and reduces the number of places a value can go missing.
+
+**Where do the values come from, and who keeps them current?** A segment validated against a value set that Finance maintains stays aligned; one validated against a copy of Finance's values drifts. Drift here does not produce an error — it produces an account combination the ledger rejects, a month after somebody restructured the chart.
+
+## Where a value can come from: the cost hierarchy
+
+A payroll result needs a value for every segment, and Oracle lets those values be set at many levels: the payroll as a whole, the element eligibility, the department, the location, the job, the position, the person, and the individual element entry. The engine resolves them through the **cost hierarchy**. It starts at the lowest level, the element entry, and works up towards the payroll, checking each level until it finds a value — and it does this separately for each segment.
+
+That last point is the one most people get wrong. Costing is not "pick the most specific level and take its account". It is "for each segment, take the most specific level that has a value for that segment". A department can supply the cost centre while the element eligibility supplies the natural account and the payroll supplies the company, and the result is one account string assembled from three places.
+
+Oracle's documented order for standard run results, from lowest to highest, is: element entry; person element at assignment level; person element at payroll-relationship level; person at assignment level; person at payroll-relationship level; position; job; location; department; costing eligibility on assignment attributes, which applies to distributed costing only; element eligibility; and payroll. The person-level settings follow the element: earnings are usually costed at the assignment level and most deductions at the payroll-relationship level, so which person level is consulted depends on how the element was defined.
+
+[[lab:cost-hierarchy]]
+
+The design instinct that follows is to **set each segment at the level where it is actually true**, and nowhere else. The company is true for the whole payroll, so set it there. The cost centre is true of the department, so set it there. The natural account is true of the element, so set it at element eligibility. Values set redundantly at several levels are not harmful in themselves, but they mean a change made at one level has no effect because a lower one is answering — which is the most confusing costing symptom there is.
+
+## Which account types read which levels
+
+Not every account type walks the whole ladder. Fixed-cost accounts look only at the element entry, the element eligibility and the payroll. Suspense and default accounts look only at the department and the payroll, the department taking precedence. Priority accounts are set on element eligibility. The offset account is set there too and is documented as not following a hierarchy at all — with one exception worth knowing, because the documentation carries both statements: costing eligibility rules on assignment attributes can supply an offset account for payroll-relationship-level elements, and that one sits above the element eligibility offset. Knowing which levels an account type reads is most of the skill in explaining a costing result.
+
+The practical use of that list is diagnostic. When a costed amount has gone somewhere unexpected, the first question is what *type* of account it is, because that decides which levels were even consulted. Looking for a missing department value on a fixed-costed element is looking in a place the engine never read.
+
+## Costing types
+
+Each element's eligibility carries a **costing type** that decides how its results are costed.
+
+A **costed** element follows the hierarchy above — the ordinary case, and the one that lets a department drive the cost centre.
+
+A **fixed costed** element takes its account from the short list of levels just described, which is how an amount that must always land in one place — a statutory accrual, say — is kept out of the department-driven logic.
+
+**Distributed costing** is for amounts that should follow other amounts: an employer liability is spread across the same accounts, in the same proportions, as a set of earnings elements.
+
+The choice is not cosmetic and is hard to change late, because it determines which configuration levels matter for that element. Making it deliberately, element by element, during design is the work; discovering it from a suspense balance is the alternative.
+
+## Distributed costing, worked
+
+Distributed costing deserves a worked explanation because it is the mechanism behind the single most common request Finance makes, and because the request is usually phrased in a way that hides what it asks for.
+
+An employer social-insurance contribution (Chapter 9) is one amount for one person. Finance does not want it in a single central account; they want it charged to the departments that employ the people, in proportion to the salary charged there. That is "fully loaded cost per department", and it is exactly what distribution does: the liability is spread across the same accounts, in the same proportions, as the earnings elements it is distributed over.
+
+The configuration therefore needs two things rather than one: the element marked as distributed, and a **distribution group** naming which earnings it follows. Getting the group wrong is the error that is hardest to see, because the total is always right — the full liability is always allocated — and only the split is wrong. A liability distributed over basic salary only, where the client intended basic plus allowances, produces departmental costs that are plausible, consistent and incorrect.
+
+The test that catches it: take one person whose earnings are split across two cost centres and check that their employer contribution splits in the same ratio. One person, two numbers, five minutes.
+
+## The accounts that catch what the design misses
+
+Every costed amount needs both sides of the entry. The **cost account** carries the expense or liability; the **offset account** carries the balancing entry, because the ledger is double-entry and a debit with no credit is not a journal.
+
+Two safety nets catch what the design misses. A **suspense account** receives results whose required segments are missing or whose account combination is invalid, and a **default account** receives what is left over when percentage splits do not add up to a hundred. A **priority account**, at the top, overrides the hierarchy entirely for an element and must have every segment populated; anything it does not cover is then built through the hierarchy as normal.
+
+The right attitude to the safety nets is that they exist so that a payroll can complete, not so that a design can be incomplete. A suspense account is a diagnostic, and a non-empty one is a defect report (below). A client whose suspense account carries a balance every month has a configuration gap they have learned to live with, and the cost of living with it is that nobody can trust the departmental numbers.
+
+## Payment costing
+
+Payment costing has its own accounts — a payroll liability account per payment source, and cash and cash-clearing accounts tied to bank accounts — because the moment money leaves the bank is a separate accounting event from the moment it was earned.
+
+The accounting shape is worth holding, because it explains why there are two processes and three accounts. When payroll calculates, the cost is recognised as an expense and a liability. When the payment is made, the liability is cleared and cash leaves. The cash-clearing account sits between the two for the period where the payment has been issued but not yet reconciled against the bank statement. Each of those is a real accounting state, which is why Finance asks for all three.
+
+## Partial period accruals
+
+A payroll period that straddles a month end creates a problem Finance cares about and payroll does not: part of the cost belongs to the closing month, and the run that will calculate it has not happened yet.
+
+*Calculate Partial Period Accruals* estimates it. It uses the costs from a previous payroll period as the basis for the estimate, and prorates on calendar days — the proportion from the start of the payroll period to the process date supplied. Its two date parameters do the work: a previous period date selects the reference period, and the process date is the accounting date of the estimate, which should be the end date of the accounting period being closed.
+
+The estimate is then unwound rather than left in place. The transfer to Subledger Accounting creates an accrual event at the process date and a matching reversal event, and when the real costs are calculated the payroll run's costing creates the actual entries and reverses the accrual. The accounting date used for the reversal is governed by a payroll process configuration setting that selects between the date earned and the process date, falling back to the payroll period end date where a date earned is not defined.
+
+Oracle's own documentation is not entirely consistent on which end date the reversal lands on — some pages describe the process end date and others the payroll period end date — so the configuration setting should be checked in the client's own environment rather than assumed. That check is a ten-minute job and it is the difference between a clean close and an accrual that reverses in the wrong month.
+
+The month-end shape Oracle suggests is a flow of its own: calculate the partial period accruals, cost the payments that have reconciled by month end, and distribute the accounting for the results. Building that as a named flow (Chapter 5) rather than a list of processes somebody remembers is the same argument as for the payroll cycle itself.
+
+## From the run to the ledger
+
+Costing results are calculated by payroll, but they become accounting only when they leave it. Calculate Payroll costs its own run results as it calculates them; **Calculate Costing of Payments** is a separate process that costs prepayments and payments, because money leaving the bank is a separate accounting event from the amount being earned. Those transactions, with any partial-period accruals and retroactive costing, are sent on by **Transfer to Subledger Accounting**, which creates the accounting events. Subledger Accounting builds journal entries from them using rules the finance team owns, and **Create Final Accounting** posts those journals to the general ledger — there is a draft run first, which validates without posting. Only after the final run does Finance see payroll at all.
+
+[[fig:cost-flow]]
+
+The draft run is the step teams skip and the one worth insisting on. It validates the accounting without posting it, which means a wrong account combination or a missing segment surfaces while it can still be fixed quietly — rather than as a reversal in a closed period, which is a conversation with the financial controller.
+
+The flow runs backwards too. If a run has been transferred but has to be corrected, the transfer is reversed before the run is touched — the same reverse-order unwinding as rolling back prepayments in Chapter 5.
+
+## Retro costing and adjustments
+
+Two things generate costing results outside the ordinary run, and both are easy to leave out of a month-end design.
+
+**Retroactive costing** is calculated by its own process rather than falling out of the payroll run (Chapter 4). A month in which retro was processed and retro costing was not is a month where HR's figures and Finance's disagree by exactly the arrears.
+
+**Balance adjustments** are costed too, which matters because an adjustment made to fix a balance is also an accounting event. A correction keyed quietly at month end and not costed is a reconciliation difference the following month.
+
+Both belong on the month-end checklist rather than in anybody's memory.
+
+## Reading a suspense balance
+
+A suspense account with money in it is the costing design reporting its own gaps. The question is never "which account should this have gone to" in the abstract; it is which segment had no value, at which level the engine stopped looking, and which level should have supplied it. A new department created in core HR without its cost centre is the classic case: everybody hired into it is paid correctly and costed to suspense, and nobody notices until month end. Fixing the department fixes the next run. The results already in suspense are corrected by the transfer and accounting route above, not by editing the department and hoping.
+
+The preventive control is better than the diagnostic one and costs almost nothing: a check, run after every payroll and before the transfer, that the suspense account is empty — and a check on the HR side that every department, position and job carries the costing it needs before anybody is hired into it. The second one is really a data-quality rule on Chapter 1's objects, and it is the kind of thing a journey or an alert can enforce (Chapter 14).
+
+## Reconciling payroll to the ledger
+
+The reconciliation that proves costing works has three layers, and a month-end that checks all three never produces a surprise.
+
+**Payroll to costing**: the total of the run results equals the total of the costing results. If these disagree, something was not costed.
+
+**Costing to the transfer**: everything costed was transferred. If these disagree, a process did not run or ran for the wrong population.
+
+**The transfer to the ledger**: everything transferred was accounted and posted. If these disagree, the accounting rules rejected something, and the draft run should have caught it.
+
+Each is a total compared with a total, each is available from the delivered reports, and each isolates a different failure. A client whose month-end consists of "the number looks about right" has none of them, and the first time it is materially wrong nobody will be able to say where.
+
+## Designing costing: the method
+
+The workshop that produces a costing design has a shape, and it is not the one people expect.
+
+Start from the **chart of accounts**, with Finance in the room, and establish which segments payroll must supply. Then take the **element list** (Chapter 5) and, for each element, ask three questions: what natural account does this belong to, does it follow the person's department or land somewhere fixed, and does it need to be distributed over other elements. Most elements answer in seconds; the interesting ones are the employer liabilities and anything statutory.
+
+Then decide **where each segment is set** — the level-of-truth principle above — and write that down as a short table of segment against level. That table is the design.
+
+Then agree the **safety nets**: the suspense and default accounts, who watches them, and what happens when they are not empty.
+
+And finally agree the **month-end sequence**, with owners: the payroll processes, the partial period accrual if the calendar needs one, the transfer, the draft accounting, the checks, and the final accounting.
+
+## Testing costing
+
+Costing is testable and is routinely untested, because it sits downstream of the thing everybody is watching.
+
+The minimum pack: one employee in a department with a cost centre; one in a department without, to prove suspense behaves; one element that is fixed costed; one employer liability that is distributed, checked against a person whose earnings split across two cost centres; a retro case; and a period that straddles a month end if the client's calendar does that. Each with the expected account string worked out in advance with Finance.
+
+And then the reconciliation above, run on the test data, because the reconciliation is itself a deliverable that has to work.
+
+## Multi-country and project costing
+
+Two extensions come up often enough to anticipate.
+
+A **multi-country group** has a cost allocation flexfield per legislative data group, which means the design in this chapter is repeated per country. Where the countries post to different ledgers that is straightforward; where they post to one, the company segment and the currency treatment become a Finance design question rather than a payroll one, and it needs answering before the second country is configured.
+
+**Project costing**, where a client uses Oracle Project Costing, imports payroll costs only after they have been transferred and accounted — which is why a project manager asking for "this month's labour cost" before the payroll close is asking for a number that does not exist yet. That timing is worth stating to the project team early, because the expectation it sets is otherwise set by somebody's spreadsheet.
+
+## Common mistakes
+
+- Designing the cost allocation flexfield without the finance consultant and the chart of accounts.
+- Validating a segment against a copy of Finance's values rather than Finance's own.
+- Assuming the most specific level supplies the whole account, when the hierarchy is resolved segment by segment.
+- Setting the same segment at several levels, so a change at one of them does nothing.
+- Looking for a missing department value on a fixed-costed element, which never reads it.
+- Distributing a liability over the wrong element group, so the total is right and every department is wrong.
+- Creating departments, jobs or positions in core HR with no costing, then discovering the gap in suspense at month end.
+- Configuring a cost account with no offset, as if the ledger were single-entry.
+- Expecting employer contributions to follow salary by department without setting them up as distributed.
+- Treating the suspense account as a feature rather than a diagnostic.
+- Skipping the draft accounting run, and finding the bad account combination after posting.
+- Forgetting retroactive costing and the costing of balance adjustments at month end.
+- Assuming which date a partial period accrual reverses on, rather than checking the configuration.
+- Correcting a costed run without reversing its transfer to Subledger Accounting first.
+- Reconciling with one total instead of three, so a difference cannot be located.
+- Treating a non-empty suspense account as Finance's problem rather than a configuration defect.
+
+## Sources
+
+- Oracle, *Administering Global Payroll Costing* — "Cost Hierarchy". https://docs.oracle.com/en/cloud/saas/human-resources/faipc/cost-hierarchy.html
+- Oracle, *Administering Global Payroll Costing* — "Payroll Setup for Costing Accounts". https://docs.oracle.com/en/cloud/saas/human-resources/faipc/payroll-setup-for-costing-accounts.html
+- Oracle, *Administering Global Payroll Costing* — "Payroll Cost Allocation Key Flexfield Structure". https://docs.oracle.com/en/cloud/saas/human-resources/faipc/payroll-cost-allocation-key-flexfield-structure.html
+- Oracle, *Administering Global Payroll Costing* — "Partial Period Accruals", for the estimate, its date parameters and the reversal. https://docs.oracle.com/en/cloud/saas/human-resources/faipc/partial-period-accruals.html
+- Oracle, *Administering Global Payroll Costing* — "How Payroll Costing Components Integrate with Other Applications". https://docs.oracle.com/en/cloud/saas/human-resources/faipc/how-payroll-costing-components-integrate-with-other-applications.html
+- Oracle, *Administering Global Payroll Costing* — "Set Up Distributed Costing". https://docs.oracle.com/en/cloud/saas/human-resources/faipc/set-up-distributed-costing.html
+- Oracle, *Administering Global Payroll Costing* — "Payroll Processes that Generate Costing Results", for which process produces which costing result. https://docs.oracle.com/en/cloud/saas/human-resources/faipc/payroll-processes-that-generate-costing-results.html
+- Oracle, *Payroll Reports* — "Payroll Costing Results Report". https://docs.oracle.com/en/cloud/saas/human-resources/faprr/payroll-costing-results-report.html
+- Oracle, *Using Common Features for HCM* — "Payroll Process Configuration Parameters", for the accounting date used when accruals reverse. https://docs.oracle.com/en/cloud/saas/human-resources/faucf/payroll-process-configuration-parameters.html
+- Oracle, *Administering Global Payroll Costing* (full guide, PDF). https://docs.oracle.com/en/cloud/saas/human-resources/faipc/administering-global-payroll-costing.pdf
+</script>
+
+<script type="text/markdown" class="src-deep">
+---
 id: dating
 minutes: 30
 ---
@@ -5110,6 +5424,187 @@ One person record. Three work relationships over nine years, two of them closed.
 
 <script type="text/markdown" class="src-deep">
 ---
+id: modules
+minutes: 36
+---
+
+This atlas teaches three modules: core HR, absence and payroll. They are what a junior functional consultant in Egypt is hired to do, and depth in them is worth more than breadth across the suite. But a client's HR director will list Recruiting, Benefits and Goals in the same sentence as payroll, a screening call will ask which modules you have worked with, and a workshop will reach a point where somebody says "that comes from Recruiting" and the room moves on.
+
+This chapter is the map: how Oracle packages the suite, where the three modules sit inside that package, and enough vocabulary and seams for everything else to follow the conversation, know what to ask, and know where the handover sits. It is not depth, and it should not be presented as depth. Saying plainly, when asked, that you have not configured a module is the answer that survives an interview; claiming otherwise is the one that ends it.
+
+That warning is worth repeating at greater length in a longer chapter, because a longer chapter invites the opposite conclusion. Everything below is **recognition-level** knowledge: enough to follow a conversation, ask the right question, and know whose problem something is. It is not enough to configure any of these modules, and a consultant who reads it twice and says they know Recruiting will be found out in the second question of a technical interview. The value of the chapter is the seams — what core HR owes each module and what each writes back — because those are the parts a core HR consultant is genuinely responsible for.
+
+## Three offerings, one suite
+
+Oracle does not sell or configure Fusion HCM as one block. In Setup and Maintenance the suite is divided into **offerings** — the unit a client opts into — and each offering is subdivided into **functional areas** and features that can be switched on or left off. Opting into an offering is what generates the setup task list, so the offering decides which configuration tasks a project even sees.
+
+Oracle's own implementation guide draws the HCM core as three offerings. **Workforce Deployment** holds the employment record and everything that pays and schedules people: global HR, payroll and payroll interfaces, time and labor, and absence management. **Workforce Development** holds what grows people: performance, goals, career development, succession and talent review. **Compensation Management** holds what rewards them: compensation cycles, incentive compensation, benefits and the total compensation statement. A small set of features — Fast Formula, profile management and the workforce directory — is drawn across all three rather than inside any one, because every offering reads them.
+
+Recruiting and Learning are configured as offerings of their own, outside that three-part figure, and the names in the Offerings page change between releases often enough that the training or client instance is the source to check against rather than a slide.
+
+[[lab:offering-map]]
+
+## What opting in actually does
+
+The offering mechanism is worth understanding beyond the vocabulary, because it has consequences a consultant meets in week one and again at every environment move.
+
+Opting into an offering and its functional areas is what **generates the setup task list**. A task that does not appear is usually not missing; the feature it belongs to has not been opted into. That is the first thing to check when a documented setup task cannot be found, before searching for it by name.
+
+Opting in also **changes what appears to users** — a feature switched on adds pages, fields and processes, and one switched off removes them. This is why two instances of the same product can look different, and why "it works in the demo pod" is not evidence about the client's environment.
+
+And the opt-in configuration is itself **setup data that has to travel between environments** (Chapter 16). A migration that carries the configuration but not the opt-ins produces a target environment where half the configuration has nowhere to display.
+
+The practical consequence for a junior is that "which modules do you know?" is really "which offerings, and which functional areas inside them?" — and the honest answer for most new consultants in the region is one offering, Workforce Deployment, and three functional areas inside it.
+
+## Inside Workforce Deployment
+
+Global HR is the part of Workforce Deployment everything else reads from, and it is easier to hold if it is grouped by the job each part does rather than by menu. Managing the workforce record — hire, transfer, promotion, termination, and the person, work relationship and assignment underneath them — is Chapters 3, 4 and 8. Security, deciding who can see and change which records, is Chapter 15. The self-service layer, where employees and managers act on their own records instead of asking HR, is Chapter 22. Bulk loading through HCM Data Loader and its spreadsheet cousin is Chapter 11, and reporting is Chapter 13.
+
+One phrase causes more confusion than it should. Trainers and clients say **workforce management** to mean managing worker records, which is the Global HR sense. Oracle also uses Workforce Management as the name of a feature area covering time, scheduling and absence. In a workshop the two meanings can sit in the same sentence; asking which one is meant costs a second and saves a requirement being written against the wrong module.
+
+Payroll and absence are the other two functional areas a junior is hired for, and their seams with each other are covered where they meet: absence elements carrying leave payment into the run (Chapter 6), and the costing that carries the run into Finance (Chapter 21).
+
+**Time and Labor** sits in the same offering and is the one a payroll consultant meets most often without configuring. The vocabulary is time card, time entry rule, and the layouts that decide what a worker is asked to enter. The seam is the hours side of pay from Chapter 5: overtime, shift premiums and anything paid by the hour arrive from here or from an interface, and the design question of whether the client pays by the hour or by the month is settled on this boundary.
+
+## Profile management: the spine of the talent side
+
+Nearly every Workforce Development module reads the same underlying data, which is why Oracle draws profile management across the offerings rather than inside one. A **talent profile** holds what a person has — competencies, skills, languages, degrees, certifications — and a model profile holds what a job or position needs.
+
+The building blocks are a **content library**, which holds the content types (competencies, languages and degrees are delivered; a client adds its own), and the content items inside each type. A **profile type** is the template a profile is built from, and there are two kinds: a person profile type for workers, and a **model profile** type for workforce structures such as jobs and positions, which records the targeted and required skills and the work requirements of the role. Each content section on a profile carries its own role access, so whether an employee can edit their own languages but only view their competency ratings is a configuration decision rather than a given.
+
+The seam into core HR is the job and position of Chapter 2. A model profile hangs off the job, so a client with a clean job catalogue gets meaningful gap comparisons and best-fit searches, and a client whose jobs are an inherited spreadsheet of titles gets noise. Profile data can be loaded with HCM Data Loader, which matters because no client wants to key in a competency framework by hand.
+
+The core HR consequence is worth stating as an instruction rather than an observation: **a job catalogue built badly in month two limits every talent module the client buys afterwards**, and the limitation is invisible until they buy one. That is a reason to raise the catalogue design properly in Chapter 2's workshop even for a client whose scope is core HR and payroll only.
+
+## Performance and goals
+
+Performance manages the review cycle through a **performance document** — a template, a period, a set of competencies and ratings, and a workflow between worker and manager. Goals manages objectives, aligned up a hierarchy and often cascaded.
+
+The seam into core HR is thinner than people expect: ratings mostly stay in the module, feeding compensation and talent review rather than the employment record. The connection worth naming is the review period against the probation period of Chapter 8 — clients frequently want the probation decision to come out of a performance document.
+
+The other core HR dependency is the **manager hierarchy** (Chapter 7). A review cycle routes between a worker and their manager, so every problem the hierarchy has becomes a problem the review cycle has, at scale, in a single week of the year. Clients who run their first review cycle on a hierarchy nobody has cleaned discover the state of their manager data very publicly.
+
+## Career development
+
+Career development is where an employee and their manager plan growth, and its working unit is the **development goal**: a goal about the person rather than the business. A development goal can carry target outcomes drawn from the talent profile's catalogues — a competency, a certification, a language — and when the goal is completed the outcome is written back to the person's talent profile, rated by the manager when approvals are on.
+
+That write-back is the seam. Career development is the module that keeps talent profiles current without HR keying them, which makes it quietly important to talent review and succession, both of which read the profile. A client that buys succession and skips career development usually finds its profiles a year out of date by the first succession meeting.
+
+## Talent review and succession
+
+A talent review is a meeting, and the module is built around it: a business leader, facilitators who run the meeting, and reviewers who submit ratings before a deadline. The meeting's template decides which ratings are shown, what the potential assessment looks like, and whether succession plans and talent pools can be worked on in the room.
+
+The screen people remember is the **box chart** — the review population plotted on one rating against another, most often performance against potential, which is the nine-box grid HR textbooks describe. During the meeting participants move people between boxes, which is the calibration the meeting exists for.
+
+**Succession plans** name candidates for a critical role, each with a readiness rating, and can be built around an incumbent, a job or a position. A **talent pool** is the looser cousin — a group being developed for a kind of role rather than a named seat.
+
+The seam is positions, from Chapter 2. Succession is one of the few genuine arguments for managing by position rather than by job, because a succession plan is a plan for a seat. A client who wants position-based succession and has no positions is asking for two things.
+
+## Learning
+
+Oracle Learning delivers and tracks courses: catalogue, learning item, assignment, completion. It is configured as its own offering. The seam is compliance — mandatory training with a completion deadline, which in practice means a report that proves it, and sometimes a journey task that will not close until the course is done. Completed learning can also feed the talent profile, which is the second way profiles stay current.
+
+In this region there is a second seam worth knowing about: training is frequently a condition attached to a role, a site or a permit — safety certification for a plant, a licence renewal — which makes the expiry tracking of Chapters 14 and 18 relevant here too. A client whose compliance training is tracked in a spreadsheet and whose document expiries are tracked in another has two problems with one shape.
+
+## Recruiting
+
+Oracle Recruiting — still widely called **ORC**, Oracle Recruiting Cloud — handles hiring up to the point someone becomes an employee, and it is configured as its own offering. The words in the room are **requisition** (the approved vacancy), candidate, and **job offer** — and offers have their own approval rules, separate from the HR approvals in Chapter 19, because an offer is a commercial commitment rather than a record change.
+
+The seam matters more than the module. When an offer is accepted, the candidate becomes a **pending worker** or an employee, and that act creates the work relationship and assignment of Chapter 3 — so the data quality in a requisition becomes the data quality in your core HR record. Job, grade, department, legal employer and start date are all chosen in Recruiting by people who are not thinking about payroll. In Egypt this is where the national identifier should be captured, because the alternative is chasing it after the hire.
+
+What Core HR owes Recruiting: the structures to pick from, and the model profiles a requisition can match candidates against. What Recruiting writes back: the person, and the first version of almost every attribute.
+
+That second sentence is the one to act on. A core HR consultant on a project where Recruiting is in scope — or will be in a later phase — should write down the list of attributes that arrive from a requisition, and make sure each one is validated at the point it is chosen rather than corrected afterwards. The candidates for that list are predictable: legal employer, business unit, department, job, grade, location, payroll, start date, worker type, and in this region the national identifier and the visa or permit details that the onboarding will need.
+
+Where positions are used, add the position — because an offer against a position that is already full, or that does not exist on the start date, is a problem discovered at the hire rather than at the offer.
+
+## Onboarding
+
+Onboarding is the checklist between offer and first day, delivered as a **journey** — the task-list feature introduced in Chapter 14. Tasks can be assigned to the new hire, the manager, IT and HR, with due dates relative to the start date.
+
+The seam is the pending worker: the record exists before day one so documents can be collected, equipment ordered and accounts created, and it converts to an employee on the start date. Egyptian onboarding usually has a statutory tail — the social-insurance registration and the labour-office file of Chapter 9 — which is a good use of a journey precisely because it is a checklist somebody currently keeps on paper.
+
+The Gulf version of that tail is longer and more time-critical: visa, work permit, residency, medical, and the platform registrations of Chapters 17 and 18, several of which have to happen in a particular order and some of which must precede the start date. A journey is the right shape for it, and getting the dependencies and lead times right is a conversation with the government-relations function rather than with HR.
+
+## Compensation
+
+Compensation Management is the third offering, and its first module covers how pay changes, as distinct from how it is paid. The vocabulary: **compensation plan**, the annual cycle or off-cycle event; budgets pushed down a management hierarchy; eligibility; worksheets that managers complete; and approvals before anything reaches the record. Oracle separates the cycle-based work of a whole workforce from one-off awards to an individual, and a client asking for "compensation" usually means one of the two.
+
+The seam is the salary record of Chapter 5. A compensation cycle writes salary, and payroll reads it — which is why a client who runs annual increases in a spreadsheet and loads the results is doing with HDL what this module exists to do. Worth knowing when the question is whether to buy it.
+
+Two further core HR dependencies decide whether a compensation cycle is usable. **Grade rates** (Chapter 2) are what a worksheet compares a proposed salary against, so a client with no rates gets a worksheet with no guidance. And the **manager hierarchy** again, because budgets are pushed down it and worksheets are assigned along it.
+
+The regional note: Egypt's mandatory annual increment (Chapter 9) is a statutory minimum rather than a merit cycle, and a client may run both. Which one the module manages, and how the statutory floor is enforced against a merit outcome below it, is a design question worth asking early.
+
+## Benefits
+
+Benefits manages plans people enrol in: medical cover, life insurance, allowances structured as plans. The vocabulary: plan, option, **enrolment**, life events — the triggers (new hire, marriage, a new child) that open an enrolment window.
+
+The seam is payroll. An enrolment produces an element entry for the employee contribution and often an employer cost, so the plan design decides what appears on the payslip. In Egypt private medical cover sits alongside the statutory universal health insurance of Chapter 9 rather than replacing it, and clients routinely conflate the two in a workshop.
+
+The second seam is **eligibility profiles** (Chapter 6), which benefits shares with absence and compensation — the same object, learned once, used three times.
+
+And the one that catches payroll consultants: a benefits design made without payroll in the room produces elements that nobody has classified, costed or tested, discovered in parallel run. The rule is that any benefit with a money consequence is a payroll requirement with a benefits front end.
+
+## When a module appears in a workshop
+
+A practical routine, for the moment somebody says "that comes from Recruiting" and looks at you.
+
+Ask **which direction the data flows**: does core HR supply it, receive it, or both. That sorts the question into one you own, one you do not, or one that needs both parties.
+
+Ask **what the seam object is** — person, assignment, job, position, salary, element entry. Every inter-module seam in this chapter lands on one of six objects, and naming it converts a module question into a chapter of this atlas.
+
+Ask **when it happens relative to the payroll cycle**, because anything that writes to a salary or an element entry has a cut-off (Chapter 5).
+
+And say plainly what you do not know. "I own the assignment it writes into; I have not configured Recruiting, and the person who has should answer the rest" is a complete, professional answer that costs nothing.
+
+## Learning a new module, quickly
+
+Since the realistic career path is to pick up a second module on a project rather than in a classroom, the method is worth writing down.
+
+Start with the **objects**, not the screens. Every module in this suite is a handful of objects with relationships, exactly as Chapter 3 is for core HR. Find them and draw them, and the screens stop being arbitrary.
+
+Then find the **seams** into what you already know, because that is where your existing knowledge is leverage and where you will be most useful on the project immediately.
+
+Then read the **delivered configuration** rather than the documentation — the delivered plans, templates and rules are the clearest statement of how the module expects to be used, exactly as Chapter 12 advises for formulas.
+
+Then configure one **end-to-end case** in a sandbox or a test environment: one plan, one person, one cycle, from setup to result. One complete case teaches more than ten partial ones.
+
+And only then read the guide, which will now make sense.
+
+## What a junior is most likely to be put on next
+
+In Egypt and the Gulf, after core HR, absence and payroll, the usual next step is Recruiting or Benefits — Recruiting because almost every client buys it and it touches the hire, Benefits because medical cover is close to payroll and the questions arrive through the payroll team anyway. Compensation tends to follow once the core is stable, and the Workforce Development modules are often a later phase or never.
+
+The honest version of this chapter in an interview is one sentence: these are the offerings, this is where each module touches what I have built, and I have not configured them.
+
+## Common mistakes
+
+- Claiming module experience from vocabulary. An interviewer's second question settles it.
+- Reading a map chapter twice and mistaking it for depth.
+- Answering "which modules?" with a list of menu names instead of the offering and the functional areas inside it.
+- Hunting for a setup task that is absent because its feature was never opted into.
+- Migrating configuration between environments without the opt-ins behind it.
+- Hearing "workforce management" and assuming which of its two meanings the speaker had in mind.
+- Building a job catalogue badly on a core HR project, and limiting every talent module the client buys later.
+- Running a first performance or compensation cycle on a manager hierarchy nobody has cleaned.
+- Treating offer approvals as the same rule set as HR approvals.
+- Designing core HR without asking what Recruiting will write into it.
+- Letting a benefits plan be designed without payroll in the room, then discovering the element.
+- Buying succession without career development, then reviewing talent against profiles nobody has updated.
+- Promising position-based succession planning to a client who manages by job and has no positions.
+- Assuming private medical cover replaces Egypt's statutory health insurance.
+
+## Sources
+
+- Oracle, *Implementing Global Human Resources* — "Generate the Setup Task List for HCM" (the figure of offerings and their features). https://docs.oracle.com/en/cloud/saas/human-resources/fapus/generate-the-setup-task-list-for-hcm.html
+- Oracle, *Implementing Global Human Resources* — "Overview of Global Human Resources" (Workforce Deployment functional areas). https://docs.oracle.com/en/cloud/saas/human-resources/faitl/overview-of-global-human-resources.html
+- Oracle, *Using Global Human Resources* — the self-service areas the quick actions sit in. https://docs.oracle.com/en/cloud/saas/human-resources/fawhr/index.html
+- Oracle, *Using Functional Setup Manager* — offerings, functional areas, feature opt-in and moving setup data between environments. https://docs.oracle.com/en/cloud/saas/applications-common/
+</script>
+
+<script type="text/markdown" class="src-deep">
+---
 id: org
 minutes: 62
 ---
@@ -5604,6 +6099,123 @@ The one piece of advice that pays for itself: run the entire cycle in a non-prod
 - Oracle, *Balance Operations* — "Steps to Initialize Balances", for the batch files, the Load Initial Balances process and the rule that balances cannot be initialised after processing has begun. https://docs.oracle.com/en/cloud/saas/human-resources/fahbo/steps-to-initialize-balances.html
 - Oracle, *Implementing Global Payroll* — "Overview of Payroll Costing". https://docs.oracle.com/en/cloud/saas/human-resources/faigp/overview-of-payroll-costing.html
 - Oracle, *Implementing Global Payroll* — "Payroll Relationship Rules". https://docs.oracle.com/en/cloud/saas/human-resources/faigp/payroll-relationship-rules.html
+</script>
+
+<script type="text/markdown" class="src-deep">
+---
+id: personas
+minutes: 28
+---
+
+Most of this atlas describes records: the person, the assignment, the absence, the element entry. Real projects are judged on something else — who touches those records, from which screen, and what happens next. A leave request that is configured perfectly but can only be entered by HR is a design that has quietly moved the HR team's workload in the wrong direction. Self-service is the part of Global HR that decides this, and it is where most of a client's users will ever meet the system.
+
+The useful frame is three seats around one record. The **employee** acts on their own data. The **manager** acts on their team's. **HR** — HR specialists, absence and payroll administrators — acts on whole populations. Every transaction in Fusion can be described by which of the three seats starts it, which approves it, and which can correct it afterwards.
+
+## Me, My Team, My Client Groups
+
+Fusion's home page reflects the three seats directly. **Me** holds what a person does for themselves: personal details, contacts, bank accounts for pay, absences, payslips, goals. **My Team** holds what a manager does for their reports: approve, promote, transfer, change working hours, view the team's absences. **My Client Groups** holds what HR does for the populations they are responsible for: hire, terminate, correct, run processes, maintain balances.
+
+Inside each area the work is launched through **quick actions** — a named task such as Request Absence, Change Manager or Promote, opening a guided flow. Quick actions are not a separate permission system. Whether one appears for a user is decided by their roles (Chapter 15): the employee abstract role gives the Me actions, the line manager role the My Team actions, and an HR job role the My Client Groups actions, each scoped by the data security that says over whom. "The button is missing" is therefore almost always a role question, and checking the user's roles and data scope comes before anything else.
+
+The three areas are labels for audiences, not separate data. A manager changing a report's working hours in My Team and an HR specialist doing the same in My Client Groups write to the same assignment, with the same effective dating (Chapter 4). What differs is what each is allowed to see, which fields the flow shows them, and what approval the change triggers.
+
+[[fig:three-doors]]
+
+## The seats a three-seat model leaves out
+
+The frame is a good one and it is a simplification, so it is worth naming what sits outside it before designing from it.
+
+**The approver** is often not the line manager — a finance approver on a salary change, a compliance approver on a contract (Chapter 19). They act on the record without owning it.
+
+**The administrator** is a different seat from the HR business partner even though both live in My Client Groups: an absence administrator or payroll administrator runs processes and fixes data for a population they have no relationship with, which is a different scope and a different risk profile.
+
+**The person acting on behalf of somebody else** is a seat the record does not naturally show, and it is covered below.
+
+**And the reader** — an auditor, a finance analyst, an executive — needs to see without touching, which is a role with data access and almost no function privileges, and which is reliably forgotten until somebody asks for it.
+
+A design that has thought about six seats rather than three produces a role catalogue (Chapter 15) that survives contact with the organisation.
+
+## One absence, three seats
+
+Absence shows the pattern most clearly, because every seat has a distinct job. The employee requests time off, sees their balance and its projection, and can withdraw a request that has not been taken. The manager approves or rejects it — through the approval rules of Chapter 19 — and sees it on the team calendar alongside everyone else's. HR, or an absence administrator, can record an absence on a worker's behalf, enrol or adjust plans, correct a balance with a reason, and run the accrual processes of Chapter 6 that keep every balance true.
+
+[[lab:three-seats]]
+
+The handover to payroll is where the seats meet the run. An approved, paid absence becomes an absence element in the next payroll (Chapter 6); an unpaid one becomes a deduction. Neither the employee nor the manager sees that step, and neither should have to — but it means an approval that arrives after the payroll cutoff is paid a period late, which is a self-service design question about cutoffs and reminders rather than a payroll defect.
+
+## Designing per seat, not per feature
+
+The practical method is to take each transaction in scope and answer five questions about it, in order.
+
+Which seat **initiates** it. Which seat **approves** it, and under what conditions. Which seats can **see** it, during and after. Which seat can **correct** it once it has happened. And what each seat is **shown** — because the same flow can present different fields to different audiences through the design studio (Chapter 14).
+
+That last question is the one that is usually skipped and the one that produces the most user complaints. A transfer flow that asks a line manager for a cost centre, a payroll, and a statutory classification is a flow that line managers will not complete. The same flow with four fields, for the same transaction, completes. The information that was removed has not gone anywhere — HR supplies it, which is the right division of labour.
+
+Running those five questions over every transaction produces the same artefact as Chapter 19's approval matrix, from a different angle, and the two should be built together.
+
+## Acting on someone's behalf
+
+Every self-service design needs an answer for the people who cannot or will not use it. A worker with no system account, a manager on leave, a request made by phone — each ends with somebody **acting on behalf** of someone else. Fusion supports this directly: HR can submit most employee and manager transactions from My Client Groups, and an approval waiting on someone who is away can be reassigned or delegated through the approval tooling rather than left to expire (Chapter 19).
+
+The design question is whose name the transaction carries and whether it still routes for approval. An absence that HR records for an employee who phoned in sick may reasonably skip the manager's approval; a salary change that HR keys for a manager should not skip the approvals that would have applied had the manager keyed it. Settling which transactions bypass approval when HR acts, and agreeing it in writing, avoids a control finding in the first audit.
+
+The second question is **traceability**. A transaction entered by HR on a manager's instruction should be identifiable as such afterwards, because the question "who decided this" will be asked. Where the product records the submitter, that is the answer; where a process relies on an instruction given by phone, the control is a note in the transaction rather than a memory.
+
+## Adoption is part of the design
+
+Many workforces in Egypt and the wider region include factory floors, field crews and retail staff who work without a corporate login, and a self-service design that assumes everybody has one fails on day one. The options are known: shared kiosks, mobile access, HR or a team leader acting on behalf, or a hybrid in which office staff self-serve and everyone else goes through HR. None is wrong, but the choice changes the approval rules, the security design and the training plan, so it belongs in the first workshop rather than in hypercare.
+
+The opposite failure is self-service switched on everywhere with no change plan. Managers who were never told they now approve leave do not approve leave, the requests sit in the Transaction Console, and HR is blamed for a system that is working exactly as configured.
+
+Three things make the difference between adoption and a backlog.
+
+**Tell people what changed, in the terms of their own job.** "You now approve leave for your team, and here is what happens if you do not" is a message; a system training deck is not.
+
+**Make the first thing they do easy.** The transactions a manager meets most often should be the ones with the fewest fields and the clearest notifications. Optimising the rare transaction and leaving the common one cluttered is the wrong way round.
+
+**Measure it.** The share of absence requests entered by employees rather than by HR, the median time an approval waits, the number of transactions sitting in the console — three numbers, available from the system, that say whether the design is working. A client who watches them for the first quarter fixes the problems while anyone still cares.
+
+## Privacy between the seats
+
+One design question deserves separating from the rest because it is a legal matter as much as a usability one: what a manager should be able to see.
+
+A line manager needs enough to run their team — absence, working hours, the structure of their reports' assignments. They do not automatically need a report's national identifier, their home address, their bank details, their medical certificates or, in many organisations, their salary history. Those are decisions to make deliberately, with the client's own data-protection position behind them, and to implement through the combination of data security (Chapter 15) and what the flow displays (Chapter 14).
+
+The default to be careful about is the cheerful one: granting managers broad visibility because it is easier than designing it. The grant is invisible until it is a complaint, and by then it is in production.
+
+A related case in this region: sick-leave certificates and the reasons attached to them are medical information. Where a qualification plan requires certification (Chapter 6), the design has to say who can see the document, which is usually a smaller group than the people who can see that an absence occurred.
+
+## What the seats mean for training and support
+
+The three-seat frame is also the right shape for the client's training and their support model, which is a contribution a consultant can make for nothing.
+
+Employees need one short thing, delivered once, about the four tasks they will ever do. Managers need a slightly longer thing about approving and about the handful of transactions they initiate, delivered close enough to go-live to be remembered. HR needs real training, repeatedly, and will still have questions in month six.
+
+The support model follows the same shape: employee questions are a help-desk script, manager questions are usually "where is the button" and answered by the same script, and HR questions are the ones that need somebody who knows the configuration. Planning support as one queue means the HR questions wait behind the password resets.
+
+## Common mistakes
+
+- Treating Me, My Team and My Client Groups as separate data rather than three views of the same records.
+- Debugging a missing quick action before checking the user's roles and data scope.
+- Designing for three seats and forgetting the approver, the administrator and the read-only reader.
+- Showing a line manager every field the transaction supports, and getting no completed transactions.
+- Designing self-service for a workforce that mostly has no system access.
+- Letting HR act on behalf without deciding which transactions still route for approval.
+- Leaving no trace of who instructed a transaction somebody else keyed.
+- Switching on manager approvals without telling the managers, then reading the backlog as a defect.
+- Optimising the rare transaction and leaving the common one cluttered.
+- Never measuring adoption, so nobody knows whether the design worked.
+- Granting managers broad visibility because it is easier than designing it.
+- Letting medical certification be visible to everyone who can see the absence.
+- Ignoring the payroll cutoff when designing absence approvals.
+- Planning one support queue for three audiences with completely different questions.
+
+## Sources
+
+- Oracle, *Securing HCM* — "Overview of Quick Actions". https://docs.oracle.com/en/cloud/saas/human-resources/ochus/overview-of-quick-actions.html
+- Oracle, *Using Global Human Resources* — "Quick Actions". https://docs.oracle.com/en/cloud/saas/human-resources/fawhr/quick-actions.html
+- Oracle, *Using Absence Management* — "Overview of Absence Processes". https://docs.oracle.com/en/cloud/saas/human-resources/faiam/overview-of-absence-processes.html
+- Oracle, *Securing HCM* — role types and the abstract employee and line manager roles. https://docs.oracle.com/en/cloud/saas/human-resources/ochus/index.html
 </script>
 
 <script type="text/markdown" class="src-deep">
