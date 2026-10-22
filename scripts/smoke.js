@@ -225,6 +225,27 @@ const check = (name, pass, detail = '') => results.push({ name, pass, detail });
     await narrow.waitForTimeout(120);
     const w = await narrow.evaluate(() => document.documentElement.scrollWidth);
     if (w > 360) overflowing.push(`${t} (${w}px)`);
+    if (t.endsWith('drill')) {
+      // The deck shows one card, drawn in a different order each time, so a
+      // single look proves almost nothing: a long chapter name on one card in
+      // twenty is a bug that only fails the build sometimes. Walk them all.
+      const cards = await narrow.evaluate(async () => {
+        const bad = [];
+        const v = document.querySelector('#view');
+        for (let i = 0; i < D.queue.length; i++) {
+          for (const flipped of [false, true]) {
+            D.idx = i; D.flipped = flipped; renderDrill(v);
+            await new Promise(r => setTimeout(r, 0));
+            const sw = document.documentElement.scrollWidth;
+            if (sw > 360) { bad.push(`card ${i + 1}${flipped ? ' flipped' : ''} (${sw}px)`); break; }
+          }
+        }
+        D.idx = 0; D.flipped = false; renderDrill(v);
+        return bad;
+      });
+      cards.slice(0, 3).forEach(c => overflowing.push(`${t} ${c}`));
+      if (cards.length > 3) overflowing.push(`${t} +${cards.length - 3} more cards`);
+    }
     if (t.startsWith('labs/')) {
       // A lab whose render() throws leaves an empty body and scrolls nothing.
       const body = await narrow.evaluate(() => {

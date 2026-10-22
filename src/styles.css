@@ -699,7 +699,10 @@ pre.code{background:var(--navy);color:var(--navy-ink);border-radius:8px;padding:
 .face .q{font-family:var(--display);font-size:clamp(20px,2.6vw,26px);font-weight:700;line-height:1.25;margin:auto 0}
 .face .a{font-size:15.5px;color:var(--ink);display:grid;gap:10px;overflow:auto;font-family:var(--body)}
 .face .a .lb{font-size:11px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--p);font-family:var(--ui)}
-.face .meta{display:flex;gap:8px;align-items:center;font-size:12.5px;color:var(--muted)}
+/* A long chapter name is the widest thing on a drill card. It wraps inside
+   its chip rather than pushing the counter off the edge on a phone. */
+.face .meta{display:flex;gap:8px;align-items:center;flex-wrap:wrap;font-size:12.5px;color:var(--muted)}
+.face .meta .chip{white-space:normal;min-width:0}
 .face .hint{margin-top:auto;font-size:13px;color:var(--muted)}
 .grade{display:flex;gap:8px;flex-wrap:wrap}
 .grade .btn{flex:1;justify-content:center}

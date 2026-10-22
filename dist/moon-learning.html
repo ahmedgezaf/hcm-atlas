@@ -2829,6 +2829,209 @@ The opposite failure is self-service switched on everywhere with no change plan.
      ======================================================================== -->
 <script type="text/markdown" class="src-deep">
 ---
+id: dating
+minutes: 30
+---
+
+Oracle HCM is a date-effective system. Almost nothing is ever deleted; changes are recorded with the date on which they become true in the real world. People coming from transactional systems trip over this more than anything else, and it has direct payroll consequences — which is why this short chapter sits underneath every record in the atlas.
+
+The chapter is short in its standard form because the idea is short. The idea being short does not make it easy. Effective dating is responsible for a disproportionate share of production incidents, and almost all of them come from four situations: a change entered on the wrong date, a correction used where an update was meant, a future-dated record nobody can see, and a retroactive change that did not happen because nothing was watching for it. This version goes through each of those properly, and through the machinery behind the last one, because "retro did not pick it up" is a sentence a consultant will hear many times.
+
+## The effective date is not the entry date
+
+The **effective date** is the date on which a change becomes true — not the date it was typed into the system. HR reality and data entry rarely happen on the same day: a promotion effective 1 January may be entered on 15 January, and the system must know the person was at the new grade from the first. Every date-effective record has a start date and an end date. Setting the effective date correctly is the difference between a correct payslip and a retroactive correction, and most "the system calculated it wrong" tickets turn out to be effective-date errors. The system tracks the entry date separately, for audit.
+
+Screens carry the same idea. A person search run as of a past date returns the organization as it was then, not as it is now — which is how a consultant answers "who reported to her in March" without a report. It is also the first thing to check when a user insists a record is missing: they may be looking at it on the wrong day.
+
+The habit worth building, and worth teaching to every key user during training, is to read the date on the page before reading anything else on it. Most of the confusion people report is not confusion about the data. It is confusion about which day they are standing on while they look at it.
+
+## How a dated record is actually stored
+
+The mechanism is simpler than the vocabulary suggests, and seeing it once makes the rest of the chapter obvious.
+
+A date-effective object is not one row. It is a chain of rows for the same logical record, each with an effective start date and an effective end date, laid end to end with no gaps. A person who was hired on grade 3 in 2019 and promoted to grade 4 on 1 July 2022 has two assignment rows: one running from the hire date to 30 June 2022, and one running from 1 July 2022 to `4712/12/31` — Oracle's conventional end of time, which means "and still true".
+
+Everything else follows from that picture. Looking at a record "as of" a date means selecting the row whose range contains that date. An update means closing the current row the day before the change and opening a new one. A correction means editing a row in place without changing where it starts or ends. A future-dated change means inserting a row whose range has not started yet. And the reason history survives is simply that nothing is overwritten unless somebody explicitly asks for a correction.
+
+The chain has no gaps by design, and that rule is enforced rather than assumed: a bulk load that supplies a dated history with a hole in it is rejected (Chapter 11). A record cannot be true, then undefined, then true again.
+
+## Which objects are dated, and which are not
+
+Not everything in the system keeps history, and knowing the difference saves an afternoon. The person, the work relationship, work terms, the assignment, salary and element entries are all date-effective: each change writes a new row with its own window. Reference data such as jobs, grades and locations is date-effective too, which is why a grade can be valid from one date and not before.
+
+Transaction records are not. A payroll run, a flow, an approval — these happen once, at a point in time, and are not re-dated afterwards. When a client asks to "change the date" of something, the first question is which of the two kinds it is, because for the first the answer is an update and for the second it is a reversal and a re-run.
+
+The distinction has a consequence worth stating plainly, because clients find it counter-intuitive. Dated objects are forgiving: a mistake is correctable and the correction leaves a trail. Transactions are not forgiving in the same way: a payroll run calculated on wrong data has to be rolled back and re-run, and a payment already made has to be recovered rather than un-made. This is why the pressure in a payroll cycle is all before the run and not after it, and why the calendar in Chapter 5 matters as much as the configuration does.
+
+## Update versus correction
+
+An **update** creates a new dated record and preserves history. A **correction** overwrites the existing record as if the previous value was never true. Some changes are real events — a promotion — and some are data-entry mistakes — a typo in a grade. The system needs to tell real history from erroneous history.
+
+Promoting someone on 1 July is an update: both the old and the new grade belong in history because both were true. Fixing a misspelled surname is a correction: the old spelling was never true and should not be preserved. Using a correction to record a real-world change destroys legitimate history and can trigger incorrect retroactive payroll; it is the one habit that corrupts an audit trail silently.
+
+The reverse mistake costs as much. Recording a typo as an update leaves the system believing an incorrect value was genuinely true for a period, which means anything reading history — a service calculation, an accrual, a retro run — will act on it. Correct the wrong record rather than stacking a new one on top of it.
+
+The test that settles it in a workshop is one question: **was the old value ever true?** If yes, it is an update, because the past deserves to keep it. If no, it is a correction, because the past never had it. Nothing about how recently the mistake was made, how embarrassing it is, or whether payroll has run changes the answer — those things change how much work the fix is, not which operation it is.
+
+[[lab:dating]]
+
+## The other date-effective operations, and the vocabulary around them
+
+Update and correction are the two a user meets. There are a few more at the edges, and the vocabulary is muddled by history, so it is worth separating what the product does from what people say.
+
+**End-dating** closes a record as of a date. This is the ordinary way to stop something being true without pretending it never was.
+
+**Deleting** exists and is unusual. Where it is offered, it purges the object's physical records and is not reversible — which is why Oracle's own guidance is to end-date the object or change its status to take it out of use instead. In a date-effective system, deletion is not a stronger form of end-dating; it is a different thing, and it is almost never the one that was wanted.
+
+Then there is the older vocabulary that still circulates in interviews and in training material: *ZAP*, *delete next change*, *future change (all)*. These come from the earlier generation of Oracle HR, where they were the named options on a date-tracked delete. They are worth recognising because people still say them, and because the concepts survive in places — the extract layer, for instance, distinguishes an operation type that identifies the deletion of individual date-effective changes from one that identifies the deletion of an object together with all of its dated changes. What a consultant should not do is use that vocabulary with a client as if it described buttons on their screen.
+
+The integration surfaces express the same choice in their own way. A bulk load decides between correction and update by whether the effective start date supplied matches an existing row, and controls what happens to later rows with an instruction and two tokens (Chapter 11). The REST interface carries the choice in a header, with a correction requiring the range mode and the exact start and end dates of the row being corrected. Three surfaces, one idea: say which row you mean, and say whether the past keeps what was there.
+
+## Future-dated changes
+
+A change may also be dated forward. A **future-dated change** — next month's promotion, a transfer agreed in advance, a termination with notice — is entered now and becomes effective later, and until that date the current record is what every process sees.
+
+Two consequences are worth holding. The screen shows the record as of the date being viewed, so a user who enters a future promotion and then looks at today's record sees the old grade and assumes the change was lost. And a future-dated termination is visible to HR while payroll still pays the person, correctly, until the date arrives — which is the intended behaviour and a reliable source of worried emails. The useful habit is to ask, every time, "as of what date are we looking at this?"
+
+There is a third consequence that shows up during cutover and catches experienced teams. Future-dated rows are real rows, and anything that rewrites a record's future can destroy them. A bulk update loaded without the instruction that retains future changes will purge the future-dated promotions somebody entered last week, silently and across the whole population — the load succeeds, the data looks right today, and three weeks later a hundred promotions do not happen. That single setting is covered in Chapter 11; the reason it belongs in this chapter too is that the damage it does is a dating problem, not a loading problem.
+
+The operational answer is a convention rather than a control: before any mass update, produce the list of future-dated changes that already exist for the affected population, and decide explicitly whether they survive. The list is usually short. The conversation is always shorter than the recovery.
+
+## More than one change on the same day
+
+Occasionally two things genuinely happen to the same record on the same date — a transfer and a salary change on 1 January, or a promotion entered on top of a correction. The model allows it for employment terms and assignments, and it describes the ordering with two attributes: a sequence number within the day that starts at 1 and increases without gaps, and a flag marking which of them is the last change of that date. On every record that is not the last change of its date, the effective end date equals the effective start date — the version lasts for part of a day as far as the model is concerned.
+
+A consultant mostly meets this through bulk loading, where it has to be supplied explicitly and is easy to get wrong, and through reporting, where a query that does not account for it returns two rows for one person on one day and inflates whatever is being counted. The safe reporting habit is to filter to the latest change of each date unless there is a reason not to.
+
+## Retroactive changes: what the machinery actually is
+
+A **retroactive change** ("retro") is a change entered with an effective date in the past, after payroll has already been processed for that period. Backdated promotions and late salary approvals are normal. A raise effective 1 May and approved in July means the May and June payrolls already ran at the old rate; the July run must calculate the arrears for both months and pay them.
+
+The mechanism has four moving parts, and knowing all four is what turns retro from mysterious into diagnosable.
+
+**The event group** is the list of changes the system is watching for. It is an event group of type Retroactive, and Oracle's recommended starting point is the predefined group that tracks changes to element entries and to assignment details such as location. A change to something in the group raises an event; a change to something outside it raises nothing, however obviously retrospective it looks to a human.
+
+**The notification** is what an event produces for a person. Each notification carries a process date, and the behaviour when several events arrive is the part worth knowing: if an unprocessed notification already exists, a new event with an earlier date moves the process date earlier rather than creating a second notification. A salary award effective 5 March raises a notification dated 5 March; a job change effective 1 February then pulls that same notification back to 1 February, and the recalculation will start from February. Notifications sit in an awaiting-processing state until retro runs, and they can also be created by hand to force somebody into the next retro run.
+
+**The recalculation process** — *Recalculate Payroll for Retroactive Changes* — picks up the notifications awaiting processing and recalculates each affected prior period. The critical property is that it **does not touch the original results**. It builds a parallel set of results, compares them with what was originally calculated, and where the two differ it writes the difference as a retroactive entry in the *current* period. There is a single-employee variant for the inevitable one-person emergency, and a separate flow that raises retro notifications for late hires automatically.
+
+**The element setup** decides whether any of this applies to a given element at all. An element is only processed retroactively if it has been set up for it, which is the single most common reason retro "does not work".
+
+Recalculation always covers **whole pay periods**, never part of one. A notification with a process date of 10 September recalculates the entire September period and every period after it. The start can be moved with an override date entered against the notification, and that override takes precedence over the two parameters that otherwise limit how far back retro will reach — an earliest processing date, and a rolling number of months.
+
+## Setting an element up for retro
+
+The configuration is short, and a consultant should be able to do it from memory.
+
+On the element's additional details, answer yes to both of the questions that matter: whether the element is subject to proration, and whether it is subject to retroactive changes. Attach the retroactive event group to the element — a template that already includes the group does this for you. Then, on the element's retroactive components, create a full retroactive calculation with a reprocess type of reprocess and mark it as the default component.
+
+There is one optional piece that clients ask for more often than consultants expect: the retroactive adjustment can be paid through a *different* element from the one that changed. That is what the retroactive pay elements section is for — an entry with its dates, an adjustment type of standard, and the element the results should land in. The reason to want it is visibility on the payslip: "Basic Salary Arrears" as its own line is a great deal easier to explain to an employee than an unexplained increase in basic salary.
+
+Taking an element back out of retro is the same list in reverse: remove the retroactive component rows and remove the event group.
+
+## Running retro in the right order
+
+Retro is a sequence, not a button, and the order is load-bearing.
+
+Start with the *Retroactive Notifications Report*, which lists the notifications outstanding before anything is processed. This is the step teams skip and the step that prevents surprises: it is the only moment at which somebody can look at who is about to receive arrears and ask whether that list is plausible.
+
+Then run *Recalculate Payroll for Retroactive Changes*. Then run the *Retroactive Entries Report*, which shows each retroactive entry beside the original result it was compared against — and read it, because this is where a wrong answer is visible before it is paid rather than after.
+
+Only then run *Calculate Payroll*.
+
+The timing rule is that the recalculation belongs as close to the cut-off as possible and **before** the payroll calculation. Running it afterwards is not an error, but the adjustments it creates will sit until the next period, which turns a one-month delay into a two-month one and produces a conversation nobody enjoys.
+
+Costing has its own step. Retroactive costing is recalculated by a separate process rather than falling out of the payroll run, which is one of the ways a month's costing can balance in HR and not in Finance (Chapter 21).
+
+## Reading a retro that did not happen
+
+When a client reports that "retro did not pick it up", there is a fixed list to walk, in order, and it almost always ends before the fifth item.
+
+Look at the transaction that was supposed to cause the event — was the change actually saved, on the date claimed, as an update rather than a correction? Look at the element setup — are both the proration and retroactive questions answered yes, and does the element have its retroactive components? Look at the person's element eligibility, because an element the person is not eligible for cannot produce a retro entry for them. Look at the retroactive event group's entities and attributes, which is where a change to a field nobody added to the group goes to die. And look at the proration event group too, since the two interact.
+
+That order is roughly the order of likelihood, and it has the useful property that each step is cheap. The temptation — opening the payroll run results first — is the expensive one, and it is usually looking at the consequence rather than the cause.
+
+## Retro is not always money in
+
+Two further things matter for a consultant explaining retro to a client.
+
+First, retro affects **balances**, not just the current payslip: it re-states social insurance and tax for the prior periods too. An arrears payment in July for May and June is not simply added to July's gross — it changes what May and June's insurable earnings should have been, which changes the contributions and the tax that should have been deducted then, and the correction to all of that flows through the current period.
+
+Second, retro is not always money in. A change that reduces pay creates a **recovery**, and a client who has never considered negative retro will want to decide its policy before the first one appears. The questions to force into the open are whether an overpayment is recovered in one period or spread, whether there is a floor below which net pay cannot fall, and who signs off a recovery from somebody who has already left. In several jurisdictions the answer to the first two is constrained by law rather than by policy, which makes this a question for the client's counsel rather than for the consultant — but it is the consultant's job to ask it before the first negative retro, not after.
+
+## Proration
+
+Retro answers what happens when a change arrives late. **Proration** answers what happens when a change takes effect mid-period: a raise effective on the 16th means the period has to be paid partly at each rate. Oracle prorates using a proration event group and a proration formula on the element, and the design question — calendar days, working days, or a fixed divisor — is a client decision with a visible effect on money.
+
+The two are often confused in a workshop. The test is when the change was entered relative to the payroll run: before it, and the period is prorated; after it, and the period is retro.
+
+The divisor question deserves more attention than it usually gets, because it is small, dull and worth real money across a year. Thirty days, actual calendar days, working days and a fixed annual divisor all produce different answers for the same half-month, and they differ systematically rather than randomly — a February joiner and an August joiner are affected in opposite directions by a calendar-days rule. The client's existing practice is the right starting point, their legal adviser is the right arbiter where a labour code speaks to it, and the decision belongs in writing in the design document, because it is the first thing queried when somebody compares a prorated month with their own arithmetic.
+
+## Dating and the Egyptian statutory calendar
+
+In Egypt this is not an edge case. Insurable-wage limits move every January, minimum-wage decrees and the commencement of Labour Law 14/2025 both landed mid-cycle, and statutory changes of that kind are routinely announced after the period they apply to. Retro is how the payroll absorbs them, which makes the event group a piece of statutory configuration rather than a technical nicety.
+
+The practical shape of that is worth planning for rather than reacting to. A statutory change announced in March and effective from January is a retro event for the entire population at once — not a handful of people, all of them. That is a different operational problem from a backdated promotion: the recalculation is long, the arrears appear on every payslip in the same period, and the employee communication matters more than the configuration. Teams that have been through one of these keep two things ready — a dry-run environment where the recalculation can be timed and checked before it touches production, and a short standard explanation of the arrears line that payroll can send out on the day.
+
+## End-dating instead of deleting
+
+**End-dating** closes a record as of a date rather than deleting it, so that history is preserved. Terminating employment end-dates the work relationship; removing an allowance end-dates the element entry. When a client asks "can you just delete this record?", the correct consulting answer is almost always "we end-date it, and here is why that is better for you." In a date-effective SaaS system the tools are end-date, correct, or reverse. Deletion is rare, restricted, and usually the wrong instinct.
+
+The conversation goes better with a concrete reason rather than a principle. An allowance that is deleted did not exist, so the payslips that paid it are unexplainable and the year-to-date figures do not reconcile to anything. An allowance that is end-dated stopped on a date, which is a sentence the employee, the auditor and the finance director can all accept. The client is not asking for destruction; they are asking for the thing to stop appearing. End-dating is what they actually want.
+
+## Dating in a data migration
+
+The same principle governs migration. History loaded as a single current row is history destroyed; loading dated records in date order is what produces a readable past (Chapter 11), and it is the part of a data migration that cannot be fixed afterwards without doing it again.
+
+Two decisions sit behind that and both belong to the functional team. How far back does history need to go — and the honest answer is usually "as far as the entitlements reach" rather than "everything", because service dates, accrual history and statutory year-to-date figures are what later processes actually read. And what is the source of truth where the legacy system holds two dates that disagree, which it will.
+
+The migration-specific trap is the one described above in the other direction: a load that corrects where it should update flattens a history into a single value, and because the load reported success nobody looks again. The defence is to reconcile a sample of records' *history*, not only their current state, in every rehearsal.
+
+## Dating in reporting
+
+Every report over a date-effective object is implicitly asking "as of when", and a report that does not say so is answering a question nobody asked.
+
+Three patterns cover most of it. A point-in-time report takes a date and returns the rows valid on it — headcount as of 31 December. A period report takes a range and has to decide what to do with somebody who was only there for part of it — which is why joiners and leavers make headcount reports disagree. And a change report looks for rows that start or end inside the range, which is how movement is counted rather than stock.
+
+Most arguments about numbers between HR and Finance are one of these three being compared with another of these three. Chapter 7 goes further into the metric definitions, and the analytics collection further still, but the dating root is here: the same table answers all three questions and gives three different numbers, all correct.
+
+## How to investigate "the system calculated it wrong"
+
+A single habit resolves most of these tickets, and it is worth writing into a support runbook.
+
+Ask what the correct answer is and where it comes from, because about a third of the time the client's number is the one that is wrong. Then open the record *as of the date in question*, not as of today — this alone resolves another large fraction. Then look at the chain of dated rows for the period, and ask whether the change that should be there is there, whether it is on the right date, and whether it was entered as an update or a correction. Then, if the value is right in the record and wrong in the pay, move to element eligibility, the event group, and the order in which the processes were run.
+
+What this amounts to is: the data, as of the date; then the configuration that reads it; then the process that ran. Problems are found far faster going in that direction than in the reverse one, and the reverse one is what people do under pressure.
+
+## Common mistakes
+
+- "The effective date is when I entered it." The system tracks the two dates separately for a reason.
+- Using correction for a real event, wiping the history — or an update for a typo, enshrining it.
+- Looking at today's record and concluding a future-dated change was lost.
+- Running a mass update that purges everybody's future-dated changes, and finding out three weeks later.
+- Treating a transaction as if it were a dated record, and asking for its date to be changed instead of reversing it.
+- Reaching for delete. End-date instead.
+- Blaming retro when the change was never in the retroactive event group.
+- Assuming retro works on an element that was never set up for it.
+- Running the retro recalculation after the payroll calculation, and wondering where the arrears went.
+- Skipping the notifications report, and discovering who was in the retro run by reading payslips.
+- Forgetting that retro re-states prior-period tax and insurance, not just gross pay.
+- Assuming retro only adds money. It can recover money too.
+- Confusing proration with retro. One is a mid-period change, the other is a late one.
+- Leaving the proration divisor undocumented, then being unable to explain a part-month to the person who received it.
+- Counting a period report and a point-in-time report as if they should agree.
+
+## Sources
+
+- Oracle, *Administering Global Payroll* — "Overview of Retroactive Pay", for event groups, notifications, the recalculation process and the period rules. https://docs.oracle.com/en/cloud/saas/human-resources/faagp/overview-of-retroactive-pay.html
+- Oracle, *Implementing Global Payroll* — "How Retroactive Pay Is Calculated", for the element setup, the retroactive components and the order the processes run in. https://docs.oracle.com/en/cloud/saas/human-resources/faigp/how-retroactive-pay-is-calculated.html
+- Oracle, *Implementing Global Payroll* — the "Events, Retroactive Pay and Proration" chapter, for event groups and proration formulas. https://docs.oracle.com/en/cloud/saas/human-resources/faigp/index.html
+- Oracle, *HCM Data Loader* — "Overview of Loading Date-Effective Objects", for how a load chooses between a correction and an update and what it does to future rows. https://docs.oracle.com/en/cloud/saas/human-resources/fahdl/overview-of-loading-date-effective-objects.html
+- Oracle, *Implementing Global Human Resources* — date-effective objects and the history they keep. https://docs.oracle.com/en/cloud/saas/human-resources/faigh/index.html
+</script>
+
+<script type="text/markdown" class="src-deep">
+---
 id: hdl
 minutes: 34
 ---
@@ -3045,6 +3248,568 @@ Three situations call for something else. A handful of records is faster to corr
 - Oracle tutorial, "Create and Maintain Data with HCM Data Loader". https://docs.oracle.com/en/cloud/saas/tutorial-hdl-load-files/
 - Oracle tutorial, "Using the HCM Data Loader REST API". https://docs.oracle.com/en/cloud/saas/human-resources/tutorial-hdl-rest/index.html
 - HCM Tables, "HCM Data Loader (HDL) Complete Guide — .dat File Format, Templates & Troubleshooting". https://hcm-tables.com/blog/hdl-data-loader-guide
+</script>
+
+<script type="text/markdown" class="src-deep">
+---
+id: model
+minutes: 58
+---
+
+This is the single most important structure in the product. Payroll, absence, security and reporting all read from it. If a new consultant learns only one chapter cold, it should be this one.
+
+The core insight: there is no employee table. A human being, that human's relationship to an employer, and the details of the job they do are three separate objects, each dated independently. Knowing which attribute lives on which object is the actual skill, and it is the skill that shows in an interview within about ninety seconds. Someone who says "we'll update the employee record" has not learned the model. Someone who asks "is that a change to the assignment or to the work relationship?" has.
+
+The reason for the split is history. HR systems have to answer questions about the past — what grade was this person on in March, who employed them in 2019, how many people were in this department a year ago — and they have to answer them without losing the fact that it is the same human throughout. Splitting the human from the employment from the job is what makes all three answerable at once.
+
+[[fig:employment-stack]]
+
+## Why the model is split the way it is
+
+It is worth spending a moment on the alternative, because understanding what the design avoids is what makes it memorable.
+
+A single employee table has to choose one grain. If one row is one person, the table cannot hold two jobs, and it cannot hold the history of either. If one row is one job, the person's date of birth is repeated on every row and will eventually disagree with itself. If one row is one dated version of one job, the table can hold history, but there is nowhere to record anything true of the human rather than the job, and nowhere to record the fact that two of those rows belong to the same employment and a third belongs to a different one.
+
+Every HR system that started with an employee table eventually bolted the other grains onto the side of it. Oracle started from the grains. The cost is that a consultant has to learn four objects instead of one; the benefit is that every question has exactly one place to be answered, and no fact is stored twice.
+
+There is a second reason, and it is legal rather than structural. Employment is a relationship between a person and a *legal entity*, not between a person and a brand. A group with eleven subsidiaries has eleven employers, and a person's move between two of them is a resignation and a hire in the eyes of the labour authority even though nobody changes desk. A model that keeps the human separate from the employment can represent that honestly. A model that does not has to fake it.
+
+## Person: the human, held once
+
+The **person** record represents a human being and is held once, globally, across the entire enterprise. It carries what is true of the human regardless of any employer: name, date of birth, national identifier, personal contact details, nationality, and personal documents such as a passport or an Iqama.
+
+A person may work for one company, leave, and return years later, or work for two group companies at once. Their date of birth does not change with any of that. Storing it once avoids contradictions, and it is why a rehire six years later still shows the same person number.
+
+Several things on the person record are themselves dated, which surprises people who expect "person" to mean "static". A name is date-effective, because people change their names and a payslip reissued for a prior period should carry the name that was correct then. Addresses are dated. National identifiers are held as a list rather than a field, each with its own type and issuing country, which is what allows an expatriate in Riyadh to carry both a home-country national ID and an Iqama without either overwriting the other. In the Gulf this is not an edge case: it is most of the workforce.
+
+What does *not* belong on the person is anything an employer decides. Job, grade, department, salary, manager, cost centre, union membership, probation end — none of them are facts about the human, and all of them are things a person can have two of at the same time if they hold two jobs. The moment one of them appears on a person record in a design, the design has started to drift back towards the employee table.
+
+## Person numbers, duplicates and the matching problem
+
+Person numbers follow the enterprise setting described in Chapter 1 — Manual, Automatic prior to submission, or Automatic upon final save. The number identifies the human, not the employment, which is why it does not change on rehire or transfer.
+
+The guarantee that one human has one record is only as good as the hire process. Before creating a person, the hire flow looks for someone already in the system with a matching name, date of birth or national identifier. Skipping that check — or bulk-loading people without a reliable key — is how duplicate person records appear.
+
+Duplicates deserve more than a warning, because the cleanup is genuinely bad. Once two person records exist, each accumulates its own work relationships, its own assignments, its own absence balances and its own payroll balances. There is no supported "merge two people" button that reconciles payroll history; the practical remedy is to end one record's employment, load the history onto the other, and leave the orphan behind as a tombstone, which means the year-to-date figures and the absence accruals have to be rebuilt by hand. A duplicate found in week two of a migration costs an hour. The same duplicate found after the first live payroll run costs a week and an apology.
+
+In Egypt and the Gulf the national identifier is the natural key and should be treated as one: the Egyptian national ID, the Saudi national ID or Iqama number. Migration plans that key on employee number instead will merge the wrong people or split the right one. Three regional complications are worth planning for. An expatriate's Iqama number can change on renewal in some circumstances, so it is a strong key but not an eternal one. Arabic names transliterate inconsistently — the same person is Mohamed, Mohammed, Muhammad and Mohammad across four legacy systems — so name matching is close to useless as a deduplication strategy without the identifier beside it. And a legacy system that stored the national ID as a number rather than a string will have dropped leading zeros, which turns an exact-match key into a near-match one.
+
+## Which attribute lives where
+
+Before the objects are described one by one, it is worth seeing them as a lookup table, because this is the question that comes up twenty times a day on a live project.
+
+[[fig:attribute-home]]
+
+The test to apply when a client asks for a new field: does this change when the person changes employer? Then it belongs on the work relationship. Does it change when they change job? Assignment. Is it true of the human regardless of who employs them? Person. Does payroll need to accumulate it across the year? Payroll relationship. Getting this wrong is the single most common data-migration defect, and it usually surfaces months later as a history that cannot be explained.
+
+There is a sharper version of the test for the cases where the first one is ambiguous. Ask how many of this thing the person can have at once. If the answer is "one, ever" it is on the person. If it is "one per employer" it is on the work relationship. If it is "one per job" it is on the assignment. A client who asks for "an employee's cost centre" is describing something a person with two jobs has two of — so it is an assignment attribute, and the requirement as stated is slightly wrong in a way that is much cheaper to correct in a workshop than in production.
+
+## Work relationship: the legal link
+
+A **work relationship** is the link between a person and one legal employer. Oracle describes it as the legal connection between a person and a legal employer, carrying the worker type and the start date of that employment. It is sometimes called a period of service, and that name is the more descriptive of the two: it is a period during which this person served this employer.
+
+Terminating employment end-dates the work relationship. It does not delete the person, and it does not delete the history. A person can hold more than one work relationship at once — a contingent-worker relationship with one group company and an employee relationship with another — and can hold several over time as they leave and return.
+
+A termination entered in error is reversible, and knowing that early saves a lot of panic. The correction is to reverse the termination rather than to re-hire the person, because a re-hire creates a second work relationship and leaves the first one closed, which is a true record of something that did not happen. The distinction between "this employment ended and another began" and "we made a mistake on Tuesday" is exactly the kind of thing the model is good at representing, provided somebody chooses the right transaction.
+
+## Worker types, and what each is for
+
+The **worker type** recorded on the work relationship is one of four: employee, contingent worker, pending worker or non-worker. They are not cosmetic. Worker type maps to a payroll relationship type, which decides whether the person is included in payroll runs at all.
+
+An **employee** is the ordinary case: employed by the legal employer, on the payroll.
+
+A **contingent worker** is engaged but not employed — an agency worker, a contractor on a supplier's books. They occupy a position, appear on the org chart and consume security and absence configuration, but a contingent worker may be excluded from payroll entirely. Clients ask for them constantly and then describe them as employees, so the question worth asking is "who pays them?"
+
+A **pending worker** is someone hired but not yet started. The record exists so onboarding — equipment, accounts, documents, the joining checklist — can begin before day one, and it converts to an employee on the actual start date. It is a genuinely useful feature that most implementations under-use, usually because nobody realised the alternative to it is hiring people early and then explaining why payroll picked them up.
+
+A **non-worker** is a person the enterprise needs to hold without an employment: a retiree drawing a pension, a board member, a beneficiary, a volunteer. They exist so that people who must appear in the system are not forced into an employee shape that would put them in a payroll run.
+
+The regional shape worth anticipating is the Gulf group that employs a large population through a manpower supplier. The business calls them staff, the finance system calls them a vendor invoice, and the labour file calls them someone else's employees. Contingent worker is usually the honest answer, and the test is the one above: who pays them, and whose name is on the work permit.
+
+## The dates on a work relationship, which are the ones that cost money
+
+The dates on the work relationship are where service is decided, and service is money. A single employment carries more dates than most clients realise, and they are not synonyms.
+
+There is the date the person first joined the **enterprise** — their first day in the group, across every employer in it. There is the date they joined **this legal employer**, which is the start of this particular work relationship. There is the **original date of hire**, which matters when a rehire should be treated as continuous. And there are one or more **seniority dates**, which are configured values rather than events, and which exist precisely because none of the other three answers every question a policy asks.
+
+This matters enormously in the region, because end-of-service gratuity in the Gulf and the Egyptian end-of-service settlement are both calculated on continuous service. A rehire that starts a fresh service clock when the client's policy bridges the break will under-pay every affected leaver, and nobody notices until somebody resigns.
+
+Ask, in the requirements workshop, exactly what the client means by "years of service" — and then ask which of those dates it maps to. The answer is rarely the one written on the offer letter, and it is frequently different for different purposes within the same company: gratuity may count from the original hire date, annual leave entitlement from the current legal employer's start date, and the long-service award from a date that excludes unpaid sabbaticals. One company, three answers, and a system that can hold all three only if somebody configures three seniority dates.
+
+## Seniority dates in practice
+
+Seniority dates are configured with the Configure Seniority Dates task, where each rule names a date and decides how it behaves. There are two generations of the feature and it is worth knowing which one an environment is on: the original version manages enterprise and legal employer dates only, while the later version supports seniority at person, work relationship and assignment level and requires a migration process to be run before it can be used. A consultant who promises assignment-level seniority on an environment that has not been migrated has promised something that is not there yet.
+
+Two mechanical facts shape how the feature behaves day to day.
+
+The first is that seniority is **not calculated in real time**. A scheduled process refreshes the dates, so a change made this morning is not reflected until that process has run. Clients report this as a bug roughly once per implementation. It is not a bug, but it does mean the process belongs in the scheduled job list from day one, and it means any report reading seniority is reading a figure that is as fresh as the last run.
+
+The second is that adjustments are expressed in units rather than by overwriting the date. An adjustment of a positive number moves the date backwards and so increases seniority; a negative number moves it forward. Adjustments carry a comment, they can be loaded in bulk — the loader attributes are the manual adjustment days and the comment that goes with them — and they bypass approval. That last point is worth a control: a field that silently increases an entitlement and needs no approval is one an auditor will eventually ask about, and the comment is the only thing standing between the client and an unexplained three-month gift.
+
+The design instinct to carry away is that seniority is where policy lives, and the hire date is where fact lives. Keep the fact true and express the policy beside it.
+
+## Assignment: the job details
+
+The **assignment** carries the actual job details: business unit, department, job, position, grade, location, manager, working hours, assignment category, assignment status, and the standing data payroll reads.
+
+Job details change often — promotions, transfers, hours changes, a new manager — while the person and the employer stay the same. Isolating them in their own date-effective object keeps the history clean. Almost every lifecycle transaction is a dated change against the assignment, which is why a consultant spends most of their configuration life here, and why Chapter 4 on effective dating matters as much as it does.
+
+The assignment also carries its own number and its own name, which exist because a person can hold several and reports have to tell them apart. Working hours and FTE sit here, and they are the input to a surprising amount of downstream arithmetic: part-time absence accrual, salary proration, headcount expressed as FTE rather than as bodies. The manager relationship is held here too, and it is a list rather than a field — line manager is one type among several, which is how a matrix organisation records a project manager alongside the person who signs the leave request.
+
+## Assignment status, and the twelve combinations behind it
+
+The **assignment status** is the attribute that generates the most support tickets in the model, and it does so because it looks like one value and is actually three.
+
+Underneath the status a consultant picks sit an **HR status**, a **payroll status**, and optionally a **user status** — a client-defined name for a situation, created with the assignment status setup task. The HR status is one of Active, Suspended or Inactive. The payroll status is one of four: Process, Do not process, Process when earning, or Process nonrecurring element entry. The application sets the HR and payroll values automatically from the assignment status chosen, and the delivered statuses are the twelve combinations of the three HR values with the four payroll values — Active - payroll eligible, Active - no payroll, Suspended - process when earning, and so on through the grid. A new assignment is created as **Active - payroll eligible**, which is Active with a payroll status of Process.
+
+The two unusual payroll statuses are the useful ones and almost nobody knows what they are for. **Process when earning** means payroll processes the assignment only in periods where there are earnings, and it exists for countries with cumulative tax rules, where running an empty period would otherwise generate a tax refund the employee is not owed. **Process nonrecurring element entry** processes only the active entry for a nonrecurring element, and it exists for paying a one-off amount to someone who has already left.
+
+The distinction that catches people is between the HR half and the payroll half. A status can be Active for HR purposes while excluding the person from payroll, which is exactly what is wanted for unpaid leave and exactly what is not wanted when somebody has set it by accident. "The employee is active but did not get paid" is almost always this, and the five-second diagnosis is to look at the payroll status rather than at the status label.
+
+User statuses are worth a recommendation. Clients want to distinguish "suspended — unpaid study leave" from "suspended — secondment" from "suspended — disciplinary", and the user status is the delivered way to do it without inventing a flexfield. Where several user statuses exist for one HR status, one of them has to be designated the default.
+
+## The primary flags, and what reads them
+
+The **primary assignment** flag matters when a person holds more than one. Reports, the org chart and many downstream integrations read the primary assignment, so a person with two jobs whose primary flag sits on the minor one will be reported under the wrong department indefinitely.
+
+There is a primary flag on the work relationship as well, for the person who holds employments with two legal employers, and it answers the same question one level up: which of these employments is the one to show when something can only show one. Both flags are quiet failures rather than loud ones. Nothing breaks, no error appears, and the headcount for two departments is simply wrong until somebody reconciles it against a list the business already trusted.
+
+A useful habit on any migration: produce a report of people with more than one assignment and have the business confirm the primary on each, before go-live rather than after. The list is always shorter than the client expects and always contains two surprises.
+
+## Actions and action reasons
+
+Every change to an assignment is recorded with an **action and action reason** — Hire, Promotion, Transfer, Termination as the action, and a client-defined reason underneath it. The action drives which flow runs and which fields appear; the reason is what makes analytics possible later.
+
+"Why did attrition rise in Q3" can only be answered if terminations carry reasons, and reasons only exist if someone insisted on configuring them during implementation. That someone is the consultant.
+
+The design advice is to keep the reason list short enough that people use it honestly. A list of forty termination reasons produces data in which thirty of them have never been used and the other ten are chosen at random by whoever is clicking. A list of eight, agreed with the HR director, each of which answers a question the business actually asks, produces an attrition analysis that somebody will act on. The same applies to transfers and promotions: the reason is the field that turns a record of what happened into evidence about why.
+
+## Work terms: the layer that is not on the configuration screen
+
+Older material, and a good deal of interview folklore, describes a **three-tier** model in which a layer of **employment terms** — also called work terms — sits between the relationship and the assignment to group contractual attributes across several assignments. It is worth recognizing the term, because it is still said out loud and it still appears in training decks. It is not on the configuration screen.
+
+What does survive is the object. A work terms record exists under every work relationship whether or not anyone calls the model three-tier, and HCM Data Loader expects it as a component of the Worker file — `PeriodOfServiceId` points a work terms record at its work relationship, and the assignment points at the work terms record (Chapter 11). A consultant meets the layer on the first data migration regardless of what the enterprise option says, which is the real reason to know the word.
+
+The practical consequence is a rule that costs an afternoon the first time it is met: where dated splits are created on an assignment, the same dated splits have to exist on its work terms record. A file that splits one and not the other is perfectly well-formed, imports without complaint, and fails at load with a message about the parent. The model is consistent here even though the configuration screen has stopped mentioning it.
+
+## The employment model option
+
+The **employment model** is set on the enterprise and can be overridden per legal employer, and it has four values: single assignment, single assignment with contract, multiple assignments, and multiple contracts with single assignment. All four are two-tier — the work relationship holds assignments directly. Where a legislation needs contract detail inside the employment record, Oracle's answer is the contract variants rather than an extra layer.
+
+The choice that actually matters is single versus multiple assignment, and it is worth making deliberately rather than by default. Single assignment is simpler and closes off concurrent employment; multiple assignment opens it and brings with it the primary flag, the question of which assignment a report means, and a set of absence and payroll behaviours that only appear when somebody holds two jobs. A client who is certain they will never have concurrent employment is usually a client who has not yet asked the medical division or the university faculty.
+
+## Payroll relationship: where payroll actually runs
+
+Parallel to this hierarchy sits the **payroll relationship**, which links the person to a payroll statutory unit. It is the highest level of the payroll employment model and groups a person's assignments for statutory calculation and reporting. Oracle creates it automatically on hire, which is why most consultants meet it for the first time when something goes wrong.
+
+The reason it exists is statutory arithmetic. Tax and social insurance must be calculated on a person's total earnings within a statutory unit, not per assignment. If someone holds two assignments, their social insurance cannot be calculated twice in isolation — that would apply the ceiling twice and under-deduct. Grouping the assignments under one payroll relationship is what makes the ceiling, the bracket and the annual accumulation apply once to the whole person.
+
+Three consequences follow, and all three appear in interviews.
+
+Payroll processing always occurs at the payroll relationship level. Elements are entered against assignments, but the run is against the relationship.
+
+Balances aggregate at the payroll relationship, and — critically — **balances do not span payroll relationships**. Year-to-date tax, year-to-date insurable earnings, accumulated employer contributions: all of it belongs to one relationship and stops at its edge.
+
+Assignments grouped in one payroll relationship must share the same payroll statutory unit and person type. That is why a person who is an employee of one company and a contingent worker at another has two payroll relationships, not one.
+
+## Payroll relationship types, and the mapping you cannot undo
+
+Behind the worker type sits a **payroll relationship type**, and the mapping between them is a piece of setup with unusually long consequences.
+
+The two that matter are **Standard**, which puts the person into payroll runs, and **Element Entries Only**, which lets element entries exist against the person but leaves them out of payroll processing. Some releases add further variants for pending workers and candidates. The types themselves are delivered and cannot be invented: a client who wants a third behaviour is going to get one of these two.
+
+Three rules around the mapping are worth carrying.
+
+It is defined **per legislation**, so the same person type can map differently in two countries within one enterprise, and a behaviour verified in the Egyptian legislative data group proves nothing about the Saudi one.
+
+A person type with **no mapping produces no payroll relationship at all**, which means no salary, no payment method, nothing payroll-shaped can be recorded. This is occasionally what is wanted and much more often a configuration gap discovered when someone tries to record a bank account.
+
+And the choice is effectively **irreversible**: Oracle says the mapping cannot be undone, and a person type mapped to Element Entries Only will produce no results from a gross-earnings calculation later. A change to the mapping affects only person records created afterwards, so the population already loaded keeps the old behaviour. Standard is the more flexible choice, and where a client is undecided, that is the one to take.
+
+## Payroll relationship rules, and what a rehire does
+
+When a new assignment or a new employment appears, something has to decide whether it joins an existing payroll relationship or starts a new one. That decision is the **payroll relationship rule**, and it belongs to the legislation rather than to the client.
+
+Three rules exist. **Lifetime Record** groups a new assignment under an existing relationship for the same payroll statutory unit and person type, for the life of the person. **Last Record** does the same but against the most recent relationship. **New Record** creates a relationship per assignment regardless.
+
+This is the mechanism behind one of the most common interview questions and one of the most common client surprises: does a rehire continue the old balances or start fresh? The honest answer is that it depends on the rule the legislative data group runs, and on the dates. Under the rule Oracle ships for Saudi Arabia, the application compares the new assignment's start date with the last standard earnings date of the existing payroll relationship and reuses that relationship when the start date falls before it — which is what makes back-to-back fixed-term contracts continuous. Only where a new relationship is created do balances start again.
+
+Before promising a client either behaviour, find out which rule their legislative data group runs. "It depends on the payroll relationship rule, and here is how I would check it for your legislation" is a better answer in an interview than either of the two confident ones.
+
+## Termination dates on the payroll relationship
+
+When employment ends, the payroll relationship carries dates of its own, and two of them decide whether the person can still be paid.
+
+The **last standard process date** is the point after which no ordinary payroll run will pick the person up. The **final close date** is the point after which nothing at all will — no supplementary run, no late correction, no final settlement.
+
+Setting the final close date too early is how a legitimate late payment becomes impossible to pay without reopening the record. In the Gulf this is not hypothetical: gratuity calculations get revised, a final leave balance is recalculated after the leaver has gone, an annual bonus is declared in March for people who left in February. Leave room, and make it a standing instruction to whoever processes terminations rather than a decision taken per leaver.
+
+## Concurrent employment
+
+**Concurrent employment** means one person holding several simultaneous assignments under one work relationship, or several work relationships across different legal employers. A lecturer who also runs a research lab. A doctor employed by a hospital who also works clinic hours. A group finance manager who formally holds a role in two subsidiaries.
+
+The two cases behave differently and the difference is the whole point. Two assignments under one work relationship means one employer, one payroll relationship, one set of balances and one statutory ceiling applied across both jobs.
+
+Two work relationships means two employers — but not, automatically, two payroll relationships. The relationship is keyed on the payroll statutory unit and the person type, exactly as stated above, so two employers that are separate PSUs produce two relationships calculating independently, while two employers sharing one parent PSU produce a single relationship, with one set of balances and one ceiling across both jobs. The shared-services shape in Chapter 1, where several legal employers name one parent PSU, is precisely that second case. Which of the two happens is also legislation-dependent, through the payroll relationship rules above.
+
+When a client describes somebody who "works for both companies", the useful follow-up is: which PSU files for this person, and is it the same one for both companies? The answer decides the shape, and it decides whether a statutory ceiling applies once or twice.
+
+The arithmetic is worth making concrete, because it is where the money is. Under one payroll relationship with a social insurance ceiling, the two salaries are added, the ceiling is applied once, and contributions stop at it. Under two relationships, each salary meets its own ceiling, and the employer pays more and the employee pays more than either party expects. Neither outcome is a bug; they are two different legal situations. The error is in assuming which one applies.
+
+## The canonical worked example: a global transfer
+
+A **global transfer** moves a worker from one legal employer to another, typically across countries. Legally that is a new employment, not an edit to an existing one — different country, different legislation, different statutory registration.
+
+Oracle handles this through a single Local and Global Transfer flow that covers both a move within the same legal employer and a move to a different one, with options for what happens to the existing assignments and whether the move is permanent or temporary. The underlying record changes are the part to be able to narrate.
+
+The source work relationship is terminated and a new one is created under the destination legal employer. The status chosen for the source applies to every assignment on that work relationship, not only to the one the transfer was started from. A new payroll relationship is created under the destination payroll statutory unit, which sits in a different legislative data group. The person record is unchanged throughout. Because balances never span payroll relationships, year-to-date figures start fresh in the new country — which is correct, since the new country's authorities have no interest in earnings taxed elsewhere, but which surprises clients who expected a single annual figure.
+
+What carries across is worth knowing in detail, because it is the part clients ask about. By default the new primary assignment is populated from the source assignment and can then be edited; non-flexfield attributes and descriptive flexfields on the assignment and work relationship copy by default and can be changed. Payroll information copies **only when the source and destination legal employers share a legislative data group** — which is to say, within a country. Element entries copy subject to eligibility, and the way to stop particular elements from travelling is an element group with the global transfer usage. There is a profile option governing whether source assignment data is copied at all; it defaults to copying, and setting it off is the switch for a client who wants every transfer entered from scratch.
+
+[[fig:global-transfer-count]]
+
+Be able to narrate this end to end and give the counts at the end: one person record, two work relationships (one ended), two payroll relationships (one ended). Then add the consequence nobody asks for but everybody wants: accrued leave and end-of-service liability do not move by themselves, and whether service bridges across the transfer is a policy decision expressed through seniority dates.
+
+## Global temporary assignment, and the difference that matters
+
+A **global temporary assignment** is the secondment case, and it differs from a transfer in exactly the way the names suggest: the source employment is not ended.
+
+The source work relationship stays in place. Only the assignment the flow was started from is affected, rather than every assignment on the relationship, and by default that assignment moves to Suspended - payroll eligible, which can be changed to any other status. The person picks up an assignment in the destination legal employer while remaining employed by the source.
+
+This is the shape a Gulf group needs when it sends somebody from the Dubai entity to the Riyadh entity for eighteen months and intends them to come back. The choice between transfer and temporary assignment is not a system preference — it follows the employment contract and the work permit, and getting it wrong produces a record that contradicts the documents in the employee's file. The useful question in the workshop is whether the person's original employment is suspended or ended, and the person who knows the answer is usually in legal rather than in HR.
+
+## Rehire: the case everyone gets wrong
+
+A rehire is a global transfer's quieter cousin and it trips up more projects.
+
+The person record is reused — same human, same person number, same date of birth — and a new work relationship is created for the new employment. What happens to the payroll relationship depends on the payroll relationship rule described above, and that is the whole of the technical answer.
+
+What is controversial is service. Whether the earlier employment counts toward gratuity, leave entitlement bands and notice periods is a policy question the client must answer, and the answer is expressed through seniority dates rather than by faking the hire date. Consultants who solve it by back-dating the new work relationship to the original hire date create a record that says the person was employed during a period when they were not, which corrupts headcount history, absence accruals and any report that counts service in a given year.
+
+The correct instinct: never lie to the dates. Configure the seniority date that means what the client means.
+
+It is worth rehearsing the conversation, because it recurs. The client says "she has been with us for twelve years". The record says she was employed for seven years, absent for two, and employed again for three. Both are true, and the second one is what the system should hold. The twelve is a policy figure computed from the first number plus a bridging rule, and the place for it is a seniority date with a comment explaining the bridge — not a hire date that makes the two missing years disappear from every headcount report the company has.
+
+## What this model looks like to a data migration
+
+The model is abstract until somebody has to load ten thousand people into it, at which point it becomes very concrete.
+
+Oracle's bulk loader (Chapter 11) treats the person, the work relationship and the assignment as components of a single Worker object rather than as three separate loads. That is deliberate and it is a mercy: the three have to be created in one transaction, with consistent dates, or the result is a person with no employment or an assignment pointing at a work relationship that does not exist. It also means the file is wide, the ordering inside it matters, and a single malformed row can fail a block of records rather than one.
+
+Three rules follow, and they are worth knowing before the first load rather than after it.
+
+Dates must agree across the components. An assignment cannot start before its work relationship does, and a work relationship cannot start before the person exists. Source systems routinely hold a hire date on the employee record and a different one on the contract, and somebody has to decide which is true.
+
+The keys must be stable. Loads reference objects by a source key or by a user key, and the person's national identifier is usually the only value in a legacy HR system that is both unique and unchanged across the whole history. Employee numbers get reissued; names get re-spelled.
+
+History is loaded as history, not as today. If the client wants the last five years of job changes, those are dated assignment records, not a single current row — and loading them in date order is what produces a readable history afterwards rather than a stack of corrections.
+
+There is a fourth rule that only appears on the second migration. Decide, before loading, how much history the client actually needs, and get that decision signed. Five years of dated assignment history multiplies the file size, the load time and the error surface by a large factor, and much of it is history nobody will ever query. A common and defensible answer is to load current state plus the dates that drive entitlements — hire, original hire, seniority — and to keep the full history in the legacy system or a reporting archive. That is a functional decision with a large technical consequence, which is precisely the kind of decision a consultant is being paid to surface early.
+
+## What the model does to reporting and security
+
+Two downstream areas read this structure constantly, and both of them punish a misunderstanding of it.
+
+Reporting reads the grain. A subject area built on assignments returns one row per assignment, so a count of rows is a count of jobs rather than a count of people, and an enterprise with concurrent employment will see a headcount that is quietly too high. A subject area built on work relationships counts employments, which double-counts the person employed by two group companies. The count the business means is almost always people, and getting it requires either a distinct count of person identifiers or a filter to primary assignments. Chapter 7 goes further into this, and the analytics collection goes further still, but the root of it is here: the model has three grains and a report has to pick one on purpose.
+
+Security reads the assignment. Data security profiles scope who can see whom by attributes that live on the assignment — department, business unit, legal employer, position hierarchy, manager hierarchy. That is why a manager who cannot see one of their people is almost always looking at an assignment whose manager or department is not what everybody assumed, and why the first diagnostic step is to open the assignment rather than to open the role. Chapter 15 takes this apart properly.
+
+## Reading the model on screen
+
+Knowing where each object surfaces in the interface saves an embarrassing pause in a demo.
+
+The person attributes sit under the personal details area: name, national identifier, date of birth, contact details, documents. The work relationship and the assignment share the employment information page, with the work relationship's dates and worker type at the top and the assignment's job, grade, department, manager and status beneath — which is a UI convenience, not evidence that they are the same object. The payroll relationship has its own page, reached from the payroll area rather than from the person's employment record, and that separation on screen is a useful reminder of the separation underneath.
+
+When something cannot be found, the question to ask is not "where is this field" but "which object owns it", and then go to that object's page.
+
+## A worked life, end to end
+
+It helps to run one person through the whole model once.
+
+A woman is hired by the Cairo entity in 2016. One person record is created, carrying her name, date of birth and national ID. One work relationship is created against the Cairo legal employer with a worker type of employee and a start date. One assignment is created under it, carrying her job, grade, department and manager, with a status of Active - payroll eligible. One payroll relationship is created against the Egyptian payroll statutory unit, and her balances begin there.
+
+In 2018 she is promoted. Nothing happens to the person, nothing happens to the work relationship, and a new dated version of the assignment is created with the new job and grade, carrying the action Promotion and a reason.
+
+In 2019 she takes unpaid study leave for four months. The assignment status moves to a suspended value with a payroll status that excludes her from the run, and moves back afterwards. Her work relationship is untouched throughout, because she never stopped being employed.
+
+In 2021 she resigns. The work relationship is end-dated with an action of Termination and a reason. The payroll relationship gets a last standard process date and a final close date far enough out that her final settlement and a later bonus correction can both be paid. The person record is untouched.
+
+In 2023 she is rehired by the same entity. The same person record is reused, with the same person number. A second work relationship is created. Whether the old payroll relationship is reused depends on the legislation's rule and on the dates. Her gratuity policy bridges the break, so a seniority date is configured and adjusted to reflect twelve years of countable service while her hire dates continue to say exactly what happened.
+
+In 2025 she moves to the Riyadh entity permanently. The Cairo work relationship is ended and a Saudi one begins; a new payroll relationship is created in the Saudi legislative data group; her Egyptian year-to-date balances stay in Egypt where they belong; her leave balance and end-of-service liability are settled or transferred by an explicit decision rather than automatically.
+
+One person record. Three work relationships over nine years, two of them closed. Several payroll relationships. Dozens of dated assignment versions. Not one employee table, and not one fact stored twice.
+
+[[lab:model]]
+
+## Common mistakes
+
+- Believing there is an employee table. There is a person, a work relationship and an assignment.
+- Confusing termination of a work relationship with deletion of the person. The person survives, and should.
+- Re-hiring somebody to fix a termination entered in error, instead of reversing the termination.
+- Keying a data migration on employee number rather than national identifier, and producing duplicate people.
+- Matching people by name in a region where one name transliterates four ways.
+- Putting an employer's decision — grade, cost centre, probation end — on the person record.
+- Believing the work terms layer does not exist because the enterprise is two-tier. It is created for every assignment, and HCM Data Loader expects the component in the file.
+- Splitting an assignment by date without splitting its work terms record the same way.
+- Thinking payroll runs against the assignment. It runs against the payroll relationship.
+- Mapping a person type to Element Entries Only to "keep them out of payroll", then discovering the mapping cannot be undone.
+- Expecting balances to carry across a global transfer. They do not — a new legislative data group means a new payroll relationship.
+- Assuming a rehire always restarts balances, or always continues them. It depends on the legislation's payroll relationship rule and on the dates.
+- Treating "years of service" as one number. Ask which date the client means before configuring anything that depends on it.
+- Back-dating a rehire's work relationship to the original hire date instead of using a seniority date.
+- Expecting a seniority date to update the moment something changes, rather than when the calculation process next runs.
+- Reading the status label instead of the payroll status when somebody active was not paid.
+- Using a transfer where the contract describes a secondment, or the reverse.
+- Leaving the primary assignment flag on the minor of two concurrent jobs, then wondering why reporting is wrong.
+- Setting the final close date on termination too early, so a legitimate late payment cannot be made.
+- Configuring actions without action reasons, then being unable to answer any question about why people left.
+- Counting rows in an assignment-grained report and calling the answer headcount.
+
+## Sources
+
+- Oracle, *Implementing Global Human Resources* — "Employment Model", for the four employment model options. https://docs.oracle.com/en/cloud/saas/human-resources/faigh/employment-model.html
+- Oracle, *Implementing Global Human Resources* — "Assignment Status", for the HR, payroll and user statuses and the twelve delivered combinations. https://docs.oracle.com/en/cloud/saas/human-resources/faigh/assignment-status.html
+- Oracle, *Implementing Global Human Resources* — "Overview of Seniority Dates" and "How You Configure Seniority Dates", for the two versions, the calculation process and adjustments. https://docs.oracle.com/en/cloud/saas/human-resources/faigh/overview-of-seniority-dates.html
+- Oracle, *Using Global Human Resources* — "Data Copy and Display Options for Local and Global Transfer", for what copies on a transfer and what does not. https://docs.oracle.com/en/cloud/saas/human-resources/fawhr/data-copy-and-display-options-for-local-and-global-transfer.html
+- Oracle, *Using Global Human Resources* — "Transfer Actions", for how a transfer and a global temporary assignment differ in what they touch. https://docs.oracle.com/en/cloud/saas/human-resources/fawhr/transfer-actions.html
+- Oracle, *Implementing Global Payroll* — "Payroll Relationship Type Mappings", for Standard versus Element Entries Only and the consequences of the mapping. https://docs.oracle.com/en/cloud/saas/human-resources/faigp/payroll-relationship-type-mappings.html
+- Oracle, *Implementing Global Payroll* — "Payroll Relationship Rules", for how a new assignment is grouped under an existing payroll relationship. https://docs.oracle.com/en/cloud/saas/human-resources/faigp/payroll-relationship-rules.html
+- Oracle, *Implementing Payroll for Saudi Arabia* — "Continuous Period of Service Payroll Relationship Rule for Saudi Arabia", for what a rehire does to the relationship in the region. https://docs.oracle.com/en/cloud/saas/human-resources/faisa/continuous-period-of-service-payroll-relationship-rule-for-saudi-arabia.html
+- Future Proof Technologies, "HCM Employment Model in Oracle Fusion HCM Cloud". https://medium.com/@futureprooftrainings/hcm-employment-model-in-oracle-fusion-hcm-cloud-0ec24a4e638a
+</script>
+
+<script type="text/markdown" class="src-deep">
+---
+id: payroll
+minutes: 48
+---
+
+Payroll in Oracle is a chain of objects, each depending on the one before it. A consultant who can recite the chain and explain what breaks when a link is missing can debug most payroll problems without opening a log. The chain runs: element → element eligibility → element entry → payroll run → balance → prepayment → payment → costing.
+
+The chain is worth learning in both directions. Forwards, it is how a payroll is built: define the thing, decide who may have it, give it to someone, run, accumulate, distribute, pay, account. Backwards, it is how a payroll is debugged, and that is the direction a consultant uses more often. A payment is wrong, so look at the prepayment. The prepayment is wrong, so look at the run result. The run result is wrong, so look at the entry. The entry is missing, so look at eligibility. Eligibility is fine, so look at the element. Six questions, in order, and almost every payroll incident is answered before the sixth.
+
+## Defining what can be paid
+
+An **element** is the definition of a single thing that can appear on a payslip: a salary, an allowance, a deduction or an informational item. Payroll is built from named, individually configured components — "Basic Salary", "Transport Allowance", "Social Insurance Employee Contribution", "Loan Deduction" — rather than one monolithic calculation, so that each can carry its own rules, taxability and reporting treatment. Elements live inside one LDG and must be rebuilt per country. Every payslip line traces back to an element, and reading a client's element list is one of the first tasks on a project.
+
+Reading that list well is a skill in itself. A well-designed element list is short, each name says what the thing is rather than what it was called in the legacy system, and the statutory elements are untouched and recognisable. A badly designed one has forty earnings elements, eleven of which are variants of "Allowance 3", and nobody left in the building knows which population each applies to. The second kind is the more common inheritance, and the first useful deliverable on a support engagement is often simply the inventory: which elements exist, who has entries for them, and which have not been used in two years.
+
+## What the element template actually builds
+
+Creating an element is not creating one object. The element template asks a series of questions and then generates a small family of objects, and knowing what it generated is what makes the result debuggable.
+
+Depending on the classification, the template creates a **results element** — a nonrecurring element named for the base one with "Results" appended — that the payroll process feeds values into, taking account of frequency rules and any skip or proration formula. Answering yes to the retroactive question generates a **retro element**, also nonrecurring, named with "Retro" appended, carrying the base element's attributes with some exceptions. One of those exceptions is worth memorising, because it is quietly sensible: every retro element is given a latest entry date of final close regardless of what was chosen for the base element, so that an arrears payment can still be made to somebody who has left.
+
+The template also creates the balances the element feeds, the balance feeds themselves, the status processing rules and the formulas that do the work. This is why two elements that look identical on screen can behave differently: they were generated by different answers to the template, and the difference lives in the objects underneath rather than on the element page.
+
+The practical consequence for a consultant is to **answer the template carefully the first time**. Several of the questions — proration, retroactive changes, whether the element is paid separately — shape generated objects that are awkward to change afterwards. On a new implementation the right instinct is to create one element of each kind in a development environment, look at what the template produced, and only then write the configuration workbook.
+
+## Classifications and processing priority
+
+Each element has a **classification** — earnings, deduction, information — which controls processing order and how the element feeds balances. Payroll must process earnings before it can calculate deductions based on them, so classification drives sequencing: standard earnings, supplemental earnings, pre-statutory deductions, statutory deductions, voluntary deductions. When a calculation runs in the wrong order, classification and processing priority are the first things to check.
+
+Underneath the classification sits a **processing priority**, a number, and the rule is that lower numbers process first. The primary classification supplies a default priority and a permitted range, and an element can be given a different number within that range. That range is the safety rail: it is not possible to drag a voluntary deduction in front of a statutory one by typing a small number, because the ranges do not overlap.
+
+Priority matters whenever one element's result is another element's input. A loan repayment capped at a percentage of net pay has to be calculated after the things that determine net pay. A percentage-based allowance has to come after the basic salary it is a percentage of. In practice the delivered priorities are correct for the delivered elements, and the ones a consultant has to think about are the client's own elements with dependencies between them. The symptom of getting it wrong is a result that is right in the second run of a period and wrong in the first, or a value that calculates as zero because the thing it reads had not been calculated yet.
+
+## Input values, and why they are hard to change later
+
+An element's **input values** are the fields that hold the data the calculation needs — amount, rate, percentage, units. A "Loan Deduction" element might carry input values for total loan amount, monthly instalment and remaining balance. Deciding an element's input values is a core design decision recorded in the configuration workbook.
+
+Each input value has a type, can be made required, and can be validated — against a range, a lookup, or a formula — and that validation is worth using. An input value that accepts any number is an input value that will one day accept 100 where 1.00 was meant.
+
+The reason to get this right early is a restriction with real teeth: **once entries exist against an element, input values cannot be freely added or removed**. Oracle's reason is integrity — retroactive processing and the balances that read those input values depend on the shape not changing underneath them. The practical effect is that an element in production has the input values it was born with, and a client who later wants to hold one more piece of information per entry is looking at a new element and a migration of the old entries rather than a quick edit.
+
+## Recurring, nonrecurring, and what happens at termination
+
+An element is either **recurring** — its entry applies in every pay period until the entry is ended — or **nonrecurring**, where the entry applies to one pay period only. Salary is recurring. A one-off bonus is nonrecurring. This is one of the template answers that cannot sensibly be changed later, and it is also one that clients get wrong when describing a requirement: "they get it every month, except when they don't" is a recurring element with a skip rule or an end date, not a nonrecurring one somebody re-enters monthly.
+
+The **termination rule** decides what happens to entries when employment ends, and the three values are worth knowing by name because they are the mechanism behind "we cannot pay his final bonus".
+
+*Actual termination* closes recurring entries on the termination date — the ordinary case for salary and allowances, which should stop when the person stops. *Last standard process* stops processing after that date. *Final close* keeps entries open after termination, which is what makes it possible to pay a bonus, a severance amount or a year-end adjustment to somebody who has already left.
+
+The design conversation to have with a client is which elements need final close, and the answer is usually a short list: end-of-service, final leave settlement, any bonus declared after the leaving date, and any statutory adjustment. Setting everything to final close instead is not a shortcut — it leaves salary entries open on leavers, and sooner or later somebody is paid for a month they did not work.
+
+## Who can get it, and who does
+
+Creating an element does nothing on its own. **Element eligibility** (historically "element link") defines which population the element applies to, by criteria such as payroll, legal employer, grade, job or department: "Car Allowance is eligible for grade G7 and above in the Cairo business unit." Without eligibility, an element cannot be given to anyone. This is the most common cause of "why can't I add this allowance to this employee?" — the answer is almost always that eligibility does not cover them. Eligibility defined too narrowly at build time is considerably messier to widen once entries exist.
+
+Two design choices sit inside eligibility and both are worth making deliberately.
+
+The first is **open versus criteria-based** eligibility. An element with no criteria is available to everyone on the payroll, and for most earnings that is the right answer — the control over who actually receives it is the entry, not the eligibility. Criteria belong where the restriction is a rule rather than a decision: an allowance that legally applies only to one legal employer, a deduction that only exists for one grade band. Encoding an HR decision as eligibility makes every exception a configuration change.
+
+The second is **automatic entry**. An element can be configured so that an eligible person receives an entry without anyone creating one, which is how standing items like a statutory deduction attach themselves. It is powerful and it is a trap in equal measure: a change to eligibility on an element with automatic entry changes who is being paid, immediately and in bulk. Any edit to that kind of eligibility deserves the same care as a mass update.
+
+An **element entry** is the actual attachment of an element to a specific person, with values and dates: a transport allowance of EGP 800 per month effective 1 March. Eligibility says who *could* receive something; the entry says who *does*, and how much. Entries can be created manually, loaded in bulk with HCM Data Loader (Chapter 11), or generated automatically.
+
+## Salary, and where it actually lives
+
+The **salary basis** decides how salary is stored, quoted and paid — annual, monthly or hourly — and which element it feeds. An annual basis stores EGP 240,000 and pays EGP 20,000 monthly. Getting the basis wrong multiplies or divides everyone's pay by twelve, so always confirm how the client quotes salary in offer letters before configuring it.
+
+Salary is held as a dated **salary record** on the assignment, and Oracle derives the element entry from it through the salary basis. That direction matters: a raise is entered on the salary page and the entry follows, never the other way round. Editing the derived entry directly leaves the salary page and the payslip telling different stories about the same person, and nothing in the system flags the disagreement — it surfaces when somebody compares a letter to a payslip.
+
+This is worth converting into a rule for the client's own administrators, because it is the kind of thing a well-meaning power user will do once and then teach to three colleagues. **Salary changes on the salary page. Everything else can be an entry.** An administrator who finds themselves typing a basic salary figure into an element entry has taken a wrong turn, and the earlier somebody says so the fewer records have to be unpicked.
+
+## Salary components and the Gulf offer letter
+
+Most Gulf offers are not quoted as one number. They are quoted as basic plus housing plus transport, and that split is what **salary components** are for: an itemised breakdown held against the salary record rather than as separate manual entries. The split is a statutory question, not a presentational one, because the contributable wage in Chapter 17 and the UAE gratuity base in Chapter 18 are both computed from particular components. Designing the components to match how the client's offer letters are written is therefore part of getting end-of-service right, and it is much harder to change afterwards than before.
+
+The workshop question that gets to the heart of it is not "how is salary structured" but "**which part of this is the gratuity calculated on**". The answer names the components that must exist as components, and everything else can be an allowance element. Asking it that way also surfaces the disagreement that frequently exists between what the offer letter says, what the policy manual says and what payroll has actually been doing, which is a far better thing to discover in design than in parallel run.
+
+## Rate definitions and grade rates
+
+**Rate definitions** convert between the stored figure and the figure a process needs — an annual salary into an hourly rate for overtime, a daily rate for an absence payment, a monthly rate for a liability accrual. Grade rates, promised in Chapter 2, attach ranges or step values to grades so that pay governed by grade is validated against the band rather than typed in free. A client whose pay is individually negotiated rarely needs them; one in the public sector or a large Gulf group almost always does.
+
+Rate definitions are the quiet dependency behind a surprising number of calculations, and they are where a hidden client policy usually lives. The hourly rate for overtime is monthly salary divided by *something*, and that something — 30 days times 8 hours, 26 days times 8, 208 hours, the actual hours in the month — is a policy choice worth several percent of the overtime bill. The same is true of the daily rate used for unpaid leave deductions and for absence payments. Each of these should appear in the design document as a named rate definition with its divisor written down, and each should be reconciled against a real legacy payslip before anyone signs it off.
+
+## The hours side of pay
+
+The functional track promises money, time and law, and time so far has meant leave. Hours are the other half, and they reach payroll in one of three ways: a time card in Oracle Time and Labor, an interface from a biometric or shift system, or a bulk load (Chapter 11). Choosing between them is a design decision with an owner and a cost, and it is worth making explicitly rather than discovering in the first run that attendance arrives as a spreadsheet somebody emails.
+
+An overtime element needs two things: a rate source, which is a rate definition, and a multiplier, which is statutory rather than negotiable. Under Egypt's Labour Law 14/2025 overtime is paid at no less than 35% above the normal hourly wage for daytime hours and 70% for night hours, with total presence at the workplace capped at twelve hours a day. Saudi Arabia's Article 107 sets overtime at 150% of the hourly wage. Sources disagree on two points worth flagging rather than resolving: whether the Saudi calculation runs on basic or total wage, and whether Egyptian rest-day work is compensated as an extra day's wage plus a substitute day off or as double pay. Both were checked in 2026 and both belong in a client's written legal position before an element is built.
+
+The design question that settles the shape is whether the client pays by the hour or by the month. An hourly salary basis fed by time cards computes pay from hours every period; a monthly salary with an overtime element computes a fixed amount plus exceptions. They produce the same payslip in an ordinary month and behave completely differently in a month with unpaid leave, a mid-month joiner or a strike of overtime claims.
+
+There is an operational dimension that the design rarely accounts for. Time data arrives late. It arrives late every month, from a system somebody else owns, and the payroll cut-off does not move. The question to settle during design is what the payroll does when the hours are not there on the cut-off date: pay a standard figure and correct by retro, hold the person out of the run, or move the cut-off. All three are defensible; having no answer is not, and the one chosen determines how much retro the client lives with permanently.
+
+## The calendar: payroll definitions and the cut-off
+
+A **payroll definition** is the calendar: frequency, period start and end dates, cut-off dates and payment date — "Egypt Monthly Payroll, calendar months, cut-off on the 25th, paid on the last working day." A person must be assigned to a payroll, on the assignment, before they can be processed.
+
+The definition generates the actual periods ahead of time, each with its dates, and those dates are what every process reads. Two of them do more work than people expect. The **cut-off** is the point after which a change will not make the current run; it is an agreement with the business rather than a lock, which is why it has to be published and defended. The **payment date** drives the bank file and, in several jurisdictions, the statutory reporting period, so moving it has consequences beyond when money lands.
+
+The conversation worth having at design time is what happens on the edges. Where does a mid-month joiner's first period start, and are they paid a part period or held to the next one? What happens when the payment date falls on a weekend or a public holiday — and in the Gulf, where the weekend itself has moved in living memory, that question needs an answer per country rather than per group. Where a client runs several payrolls, do they share a calendar or not, and if not, what does that do to the reporting dates that follow.
+
+## Running it
+
+The **payroll run** (Calculate Payroll) is the engine that calculates gross-to-net for a population for a period: it evaluates elements, applies formulas, and produces run results and balances, held against the payroll relationship. Errors at this stage typically point to missing entries, missing eligibility or formula problems.
+
+**QuickPay** runs the same calculation for a single person outside the main run — the primary testing tool during configuration (change an element, QuickPay one employee, check the result) and the mechanism for off-cycle payments such as a final settlement. A consultant who is not using QuickPay constantly during a build is working much harder than necessary: the loop of change one thing, QuickPay one person, read the result is the fastest feedback available in the product.
+
+Which population a run covers is controlled by object groups — a payroll relationship group names a set of people, an element group names a set of elements. These are what make a targeted run possible: recalculate only the population affected by a correction, or process only the elements that changed. During parallel run and hypercare they are used constantly, and a team that does not know they exist re-runs the entire payroll to fix two people.
+
+## Balances: the part everything else reads
+
+A **balance** is an accumulated total of element results over a period and dimension: gross pay year-to-date, taxable earnings month-to-date. Balances have dimensions (period-, month-, quarter-, year-to-date) and scope (assignment or relationship level). Statutory calculations, payslips and reports all depend on them, and when a report shows a wrong total the balance feed is usually where the problem lives. Balances do not span payroll relationships — which is why year-to-date figures reset on a global transfer.
+
+Three pieces of vocabulary make balance problems tractable.
+
+A **balance feed** is what adds to or subtracts from a balance, and it can be defined in two ways: from particular element input values, or from the run results of a whole classification. The difference matters when a new element is added. An element feeding a classification-level balance joins the total automatically; an element that must feed a specific balance needs its feed created, and a missing feed is the single most common cause of "the year-to-date on the payslip is wrong but every individual line is right".
+
+A **balance dimension** is the window and scope — the period over which the balance accumulates and whether it is held at assignment, terms or payroll relationship level. The same balance type with two dimensions is two different numbers, both correct.
+
+A **defined balance** is the pairing of the two: a balance type plus a dimension, which is how the rest of the system refers to a balance — a gross pay balance at assignment level year-to-date, for instance, is a different defined balance from the same gross pay at relationship level. Formulas, reports and extracts all name defined balances, which is why the name looks long and why getting the dimension wrong in a formula returns a plausible number that is not the one wanted.
+
+## Loading balances at go-live, which you only get to do once
+
+A payroll going live in the middle of a tax year starts with a problem: year-to-date tax, insurable earnings and every other accumulated figure already exist in the old system, and the new one has to begin from them or the first payslip will be wrong in a way every employee can see.
+
+The process is **initial balance loading**, and it has properties worth knowing well in advance.
+
+Values are loaded into batch interface tables — through two loader files, one for the batch header and one for its lines — and then the *Load Initial Balances* process is submitted to post them. For each balance being initialised, that process defines a balance initialization element, adds it to the balance as a feed, and posts balance adjustments to set the values. Every line needs the payroll relationship number; a line initialising a terms-level balance also needs the term number, and an assignment-level one needs both term and assignment numbers — which is the model from Chapter 3 reappearing as a file format.
+
+The dates are the control that matters. Values are set relative to an upload date, the batch header's date applies to every line unless a line overrides it, and the whole exercise depends on choosing those dates to match the point at which the legacy payroll stopped.
+
+And then the part that makes this a one-shot exercise: **balances cannot be initialised once any payroll process has run**. After that, the only route is balance adjustments, one at a time, through an element that feeds the balance. A team that runs a test payroll in the production environment before loading balances has made a rod for its own back, and a team that discovers a wrong balance a week after go-live is doing adjustments rather than a reload.
+
+Two smaller rules save a rehearsal each. Each balance should have exactly one initial feed. And where one element has several input values feeding balances, those balances must share an upload date.
+
+## After the run
+
+Calculation and payment are separate steps. **Prepayments** takes the run results and distributes them across each person's payment methods — someone may split their salary across two bank accounts. It runs after the payroll run and before the payment process, and it is the step people forget exists until a payment fails.
+
+Payment methods come in two layers that are easy to conflate. The organization payment method is the employer's — a payment type and a source bank account, defined once. The personal payment method is the employee's — their account, and the split if they have more than one. A new joiner with no personal payment method will calculate perfectly and then fail at prepayment, which is exactly the right place for it to fail and exactly the error people misread as a payroll problem.
+
+Oracle's standard flow then archives the results, generates payslips, and produces the payments: the **payment process** creates the bank file. In Saudi Arabia and the UAE, the file must follow the Wage Protection System SIF format (Chapter 17), and a Gulf go-live always includes a bank-file test with the actual bank. The bank file is a common cause of go-live delay; never treat it as an afterthought.
+
+The archive step deserves more respect than it gets. The payslip is generated from archived data rather than from live records, which is both why a payslip for a past period still shows what it showed then and why a payslip that is wrong cannot be fixed by correcting the record — the archive has to be regenerated. Consultants who do not know this spend an afternoon correcting data and refreshing a payslip that will not change.
+
+## Costing
+
+**Costing** allocates payroll results to accounting segments so the cost lands in the right place in the general ledger, broken down by department, project or cost centre. It is the bridge between HCM and Finance and is often owned jointly with a finance consultant.
+
+Where the cost lands is the other half of finishing a cycle. Costing is resolved segment by segment through the cost hierarchy, so one account string can be assembled from values held at several different levels. The results then reach the ledger through Transfer to Subledger Accounting and the accounting processes that follow it — Chapter 21. A costing design that is merely plausible produces a month-end reconciliation that nobody can explain, which is why the finance consultant belongs in that conversation from the start rather than at the end.
+
+[[fig:payroll-chain]]
+
+[[lab:payroll]]
+
+## Running it is a flow, not a button
+
+Calculate Payroll is not a button; it is a **payroll flow** — a sequenced set of tasks with a checklist, owners and a status for each step. Submitting the flow starts it, and the checklist is where a stuck task is seen. On a real cycle the flow is what the payroll team watches, and the consultant's job in hypercare is usually reading it rather than reading a log.
+
+The flow is also where the cycle becomes a repeatable process rather than a sequence somebody remembers. A well-built payroll cycle flow carries every step in order — retro notifications, the retro recalculation, the calculation, verification, prepayments, the archive, payslips, the payment file, costing and the transfer to accounting — with the right owner on each and a verification task where a human has to look at something before the next step runs. Building that flow with the client's payroll manager, rather than handing them a list of processes to submit, is one of the higher-value things a consultant does on an implementation, because it is the artefact the team will still be using in three years.
+
+## Retry, roll back, and the order they unwind in
+
+When something is wrong, three corrections do different things. **Mark for retry** flags the records that failed so the next retry picks up only those. **Retry** re-processes them after the cause is fixed. **Roll back** removes the results entirely, as though the process had not run.
+
+The order constraint is the part to know: once prepayments have locked a run's results, the run cannot be rolled back until the prepayments are rolled back first. Corrections therefore unwind in the reverse of the order they were made, and a team that tries to roll back a run with prepayments sitting on top of it gets an error that reads like a bug and is not.
+
+The same logic extends along the whole chain, and it is worth picturing as a stack. Costing sits on payments, payments sit on prepayments, prepayments sit on the run. Anything resting on top of the thing being removed must come off first. The practical rule during hypercare is to establish how far down the stack a correction has to reach *before* starting, because a half-unwound cycle at eight in the evening is where mistakes are made.
+
+The other practical rule is to prefer retry over roll back where both would work. Retry is narrower, faster, and leaves the rest of the run untouched; rolling back a whole payroll to fix four people is a blunt instrument that creates its own risks.
+
+## The quiet failures
+
+The failures worth rehearsing are the quiet ones. A person not assigned to a payroll is skipped by the run without an error. A salary basis that says monthly while the annual figure was loaded against it pays twelve times the intended salary, and the run reports nothing, because it calculated exactly what it was given. A deduction classified as an earning is added to gross instead of taken off it. None of these produce a failure message; all of them produce a payslip.
+
+The defence against this class of problem is not more careful configuration — it is a set of checks that run every cycle and are read by somebody. The useful ones are cheap: the headcount in the run against the headcount expected, the total gross against last period with the difference explained, a list of anybody whose net pay moved by more than a threshold, a list of anybody in the population who was not processed, and a check that nobody's net pay is negative or implausibly large. Four of those five are simple reports, and together they catch nearly everything that otherwise reaches an employee's bank account.
+
+[[lab:payslip]]
+
+[[lab:balances]]
+
+## Proving it works: the parallel run
+
+A **parallel run** executes the new system's payroll alongside the legacy payroll for the same period and reconciles the two line by line. It is the only reliable proof that the new payroll is correct before the old one is switched off, and it typically runs for two or three consecutive months before go-live. Differences must be explained, not just noted. It is also the highest-stakes activity before go-live, and the point where a consultant with analytical instincts is visibly useful.
+
+Two habits separate a reconciliation that proves something from one that merely documents. The first is reading every line rather than the exceptions someone has already flagged, because a difference nobody noticed is exactly the one that reaches hypercare. The second is remembering what the exercise can and cannot prove: a matching line proves the new system agrees with the old one, not that either agrees with the client's policy. Where legacy is wrong — an out-of-date insurable-wage ceiling, an allowance paid flat that policy says is a percentage — the correct outcome is a difference, raised with the client rather than configured away.
+
+It is worth structuring the reconciliation rather than improvising it. Compare at three levels: the control total for the whole population, the total per element, and then the individual people whose totals differ. Most differences cluster — twenty people differ by the same amount for the same reason — so the per-element layer finds causes much faster than a person-by-person scan. Every difference gets one of four dispositions: the new system is wrong and will be fixed, the legacy system is wrong and the client accepts it, the two are both right and the difference is a deliberate policy change, or the difference is a rounding treatment that has to be documented. A parallel run signed off without a difference log is not signed off; it is just finished.
+
+The second and third cycles matter as much as the first. The first parallel run finds configuration errors. The second finds the things that only happen in some months — a quarterly payment, a joiner, a leaver, a retro. The third proves the team can do it, which is the part that actually determines whether go-live is calm.
+
+[[lab:parallel-run]]
+
+## Hypercare and the first live run
+
+Go-live is not the finish line; the first live payroll is, and the two are usually a few weeks apart.
+
+The things that go wrong in the first live run are rarely the things tested hardest. They are the operational edges: a time file that arrived in a different format, a bank that rejected the file for a reason the test file never triggered, a joiner created after cut-off, a leaver whose final settlement needed an element somebody set to actual termination. Planning for hypercare means planning for the day of the run rather than for the configuration — who is in the room, who can approve an exception, how late the payment can be submitted and still land on time, and what the fallback is if the file is rejected.
+
+The one piece of advice that pays for itself: run the entire cycle in a non-production environment with production-like data one week before the first live run, timed. Not a test of the configuration, which has been tested, but a rehearsal of the day. It finds the things nobody wrote down.
+
+## Common mistakes
+
+- Creating an element and expecting it to appear on payslips. Nothing happens until eligibility exists and an entry is made.
+- Confusing eligibility (who could) with entry (who does).
+- Answering the element template carelessly, then discovering the generated objects cannot be changed.
+- Designing input values loosely, then finding they cannot be added once entries exist.
+- Setting every element's termination rule to final close, and paying leavers for months they did not work.
+- Encoding an HR decision as element eligibility, so every exception becomes a configuration change.
+- Editing a derived salary element entry instead of the salary record.
+- Leaving the overtime divisor undocumented, then being unable to explain an hourly rate.
+- Forgetting a balance feed for a new element, and seeing correct lines with a wrong year-to-date.
+- Confusing two dimensions of the same balance, in a formula or in a report.
+- Running a payroll process in production before initial balances are loaded, and losing the ability to load them.
+- Forgetting prepayments sits between calculation and payment.
+- Correcting a record to fix a payslip, without regenerating the archive.
+- Trying to roll back a run with prepayments still on top of it.
+- Rolling back a whole payroll to fix four people.
+- Treating the bank file as a formality.
+- Signing off a parallel run without a difference log.
+- Believing go-live means done. Hypercare and the first live payroll are the finish line.
+
+## Sources
+
+- Oracle, *Administering Payroll for the United States* — the "Payroll Processes" chapter, for the calculate, prepayments, archive and payment sequence, which is the same in every localization. https://docs.oracle.com/en/cloud/saas/human-resources/faaus/index.html
+- Oracle, *Implementing Global Payroll* — "How You Maintain Payroll Elements", for what the element template generates and what cannot be changed afterwards. https://docs.oracle.com/en/cloud/saas/human-resources/faigp/how-you-maintain-payroll-elements.html
+- Oracle, *Implementing Global Payroll* — the "Payroll Balances" chapter, for balance feeds, dimensions and defined balances. https://docs.oracle.com/en/cloud/saas/human-resources/faigp/index.html
+- Oracle, *Balance Operations* — "Steps to Initialize Balances", for the batch files, the Load Initial Balances process and the rule that balances cannot be initialised after processing has begun. https://docs.oracle.com/en/cloud/saas/human-resources/fahbo/steps-to-initialize-balances.html
+- Oracle, *Implementing Global Payroll* — "Overview of Payroll Costing". https://docs.oracle.com/en/cloud/saas/human-resources/faigp/overview-of-payroll-costing.html
+- Oracle, *Implementing Global Payroll* — "Payroll Relationship Rules". https://docs.oracle.com/en/cloud/saas/human-resources/faigp/payroll-relationship-rules.html
 </script>
 
 <!-- ========================================================================
@@ -7363,7 +8128,10 @@ pre.code{background:var(--navy);color:var(--navy-ink);border-radius:8px;padding:
 .face .q{font-family:var(--display);font-size:clamp(20px,2.6vw,26px);font-weight:700;line-height:1.25;margin:auto 0}
 .face .a{font-size:15.5px;color:var(--ink);display:grid;gap:10px;overflow:auto;font-family:var(--body)}
 .face .a .lb{font-size:11px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--p);font-family:var(--ui)}
-.face .meta{display:flex;gap:8px;align-items:center;font-size:12.5px;color:var(--muted)}
+/* A long chapter name is the widest thing on a drill card. It wraps inside
+   its chip rather than pushing the counter off the edge on a phone. */
+.face .meta{display:flex;gap:8px;align-items:center;flex-wrap:wrap;font-size:12.5px;color:var(--muted)}
+.face .meta .chip{white-space:normal;min-width:0}
 .face .hint{margin-top:auto;font-size:13px;color:var(--muted)}
 .grade{display:flex;gap:8px;flex-wrap:wrap}
 .grade .btn{flex:1;justify-content:center}
