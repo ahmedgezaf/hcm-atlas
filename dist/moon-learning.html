@@ -5062,7 +5062,9 @@ Three dates matter more than the rest: when the extract specification is agreed 
 
 Beyond those two sit three more that are easy to leave out of a plan and expensive to leave out of a project. **Regression testing** proves that today's change did not break last week's — and becomes a standing obligation after go-live, because of the quarterly cycle (Chapter 14). **Payroll parallel runs** (Chapter 5) are a form of testing with their own calendar and their own sign-off. And **security testing** has to be done as the actual audiences (Chapter 15), not as an administrator.
 
-A test script is worth writing properly because it is the artefact that makes testing repeatable. The expected result is the part that gets skipped and the part that matters: a script that says "check the payslip is correct" tests nothing, because correctness is exactly what is in question. A script that says "basic salary 10,000, insurable wage capped at the ceiling, employee contribution 1,837.00, net pay 8,163.00 less tax" is a test.
+A test script is worth writing properly because it is the artefact that makes testing repeatable. The expected result is the part that gets skipped and the part that matters: a script that says "check the payslip is correct" tests nothing, because correctness is exactly what is in question. A script that says "monthly wage 20,000; insurable wage capped at the ceiling, so 16,700; employee social-insurance contribution 11% of that, so 1,837.00; tax calculated on what is left" is a test — it states the inputs, the rule being exercised and the arithmetic, so a failure says which of the three is wrong.
+
+Two things make an expected result trustworthy rather than merely specific. It has to be **derived**, not copied from the system being tested — a figure read off the new payroll proves only that the payroll agrees with itself. And a statutory figure in a script carries its date, because the ceiling in that example is the 2026 one (Chapter 9) and a script re-run next year against last year's number fails for the wrong reason.
 
 ## Defects, and how they are triaged
 

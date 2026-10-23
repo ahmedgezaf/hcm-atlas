@@ -145,6 +145,12 @@ def load_deep():
                 raise SystemExit(f"content/deep/{path.name}: frontmatter is missing `{required}`")
         if meta["id"] in out:
             raise SystemExit(f"content/deep/{path.name}: a second file for chapter '{meta['id']}'")
+        # The loader keys on the frontmatter id, but the importer writes back to
+        # content/deep/<id>.md — so a filename that disagrees with its id builds
+        # cleanly and then fails the round trip. Catch it here instead.
+        if meta["id"] != path.stem:
+            raise SystemExit(f"content/deep/{path.name}: id is '{meta['id']}', so the file "
+                             f"must be named {meta['id']}.md")
         out[meta["id"]] = {"minutes": int(meta["minutes"]), "body": body.strip(),
                            "html": render_chapter_html(body.strip()), "file": path.name}
     return out
