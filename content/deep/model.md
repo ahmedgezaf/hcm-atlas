@@ -177,7 +177,9 @@ And the choice is effectively **irreversible**: Oracle says the mapping cannot b
 
 When a new assignment or a new employment appears, something has to decide whether it joins an existing payroll relationship or starts a new one. That decision is the **payroll relationship rule**, and it belongs to the legislation rather than to the client.
 
-Three rules exist. **Lifetime Record** groups a new assignment under an existing relationship for the same payroll statutory unit and person type, for the life of the person. **Last Record** does the same but against the most recent relationship. **New Record** creates a relationship per assignment regardless.
+Three rules exist, and the difference between the first two is one word. **Lifetime Record** looks for any payroll relationship of the same person type and payroll statutory unit — and if it finds a terminated one, it removes the end date and reuses it. **Last Record** looks for an **active** one, and creates a new relationship when none is active. **New Record** creates a relationship per assignment regardless.
+
+That word decides what a rehire does to the balances. Under Lifetime Record the old relationship comes back to life and its year-to-date figures continue; under Last Record the terminated one is left closed and a fresh relationship starts from zero. The two rules sound almost identical and produce opposite answers to the question clients actually ask.
 
 This is the mechanism behind one of the most common interview questions and one of the most common client surprises: does a rehire continue the old balances or start fresh? The honest answer is that it depends on the rule the legislative data group runs, and on the dates. Under the rule Oracle ships for Saudi Arabia, the application compares the new assignment's start date with the last standard earnings date of the existing payroll relationship and reuses that relationship when the start date falls before it — which is what makes back-to-back fixed-term contracts continuous. Only where a new relationship is created do balances start again.
 
@@ -281,7 +283,7 @@ In 2019 she takes unpaid study leave for four months. The assignment status move
 
 In 2021 she resigns. The work relationship is end-dated with an action of Termination and a reason. The payroll relationship gets a last standard process date and a final close date far enough out that her final settlement and a later bonus correction can both be paid. The person record is untouched.
 
-In 2023 she is rehired by the same entity. The same person record is reused, with the same person number. A second work relationship is created. Whether the old payroll relationship is reused depends on the legislation's rule and on the dates. Her gratuity policy bridges the break, so a seniority date is configured and adjusted to reflect twelve years of countable service while her hire dates continue to say exactly what happened.
+In 2023 she is rehired by the same entity. The same person record is reused, with the same person number. A second work relationship is created. Whether the old payroll relationship is reused depends on the legislation's rule and on the dates. Her gratuity policy bridges the break, so a seniority date is configured and adjusted to carry the five years she had already served into the new employment, while her hire dates continue to say exactly what happened — employed 2016 to 2021, absent for two years, employed again from 2023.
 
 In 2025 she moves to the Riyadh entity permanently. The Cairo work relationship is ended and a Saudi one begins; a new payroll relationship is created in the Saudi legislative data group; her Egyptian year-to-date balances stay in Egypt where they belong; her leave balance and end-of-service liability are settled or transferred by an explicit decision rather than automatically.
 

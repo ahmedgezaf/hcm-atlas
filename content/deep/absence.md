@@ -34,7 +34,9 @@ The practical skill is mapping a client's sentence to the right one quickly. "Th
 
 An **accrual plan** accumulates leave over time, with rules for accrual rate, ceilings and carryover. Two decisions shape everything else.
 
-The **accrual term** is the period over which entitlement accumulates and at the end of which carryover happens. The delivered choices are a calendar year, an anniversary year — running from each worker's own hire or adjusted date — and a rolling term, which has no fixed start and instead calculates over the previous twelve months. Calendar year is the simplest to explain and to reconcile; anniversary year matches how many Gulf policies are actually written; rolling is what a client means when they say "in any twelve-month period", which is a phrase worth listening for because it changes the plan type of answer.
+The **accrual term** is the period over which entitlement accumulates and at the end of which carryover happens. An accrual plan has two delivered choices: a **calendar year**, and an **anniversary year** running from each worker's own hire or adjusted date. Calendar year is the simplest to explain and to reconcile; anniversary year matches how many Gulf policies are actually written.
+
+The rolling window a client describes when they say "in any twelve-month period" is not available here. **Rolling backward**, **rolling forward** and **absence duration** are *qualification* plan term types, not accrual ones — so that phrase is a signal that the requirement may not be an accrual plan at all, and it is worth stopping on rather than configuring around.
 
 The **accrual method** is front-loaded or incremental. Front-loaded grants the whole term's entitlement at the start; incremental earns it period by period. The difference is invisible to a worker who stays all year and very visible to one who leaves in March — front-loaded means they have already been granted days they have not earned, and the policy has to say whether those are recovered at termination. That is a client decision with a money consequence, and it belongs in writing before the plan is built.
 
@@ -154,6 +156,7 @@ And across the Gulf, **annual leave entitlements and sick leave bands differ per
 
 - Knowing only accrual and qualification plans. There are six.
 - Choosing the wrong plan type for a requirement, and finding it cannot be changed once the plan is in use.
+- Promising a rolling twelve-month accrual term. Rolling terms belong to qualification plans.
 - Building a flat annual entitlement when the law is tiered by service.
 - Not writing the band-boundary test cases before building the plan.
 - Front-loading entitlement without deciding what happens when somebody leaves in March.
@@ -175,5 +178,6 @@ And across the Gulf, **annual leave entitlements and sick leave bands differ per
 
 - Oracle, *Implementing Absence Management* — "Types of Absence Plans". https://docs.oracle.com/en/cloud/saas/human-resources/faiam/types-of-absence-plans.html
 - Oracle, *Implementing Absence Management* — the "Accrual Absence Plans" chapter, for accrual terms, methods, ceilings, carryover, expiry and vesting. https://docs.oracle.com/en/cloud/saas/human-resources/faiam/index.html
+- Oracle, *Implementing Absence Management* — the "Qualification Absence Plans" chapter, for the rolling and absence-duration term types. https://docs.oracle.com/en/cloud/saas/human-resources/faiam/index.html
 - Oracle, *Fast Formula* — the "Formulas for Absence Management" chapter, for what the carryover calculation returns. https://docs.oracle.com/en/cloud/saas/human-resources/oapff/index.html
 - Oracle, *Absence Management* datasheet. https://www.oracle.com/a/ocom/docs/applications/human-capital-management/absence-management-ds.pdf

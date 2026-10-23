@@ -43,11 +43,15 @@ The reason to get this right early is a restriction with real teeth: **once entr
 
 An element is either **recurring** — its entry applies in every pay period until the entry is ended — or **nonrecurring**, where the entry applies to one pay period only. Salary is recurring. A one-off bonus is nonrecurring. This is one of the template answers that cannot sensibly be changed later, and it is also one that clients get wrong when describing a requirement: "they get it every month, except when they don't" is a recurring element with a skip rule or an end date, not a nonrecurring one somebody re-enters monthly.
 
-The **termination rule** decides what happens to entries when employment ends, and the three values are worth knowing by name because they are the mechanism behind "we cannot pay his final bonus".
+The element's **latest entry date** decides what happens to its entries when employment ends, and the three delivered values are worth knowing by name because they are the mechanism behind "we cannot pay his final bonus".
 
-*Actual termination* closes recurring entries on the termination date — the ordinary case for salary and allowances, which should stop when the person stops. *Last standard process* stops processing after that date. *Final close* keeps entries open after termination, which is what makes it possible to pay a bonus, a severance amount or a year-end adjustment to somebody who has already left.
+*Last standard earning date* stops the element's entries on the date the person leaves — the ordinary case for salary and allowances, which should stop when the person stops. *Last standard process date* runs to the end of the pay period the termination falls in rather than to the termination date itself, which is the distinction people compress and then get wrong. *Final close* keeps entries open past the last day worked, which is what makes it possible to pay a bonus, a severance amount or a year-end adjustment to somebody who has already left.
 
-The design conversation to have with a client is which elements need final close, and the answer is usually a short list: end-of-service, final leave settlement, any bonus declared after the leaving date, and any statutory adjustment. Setting everything to final close instead is not a shortcut — it leaves salary entries open on leavers, and sooner or later somebody is paid for a month they did not work.
+Those three are the same dates Chapter 3 describes on the payroll relationship, read from the element's side: the relationship says how late the person can be processed at all, and the element's latest entry date says how late *this* element may be entered.
+
+A vocabulary warning, because it costs an interview. Older Oracle HR — the E-Business Suite generation — called this the **termination rule** and its values *actual termination*, *final close* and *last standard process*. Those words are still in circulation, in training notes and in a great deal of material a search will surface, and they are not what Fusion calls them. If a client or a colleague says "actual termination", they mean last standard earning date.
+
+The design conversation to have is which elements need final close, and the answer is usually a short list: end-of-service, final leave settlement, any bonus declared after the leaving date, and any statutory adjustment. Setting everything to final close instead is not a shortcut — it leaves salary entries open on leavers, and sooner or later somebody is paid for a month they did not work.
 
 ## Who can get it, and who does
 
@@ -195,7 +199,7 @@ The second and third cycles matter as much as the first. The first parallel run 
 
 Go-live is not the finish line; the first live payroll is, and the two are usually a few weeks apart.
 
-The things that go wrong in the first live run are rarely the things tested hardest. They are the operational edges: a time file that arrived in a different format, a bank that rejected the file for a reason the test file never triggered, a joiner created after cut-off, a leaver whose final settlement needed an element somebody set to actual termination. Planning for hypercare means planning for the day of the run rather than for the configuration — who is in the room, who can approve an exception, how late the payment can be submitted and still land on time, and what the fallback is if the file is rejected.
+The things that go wrong in the first live run are rarely the things tested hardest. They are the operational edges: a time file that arrived in a different format, a bank that rejected the file for a reason the test file never triggered, a joiner created after cut-off, a leaver whose final settlement needed an element whose latest entry date stopped at the last standard earning date. Planning for hypercare means planning for the day of the run rather than for the configuration — who is in the room, who can approve an exception, how late the payment can be submitted and still land on time, and what the fallback is if the file is rejected.
 
 The one piece of advice that pays for itself: run the entire cycle in a non-production environment with production-like data one week before the first live run, timed. Not a test of the configuration, which has been tested, but a rehearsal of the day. It finds the things nobody wrote down.
 
@@ -205,7 +209,8 @@ The one piece of advice that pays for itself: run the entire cycle in a non-prod
 - Confusing eligibility (who could) with entry (who does).
 - Answering the element template carelessly, then discovering the generated objects cannot be changed.
 - Designing input values loosely, then finding they cannot be added once entries exist.
-- Setting every element's termination rule to final close, and paying leavers for months they did not work.
+- Setting every element's latest entry date to final close, and paying leavers for months they did not work.
+- Saying "termination rule" and "actual termination" in a Fusion conversation. Those are the previous generation's names.
 - Encoding an HR decision as element eligibility, so every exception becomes a configuration change.
 - Editing a derived salary element entry instead of the salary record.
 - Leaving the overtime divisor undocumented, then being unable to explain an hourly rate.
@@ -225,6 +230,8 @@ The one piece of advice that pays for itself: run the entire cycle in a non-prod
 - Oracle, *Administering Payroll for the United States* — the "Payroll Processes" chapter, for the calculate, prepayments, archive and payment sequence, which is the same in every localization. https://docs.oracle.com/en/cloud/saas/human-resources/faaus/index.html
 - Oracle, *Implementing Global Payroll* — "How You Maintain Payroll Elements", for what the element template generates and what cannot be changed afterwards. https://docs.oracle.com/en/cloud/saas/human-resources/faigp/how-you-maintain-payroll-elements.html
 - Oracle, *Implementing Global Payroll* — the "Payroll Balances" chapter, for balance feeds, dimensions and defined balances. https://docs.oracle.com/en/cloud/saas/human-resources/faigp/index.html
+- Oracle, *Using Common Features for HCM* — "Options to Determine an Element's Latest Entry Date". https://docs.oracle.com/en/cloud/saas/human-resources/faucf/options-to-determine-an-element-s-latest-entry-date.html
+- Oracle, *Payroll Element Dates*, for what each latest entry date option does at termination. https://docs.oracle.com/en/cloud/saas/human-resources/facpe/payroll-element-dates.html
 - Oracle, *Balance Operations* — "Steps to Initialize Balances", for the batch files, the Load Initial Balances process and the rule that balances cannot be initialised after processing has begun. https://docs.oracle.com/en/cloud/saas/human-resources/fahbo/steps-to-initialize-balances.html
 - Oracle, *Implementing Global Payroll* — "Overview of Payroll Costing". https://docs.oracle.com/en/cloud/saas/human-resources/faigp/overview-of-payroll-costing.html
 - Oracle, *Implementing Global Payroll* — "Payroll Relationship Rules". https://docs.oracle.com/en/cloud/saas/human-resources/faigp/payroll-relationship-rules.html

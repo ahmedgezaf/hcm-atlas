@@ -71,7 +71,9 @@ Two smaller statutory items belong in every Egyptian element inventory, and both
 
 The **Martyrs and Victims Fund** deduction is 0.05% of gross pay — note that this one is on gross, not on the insurable wage, which is exactly the kind of inconsistency that makes a build error easy.
 
-**Universal health insurance** (employer 3.25%, employee 1%) applies only in governorates where the scheme has been rolled out, under the phased implementation of the universal health insurance law. Confirm the client's governorate rather than assuming, and confirm it per site rather than per company — a group with a Cairo head office and an Upper Egypt plant may be in the scheme for one and not the other, which makes it a location-driven rule (Chapter 1) rather than a company-wide one.
+**Universal health insurance** applies only in governorates where the scheme has been rolled out, under the phased implementation of the universal health insurance law. Confirm the client's governorate rather than assuming, and confirm it per site rather than per company — a group with a Cairo head office and an Upper Egypt plant may be in the scheme for one and not the other, which makes it a location-driven rule (Chapter 1) rather than a company-wide one.
+
+Its rate is the figure in this chapter to treat with the most suspicion. It is commonly quoted as employer 3.25% and employee 1% — but those are precisely the percentages the branch split above assigns to *sickness* inside the headline 18.75% and 11%, and that same split routes part of the employer's work-injury share to the Universal Health Insurance Authority. So it is not clear from the available summaries whether this is money on top of the headline rates or the health component of them, and published employer figures vary between roughly 1% and 4%. The chapter's main statutory source does not cover the scheme at all. Establish from the client's own filings whether their contribution is additional or included, because the two readings differ by a few per cent of payroll.
 
 ## The minimum wage and the mandatory increment
 
@@ -161,6 +163,7 @@ The second is that legacy payrolls in any country drift from the statute, and in
 - Taking a branch-by-branch rate split from a summary without confirming it against the law.
 - Forgetting that the Martyrs Fund is on gross while the contributions are on the insurable wage.
 - Applying universal health insurance everywhere, or nowhere, instead of by governorate.
+- Adding a universal health insurance rate on top of the headline contribution without establishing that it is not already inside it.
 - Calculating the 3% increment on total salary.
 - Implementing the annual increment as an allowance element rather than a salary change.
 - Deducting tax before the social-insurance contribution instead of after it.

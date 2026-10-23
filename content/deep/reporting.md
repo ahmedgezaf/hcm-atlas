@@ -29,11 +29,13 @@ A second habit, for anything that will be quoted to management: reconcile the nu
 
 Three constraints catch people.
 
-Two subject areas cannot be joined in a single analysis. There is a default row limit — commonly cited around 65,000 — past which OTBI can truncate silently, which is the worst failure mode available: a plausible answer that is simply short. And subject areas are predefined; their grain cannot be changed.
+Subject areas can be combined in one analysis, but only on what they share. Oracle supports adding more than one subject area to an analysis, joined on a **common dimension** — an attribute that exists in all of them — and where a local dimension is involved, a measure from each subject area has to be included. The areas have to come from the same Oracle Cloud application, only common dimensions join, and the join costs performance. So the honest constraint is not "you cannot" but "you can join on what they share, and no further" — which rules out exactly the cases people want most, where the link is an attribute one side does not carry.
 
-When one subject area is not enough there are three workarounds: a Combined Analysis joining two analyses on a shared key such as person number; moving to BI Publisher and writing the SQL; or an HCM Extract for genuinely large volumes.
+There is a default row limit — commonly cited around 65,000 — past which OTBI can truncate silently, which is the worst failure mode available: a plausible answer that is simply short. And subject areas are predefined; their grain cannot be changed.
 
-Combined analysis deserves a caution. It stitches result sets rather than joining tables, which means both halves must return compatible columns in compatible order, and the join key has to be genuinely unique on both sides. It is the right tool for "headcount from one area beside absence days from another", and the wrong tool for anything where the two halves have different grains — in which case the combination multiplies in a way that is hard to see.
+When the areas share no dimension that answers the question, there are three routes: a combined analysis; moving to BI Publisher and writing the SQL; or an HCM Extract for genuinely large volumes.
+
+A combined analysis is a different thing from the join above and the two get confused, including by people who have built both. It **stitches result sets together** with a set operation rather than joining tables, so both halves must return the same number of columns, of compatible types, in the same order. It is the right tool for stacking like with like — this population from one area beneath that population from another — and the wrong tool when what is actually wanted is one row per person carrying columns from both. Reaching for it there produces a result that looks assembled and is not.
 
 The row limit is worth building a habit around too: for any analysis that might approach it, check the row count against the same filters in a second, smaller analysis, or add a total that would obviously be wrong if rows were missing. Silent truncation is only silent if nobody listens for it.
 
@@ -179,7 +181,8 @@ The consulting contribution here is small and disproportionately valuable: at th
 - Trusting a large OTBI result without checking the row limit.
 - Picking a subject area by name without checking its grain.
 - Counting rows where distinct people were meant.
-- Combining two analyses with different grains and multiplying the result.
+- Believing subject areas cannot be combined at all, when the real limit is that they join only on what they share.
+- Reaching for a combined analysis when what was wanted was one row per person carrying columns from both areas.
 - Testing a report only as an administrator, so its security is never exercised.
 - Writing a BI Publisher data model straight against base tables and shipping a report with no data security at all.
 - Treating the privilege to write SQL in a data model as an ordinary report-building grant.
@@ -193,6 +196,7 @@ The consulting contribution here is small and disproportionately valuable: at th
 ## Sources
 
 - Oracle, *Creating and Administering Analytics and Reports for HCM* — "HCM Subject Areas for Transactional Business Intelligence". https://docs.oracle.com/en/cloud/saas/human-resources/fahca/hcm-subject-areas-for-transactional-business-intelligence.html
+- Oracle, *Creating Analyses and Dashboards in OTBI* — "Combine Subject Areas in Analyses". https://docs.oracle.com/en/cloud/saas/otbi/otbi-user/combine-subject-areas-analyses.html
 - Oracle, *Creating and Administering Analytics and Reports for HCM* — data model security, secured list views and the PII tables protected at database level. https://docs.oracle.com/en/cloud/saas/human-resources/fahca/index.html
 - Oracle, *Data Modeling Guide for Oracle Business Intelligence Publisher* — data models, bursting and delivery. https://docs.oracle.com/middleware/12211/bip/BIPDM/BIPDM.pdf
 - Oracle, BI Publisher — "Creating an eText Template", for the template type used to produce EFT and EDI files. https://docs.oracle.com/cd/E10091_01/doc/bip.1013/b40017/T421739T481436.htm

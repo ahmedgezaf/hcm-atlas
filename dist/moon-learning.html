@@ -2053,7 +2053,7 @@ The discipline that prevents it is one sentence long: say what a single row mean
 
 [[lab:grain-trap]]
 
-Three constraints catch people. Two subject areas cannot be joined in a single analysis. There is a default row limit — commonly cited around 65,000 — past which OTBI can truncate silently. And subject areas are predefined; their grain cannot be changed. When one subject area is not enough there are three workarounds: a Combined Analysis joining two analyses on a shared key such as person number; moving to BI Publisher and writing the SQL; or an HCM Extract for genuinely large volumes.
+Three constraints catch people. Subject areas can be combined in one analysis, but only on a dimension they share — so the link people most often want, an attribute one side does not carry, is the one that is not available. There is a default row limit — commonly cited around 65,000 — past which OTBI can truncate silently. And subject areas are predefined; their grain cannot be changed. When the areas share nothing that answers the question there are three routes: a combined analysis, which stacks result sets rather than joining them; moving to BI Publisher and writing the SQL; or an HCM Extract for genuinely large volumes.
 
 ## BI Publisher: pixel-controlled documents
 
@@ -2107,6 +2107,7 @@ Two requests that sound like reporting questions are not. Anything coming *into*
 ## Sources
 
 - Oracle, *Creating and Administering Analytics and Reports for HCM* — "HCM Subject Areas for Transactional Business Intelligence". https://docs.oracle.com/en/cloud/saas/human-resources/fahca/hcm-subject-areas-for-transactional-business-intelligence.html
+- Oracle, *Creating Analyses and Dashboards in OTBI* — "Combine Subject Areas in Analyses". https://docs.oracle.com/en/cloud/saas/otbi/otbi-user/combine-subject-areas-analyses.html
 - HCM Tables, "Oracle Fusion HCM OTBI Subject Areas — Complete Guide with Decision Tree". https://www.hcm-tables.com/blog/otbi-subject-area-guide
 - Hexstream, "Oracle Fusion OTBI vs BI Publisher". https://www.hexstream.com/tech-corner/oracle-fusion-otbi-vs-bi-publisher
 - SplashBI, "How To Join Two Subject Areas in OTBI". https://splashbi.com/blog/cross-subject-area-otbi-reporting/
@@ -2352,7 +2353,7 @@ A Saudi implementation runs on government platforms that have no Egyptian equiva
 
 ## GOSI: social insurance with two populations
 
-The **General Organization for Social Insurance (GOSI)** is the Saudi counterpart to Egypt's NOSI. The structural difference from Egypt is that contribution treatment depends on nationality. For Saudi nationals registered before the new Social Insurance Law took effect on 3 July 2024, the combined rate is 21.5% of the contributable wage — employee 9.75% (9% pension plus 0.75% SANED unemployment insurance), employer 11.75% (9% pension, 2% occupational hazards, 0.75% SANED). Nationals registered on or after that date fall under a phased schedule that rises from 22.5% to 23.5% combined from 1 July 2026, with further annual steps and a retirement age of 65. Expatriates carry only the employer-paid 2% occupational-hazards contribution — no pension, no SANED. The contributable wage is basic salary plus housing allowance, capped at SAR 45,000 per month; transport, commission and bonuses are excluded.
+The **General Organization for Social Insurance (GOSI)** is the Saudi counterpart to Egypt's NOSI. The structural difference from Egypt is that contribution treatment depends on nationality. For Saudi nationals registered before the new Social Insurance Law took effect on 3 July 2024, the combined rate is 21.5% of the contributable wage — employee 9.75% (9% pension plus 0.75% SANED unemployment insurance), employer 11.75% (9% pension, 2% occupational hazards, 0.75% SANED). Nationals registered on or after that date are on a phased schedule that reached 23.5% combined on 1 July 2026 — employee 10.75%, employer 12.75% — with a further step expected in July 2027 and a retirement age of 65. Several summaries still publish the superseded 22.5% split, so take the rate from GOSI. Checked October 2026. Expatriates carry only the employer-paid 2% occupational-hazards contribution — no pension, no SANED. The contributable wage is basic salary plus housing allowance, capped at SAR 45,000 per month; transport, commission and bonuses are excluded.
 
 [[fig:gosi-populations]]
 
@@ -2864,7 +2865,9 @@ The practical skill is mapping a client's sentence to the right one quickly. "Th
 
 An **accrual plan** accumulates leave over time, with rules for accrual rate, ceilings and carryover. Two decisions shape everything else.
 
-The **accrual term** is the period over which entitlement accumulates and at the end of which carryover happens. The delivered choices are a calendar year, an anniversary year — running from each worker's own hire or adjusted date — and a rolling term, which has no fixed start and instead calculates over the previous twelve months. Calendar year is the simplest to explain and to reconcile; anniversary year matches how many Gulf policies are actually written; rolling is what a client means when they say "in any twelve-month period", which is a phrase worth listening for because it changes the plan type of answer.
+The **accrual term** is the period over which entitlement accumulates and at the end of which carryover happens. An accrual plan has two delivered choices: a **calendar year**, and an **anniversary year** running from each worker's own hire or adjusted date. Calendar year is the simplest to explain and to reconcile; anniversary year matches how many Gulf policies are actually written.
+
+The rolling window a client describes when they say "in any twelve-month period" is not available here. **Rolling backward**, **rolling forward** and **absence duration** are *qualification* plan term types, not accrual ones — so that phrase is a signal that the requirement may not be an accrual plan at all, and it is worth stopping on rather than configuring around.
 
 The **accrual method** is front-loaded or incremental. Front-loaded grants the whole term's entitlement at the start; incremental earns it period by period. The difference is invisible to a worker who stays all year and very visible to one who leaves in March — front-loaded means they have already been granted days they have not earned, and the policy has to say whether those are recovered at termination. That is a client decision with a money consequence, and it belongs in writing before the plan is built.
 
@@ -2984,6 +2987,7 @@ And across the Gulf, **annual leave entitlements and sick leave bands differ per
 
 - Knowing only accrual and qualification plans. There are six.
 - Choosing the wrong plan type for a requirement, and finding it cannot be changed once the plan is in use.
+- Promising a rolling twelve-month accrual term. Rolling terms belong to qualification plans.
 - Building a flat annual entitlement when the law is tiered by service.
 - Not writing the band-boundary test cases before building the plan.
 - Front-loading entitlement without deciding what happens when somebody leaves in March.
@@ -3005,6 +3009,7 @@ And across the Gulf, **annual leave entitlements and sick leave bands differ per
 
 - Oracle, *Implementing Absence Management* — "Types of Absence Plans". https://docs.oracle.com/en/cloud/saas/human-resources/faiam/types-of-absence-plans.html
 - Oracle, *Implementing Absence Management* — the "Accrual Absence Plans" chapter, for accrual terms, methods, ceilings, carryover, expiry and vesting. https://docs.oracle.com/en/cloud/saas/human-resources/faiam/index.html
+- Oracle, *Implementing Absence Management* — the "Qualification Absence Plans" chapter, for the rolling and absence-duration term types. https://docs.oracle.com/en/cloud/saas/human-resources/faiam/index.html
 - Oracle, *Fast Formula* — the "Formulas for Absence Management" chapter, for what the carryover calculation returns. https://docs.oracle.com/en/cloud/saas/human-resources/oapff/index.html
 - Oracle, *Absence Management* datasheet. https://www.oracle.com/a/ocom/docs/applications/human-capital-management/absence-management-ds.pdf
 </script>
@@ -3839,7 +3844,9 @@ Two smaller statutory items belong in every Egyptian element inventory, and both
 
 The **Martyrs and Victims Fund** deduction is 0.05% of gross pay — note that this one is on gross, not on the insurable wage, which is exactly the kind of inconsistency that makes a build error easy.
 
-**Universal health insurance** (employer 3.25%, employee 1%) applies only in governorates where the scheme has been rolled out, under the phased implementation of the universal health insurance law. Confirm the client's governorate rather than assuming, and confirm it per site rather than per company — a group with a Cairo head office and an Upper Egypt plant may be in the scheme for one and not the other, which makes it a location-driven rule (Chapter 1) rather than a company-wide one.
+**Universal health insurance** applies only in governorates where the scheme has been rolled out, under the phased implementation of the universal health insurance law. Confirm the client's governorate rather than assuming, and confirm it per site rather than per company — a group with a Cairo head office and an Upper Egypt plant may be in the scheme for one and not the other, which makes it a location-driven rule (Chapter 1) rather than a company-wide one.
+
+Its rate is the figure in this chapter to treat with the most suspicion. It is commonly quoted as employer 3.25% and employee 1% — but those are precisely the percentages the branch split above assigns to *sickness* inside the headline 18.75% and 11%, and that same split routes part of the employer's work-injury share to the Universal Health Insurance Authority. So it is not clear from the available summaries whether this is money on top of the headline rates or the health component of them, and published employer figures vary between roughly 1% and 4%. The chapter's main statutory source does not cover the scheme at all. Establish from the client's own filings whether their contribution is additional or included, because the two readings differ by a few per cent of payroll.
 
 ## The minimum wage and the mandatory increment
 
@@ -3929,6 +3936,7 @@ The second is that legacy payrolls in any country drift from the statute, and in
 - Taking a branch-by-branch rate split from a summary without confirming it against the law.
 - Forgetting that the Martyrs Fund is on gross while the contributions are on the insurable wage.
 - Applying universal health insurance everywhere, or nowhere, instead of by governorate.
+- Adding a universal health insurance rate on top of the headline contribution without establishing that it is not already inside it.
 - Calculating the 3% increment on total salary.
 - Implementing the annual increment as an allowance element rather than a salary change.
 - Deducting tax before the social-insurance contribution instead of after it.
@@ -4331,7 +4339,7 @@ Three design consequences follow and belong in the first workshop. Nationality d
 
 The **General Organization for Social Insurance (GOSI)** is the Saudi counterpart to Egypt's NOSI. The structural difference from Egypt is that contribution treatment depends on nationality.
 
-For Saudi nationals registered before the new Social Insurance Law took effect on 3 July 2024, the combined rate is 21.5% of the contributable wage — employee 9.75% (9% pension plus 0.75% SANED unemployment insurance), employer 11.75% (9% pension, 2% occupational hazards, 0.75% SANED). Nationals registered on or after that date fall under a phased schedule that rises from 22.5% to 23.5% combined from 1 July 2026, with further annual steps and a retirement age of 65. Expatriates carry only the employer-paid 2% occupational-hazards contribution — no pension, no SANED.
+For Saudi nationals registered before the new Social Insurance Law took effect on 3 July 2024, the combined rate is 21.5% of the contributable wage — employee 9.75% (9% pension plus 0.75% SANED unemployment insurance), employer 11.75% (9% pension, 2% occupational hazards, 0.75% SANED). Nationals registered on or after that date are on a phased schedule that reached **23.5% combined** on 1 July 2026 — employee 10.75% (10% pension plus 0.75% SANED), employer 12.75% (10% pension, 2% occupational hazards, 0.75% SANED) — with a further step expected on 1 July 2027 and a retirement age of 65. A caution that matters here: several payroll summaries still publish the superseded 22.5% split, and others give different component rates again, so the figure to configure comes from GOSI rather than from a guide. Checked October 2026. Expatriates carry only the employer-paid 2% occupational-hazards contribution — no pension, no SANED.
 
 [[fig:gosi-populations]]
 
@@ -5335,7 +5343,9 @@ And the choice is effectively **irreversible**: Oracle says the mapping cannot b
 
 When a new assignment or a new employment appears, something has to decide whether it joins an existing payroll relationship or starts a new one. That decision is the **payroll relationship rule**, and it belongs to the legislation rather than to the client.
 
-Three rules exist. **Lifetime Record** groups a new assignment under an existing relationship for the same payroll statutory unit and person type, for the life of the person. **Last Record** does the same but against the most recent relationship. **New Record** creates a relationship per assignment regardless.
+Three rules exist, and the difference between the first two is one word. **Lifetime Record** looks for any payroll relationship of the same person type and payroll statutory unit — and if it finds a terminated one, it removes the end date and reuses it. **Last Record** looks for an **active** one, and creates a new relationship when none is active. **New Record** creates a relationship per assignment regardless.
+
+That word decides what a rehire does to the balances. Under Lifetime Record the old relationship comes back to life and its year-to-date figures continue; under Last Record the terminated one is left closed and a fresh relationship starts from zero. The two rules sound almost identical and produce opposite answers to the question clients actually ask.
 
 This is the mechanism behind one of the most common interview questions and one of the most common client surprises: does a rehire continue the old balances or start fresh? The honest answer is that it depends on the rule the legislative data group runs, and on the dates. Under the rule Oracle ships for Saudi Arabia, the application compares the new assignment's start date with the last standard earnings date of the existing payroll relationship and reuses that relationship when the start date falls before it — which is what makes back-to-back fixed-term contracts continuous. Only where a new relationship is created do balances start again.
 
@@ -5439,7 +5449,7 @@ In 2019 she takes unpaid study leave for four months. The assignment status move
 
 In 2021 she resigns. The work relationship is end-dated with an action of Termination and a reason. The payroll relationship gets a last standard process date and a final close date far enough out that her final settlement and a later bonus correction can both be paid. The person record is untouched.
 
-In 2023 she is rehired by the same entity. The same person record is reused, with the same person number. A second work relationship is created. Whether the old payroll relationship is reused depends on the legislation's rule and on the dates. Her gratuity policy bridges the break, so a seniority date is configured and adjusted to reflect twelve years of countable service while her hire dates continue to say exactly what happened.
+In 2023 she is rehired by the same entity. The same person record is reused, with the same person number. A second work relationship is created. Whether the old payroll relationship is reused depends on the legislation's rule and on the dates. Her gratuity policy bridges the break, so a seniority date is configured and adjusted to carry the five years she had already served into the new employment, while her hire dates continue to say exactly what happened — employed 2016 to 2021, absent for two years, employed again from 2023.
 
 In 2025 she moves to the Riyadh entity permanently. The Cairo work relationship is ended and a Saudi one begins; a new payroll relationship is created in the Saudi legislative data group; her Egyptian year-to-date balances stay in Egypt where they belong; her leave balance and end-of-service liability are settled or transferred by an explicit decision rather than automatically.
 
@@ -5976,11 +5986,15 @@ The reason to get this right early is a restriction with real teeth: **once entr
 
 An element is either **recurring** — its entry applies in every pay period until the entry is ended — or **nonrecurring**, where the entry applies to one pay period only. Salary is recurring. A one-off bonus is nonrecurring. This is one of the template answers that cannot sensibly be changed later, and it is also one that clients get wrong when describing a requirement: "they get it every month, except when they don't" is a recurring element with a skip rule or an end date, not a nonrecurring one somebody re-enters monthly.
 
-The **termination rule** decides what happens to entries when employment ends, and the three values are worth knowing by name because they are the mechanism behind "we cannot pay his final bonus".
+The element's **latest entry date** decides what happens to its entries when employment ends, and the three delivered values are worth knowing by name because they are the mechanism behind "we cannot pay his final bonus".
 
-*Actual termination* closes recurring entries on the termination date — the ordinary case for salary and allowances, which should stop when the person stops. *Last standard process* stops processing after that date. *Final close* keeps entries open after termination, which is what makes it possible to pay a bonus, a severance amount or a year-end adjustment to somebody who has already left.
+*Last standard earning date* stops the element's entries on the date the person leaves — the ordinary case for salary and allowances, which should stop when the person stops. *Last standard process date* runs to the end of the pay period the termination falls in rather than to the termination date itself, which is the distinction people compress and then get wrong. *Final close* keeps entries open past the last day worked, which is what makes it possible to pay a bonus, a severance amount or a year-end adjustment to somebody who has already left.
 
-The design conversation to have with a client is which elements need final close, and the answer is usually a short list: end-of-service, final leave settlement, any bonus declared after the leaving date, and any statutory adjustment. Setting everything to final close instead is not a shortcut — it leaves salary entries open on leavers, and sooner or later somebody is paid for a month they did not work.
+Those three are the same dates Chapter 3 describes on the payroll relationship, read from the element's side: the relationship says how late the person can be processed at all, and the element's latest entry date says how late *this* element may be entered.
+
+A vocabulary warning, because it costs an interview. Older Oracle HR — the E-Business Suite generation — called this the **termination rule** and its values *actual termination*, *final close* and *last standard process*. Those words are still in circulation, in training notes and in a great deal of material a search will surface, and they are not what Fusion calls them. If a client or a colleague says "actual termination", they mean last standard earning date.
+
+The design conversation to have is which elements need final close, and the answer is usually a short list: end-of-service, final leave settlement, any bonus declared after the leaving date, and any statutory adjustment. Setting everything to final close instead is not a shortcut — it leaves salary entries open on leavers, and sooner or later somebody is paid for a month they did not work.
 
 ## Who can get it, and who does
 
@@ -6128,7 +6142,7 @@ The second and third cycles matter as much as the first. The first parallel run 
 
 Go-live is not the finish line; the first live payroll is, and the two are usually a few weeks apart.
 
-The things that go wrong in the first live run are rarely the things tested hardest. They are the operational edges: a time file that arrived in a different format, a bank that rejected the file for a reason the test file never triggered, a joiner created after cut-off, a leaver whose final settlement needed an element somebody set to actual termination. Planning for hypercare means planning for the day of the run rather than for the configuration — who is in the room, who can approve an exception, how late the payment can be submitted and still land on time, and what the fallback is if the file is rejected.
+The things that go wrong in the first live run are rarely the things tested hardest. They are the operational edges: a time file that arrived in a different format, a bank that rejected the file for a reason the test file never triggered, a joiner created after cut-off, a leaver whose final settlement needed an element whose latest entry date stopped at the last standard earning date. Planning for hypercare means planning for the day of the run rather than for the configuration — who is in the room, who can approve an exception, how late the payment can be submitted and still land on time, and what the fallback is if the file is rejected.
 
 The one piece of advice that pays for itself: run the entire cycle in a non-production environment with production-like data one week before the first live run, timed. Not a test of the configuration, which has been tested, but a rehearsal of the day. It finds the things nobody wrote down.
 
@@ -6138,7 +6152,8 @@ The one piece of advice that pays for itself: run the entire cycle in a non-prod
 - Confusing eligibility (who could) with entry (who does).
 - Answering the element template carelessly, then discovering the generated objects cannot be changed.
 - Designing input values loosely, then finding they cannot be added once entries exist.
-- Setting every element's termination rule to final close, and paying leavers for months they did not work.
+- Setting every element's latest entry date to final close, and paying leavers for months they did not work.
+- Saying "termination rule" and "actual termination" in a Fusion conversation. Those are the previous generation's names.
 - Encoding an HR decision as element eligibility, so every exception becomes a configuration change.
 - Editing a derived salary element entry instead of the salary record.
 - Leaving the overtime divisor undocumented, then being unable to explain an hourly rate.
@@ -6158,6 +6173,8 @@ The one piece of advice that pays for itself: run the entire cycle in a non-prod
 - Oracle, *Administering Payroll for the United States* — the "Payroll Processes" chapter, for the calculate, prepayments, archive and payment sequence, which is the same in every localization. https://docs.oracle.com/en/cloud/saas/human-resources/faaus/index.html
 - Oracle, *Implementing Global Payroll* — "How You Maintain Payroll Elements", for what the element template generates and what cannot be changed afterwards. https://docs.oracle.com/en/cloud/saas/human-resources/faigp/how-you-maintain-payroll-elements.html
 - Oracle, *Implementing Global Payroll* — the "Payroll Balances" chapter, for balance feeds, dimensions and defined balances. https://docs.oracle.com/en/cloud/saas/human-resources/faigp/index.html
+- Oracle, *Using Common Features for HCM* — "Options to Determine an Element's Latest Entry Date". https://docs.oracle.com/en/cloud/saas/human-resources/faucf/options-to-determine-an-element-s-latest-entry-date.html
+- Oracle, *Payroll Element Dates*, for what each latest entry date option does at termination. https://docs.oracle.com/en/cloud/saas/human-resources/facpe/payroll-element-dates.html
 - Oracle, *Balance Operations* — "Steps to Initialize Balances", for the batch files, the Load Initial Balances process and the rule that balances cannot be initialised after processing has begun. https://docs.oracle.com/en/cloud/saas/human-resources/fahbo/steps-to-initialize-balances.html
 - Oracle, *Implementing Global Payroll* — "Overview of Payroll Costing". https://docs.oracle.com/en/cloud/saas/human-resources/faigp/overview-of-payroll-costing.html
 - Oracle, *Implementing Global Payroll* — "Payroll Relationship Rules". https://docs.oracle.com/en/cloud/saas/human-resources/faigp/payroll-relationship-rules.html
@@ -6363,11 +6380,13 @@ A second habit, for anything that will be quoted to management: reconcile the nu
 
 Three constraints catch people.
 
-Two subject areas cannot be joined in a single analysis. There is a default row limit — commonly cited around 65,000 — past which OTBI can truncate silently, which is the worst failure mode available: a plausible answer that is simply short. And subject areas are predefined; their grain cannot be changed.
+Subject areas can be combined in one analysis, but only on what they share. Oracle supports adding more than one subject area to an analysis, joined on a **common dimension** — an attribute that exists in all of them — and where a local dimension is involved, a measure from each subject area has to be included. The areas have to come from the same Oracle Cloud application, only common dimensions join, and the join costs performance. So the honest constraint is not "you cannot" but "you can join on what they share, and no further" — which rules out exactly the cases people want most, where the link is an attribute one side does not carry.
 
-When one subject area is not enough there are three workarounds: a Combined Analysis joining two analyses on a shared key such as person number; moving to BI Publisher and writing the SQL; or an HCM Extract for genuinely large volumes.
+There is a default row limit — commonly cited around 65,000 — past which OTBI can truncate silently, which is the worst failure mode available: a plausible answer that is simply short. And subject areas are predefined; their grain cannot be changed.
 
-Combined analysis deserves a caution. It stitches result sets rather than joining tables, which means both halves must return compatible columns in compatible order, and the join key has to be genuinely unique on both sides. It is the right tool for "headcount from one area beside absence days from another", and the wrong tool for anything where the two halves have different grains — in which case the combination multiplies in a way that is hard to see.
+When the areas share no dimension that answers the question, there are three routes: a combined analysis; moving to BI Publisher and writing the SQL; or an HCM Extract for genuinely large volumes.
+
+A combined analysis is a different thing from the join above and the two get confused, including by people who have built both. It **stitches result sets together** with a set operation rather than joining tables, so both halves must return the same number of columns, of compatible types, in the same order. It is the right tool for stacking like with like — this population from one area beneath that population from another — and the wrong tool when what is actually wanted is one row per person carrying columns from both. Reaching for it there produces a result that looks assembled and is not.
 
 The row limit is worth building a habit around too: for any analysis that might approach it, check the row count against the same filters in a second, smaller analysis, or add a total that would obviously be wrong if rows were missing. Silent truncation is only silent if nobody listens for it.
 
@@ -6513,7 +6532,8 @@ The consulting contribution here is small and disproportionately valuable: at th
 - Trusting a large OTBI result without checking the row limit.
 - Picking a subject area by name without checking its grain.
 - Counting rows where distinct people were meant.
-- Combining two analyses with different grains and multiplying the result.
+- Believing subject areas cannot be combined at all, when the real limit is that they join only on what they share.
+- Reaching for a combined analysis when what was wanted was one row per person carrying columns from both areas.
 - Testing a report only as an administrator, so its security is never exercised.
 - Writing a BI Publisher data model straight against base tables and shipping a report with no data security at all.
 - Treating the privilege to write SQL in a data model as an ordinary report-building grant.
@@ -6527,6 +6547,7 @@ The consulting contribution here is small and disproportionately valuable: at th
 ## Sources
 
 - Oracle, *Creating and Administering Analytics and Reports for HCM* — "HCM Subject Areas for Transactional Business Intelligence". https://docs.oracle.com/en/cloud/saas/human-resources/fahca/hcm-subject-areas-for-transactional-business-intelligence.html
+- Oracle, *Creating Analyses and Dashboards in OTBI* — "Combine Subject Areas in Analyses". https://docs.oracle.com/en/cloud/saas/otbi/otbi-user/combine-subject-areas-analyses.html
 - Oracle, *Creating and Administering Analytics and Reports for HCM* — data model security, secured list views and the PII tables protected at database level. https://docs.oracle.com/en/cloud/saas/human-resources/fahca/index.html
 - Oracle, *Data Modeling Guide for Oracle Business Intelligence Publisher* — data models, bursting and delivery. https://docs.oracle.com/middleware/12211/bip/BIPDM/BIPDM.pdf
 - Oracle, BI Publisher — "Creating an eText Template", for the template type used to produce EFT and EDI files. https://docs.oracle.com/cd/E10091_01/doc/bip.1013/b40017/T421739T481436.htm
@@ -9409,7 +9430,7 @@ Clients who are told this and choose positions do well. Clients who are sold pos
   {
     "chapter": "egypt-payroll",
     "question": "Under the current Egyptian brackets, why might a naive progressive tax calculation understate tax for a senior employee?",
-    "answer": "Because of bracket elimination. Above defined net-income thresholds the lower bands are removed — above EGP 600,000 the 0% band goes, above 700,000 the 10% band too, and so on until above 1.2 million only the 25% and 27.5% bands apply. A calculator that applies every band to everyone gives senior staff lower-band relief they are not entitled to.",
+    "answer": "Because of bracket elimination. Above defined net-income thresholds the lower bands are removed — above EGP 600,000 the 0% band goes, above 700,000 the 10% band too, and so on until above 1.2 million only the 25% and 27.5% bands apply. A calculator that applies every band to everyone gives senior staff lower-band relief they are not entitled to. Brackets and thresholds checked in 2026; the ladder moves by decree, so verify against the Egyptian Tax Authority.",
     "terms": [
       "bracket-elimination-for-high-earners",
       "progressive-tax-brackets"
@@ -10056,7 +10077,7 @@ Clients who are told this and choose positions do well. Clients who are sold pos
   {
     "chapter": "uae",
     "question": "A client runs payroll in Saudi Arabia and is adding the UAE. What can be reused and what has to be built again?",
-    "answer": "The chain itself — elements, eligibility, entries, run, balances, prepayments, payment, costing — is the same, and so are the structures. Almost nothing statutory transfers. End-of-service is 21 days of basic wage per year for the first five years and 30 after, capped at two years' pay and payable from one year of service, against the Saudi award on last wage with a resignation scale. The wage-protection file is a UAE Salary Information File through MOHRE, not Mudad. Pension covers nationals through GPSSA, not GOSI. Each country is its own legislative data group, so the elements and formulas are rebuilt regardless.",
+    "answer": "The chain itself — elements, eligibility, entries, run, balances, prepayments, payment, costing — is the same, and so are the structures. Almost nothing statutory transfers. End-of-service is 21 days of basic wage per year for the first five years and 30 after, capped at two years' pay and payable from one year of service, against the Saudi award on last wage with a resignation scale. The wage-protection file is a UAE Salary Information File through MOHRE, not Mudad. Pension covers nationals through GPSSA, not GOSI. Each country is its own legislative data group, so the elements and formulas are rebuilt regardless. Figures checked in 2026 — re-verify against MOHRE and the Saudi labour law.",
     "terms": [
       "end-of-service-benefit-eosb-gratuity",
       "gpssa",
@@ -10214,7 +10235,7 @@ Clients who are told this and choose positions do well. Clients who are sold pos
   {
     "chapter": "payroll",
     "question": "How do hours get into payroll, and what does an overtime element need?",
-    "answer": "Hours arrive from a time card in Oracle Time and Labor, from an interface with an attendance or shift system, or from a bulk load — and which one is a design decision with an owner. An overtime element needs a rate source, which is a rate definition, and a multiplier, which is statutory: Egypt's Law 14/2025 sets at least 35% above the hourly wage by day and 70% at night, and Saudi Article 107 sets 150%. Sources disagree on whether the Saudi base is basic or total wage, so that goes in writing from the client's counsel before anything is built.",
+    "answer": "Hours arrive from a time card in Oracle Time and Labor, from an interface with an attendance or shift system, or from a bulk load — and which one is a design decision with an owner. An overtime element needs a rate source, which is a rate definition, and a multiplier, which is statutory: Egypt's Law 14/2025 sets at least 35% above the hourly wage by day and 70% at night, and Saudi Article 107 sets 150%. Sources disagree on whether the Saudi base is basic or total wage, so that goes in writing from the client's counsel before anything is built. Both checked in 2026; overtime multipliers move with the statute.",
     "terms": [
       "time-card",
       "rate-definition",
@@ -10350,7 +10371,7 @@ Clients who are told this and choose positions do well. Clients who are sold pos
   {
     "chapter": "uae",
     "question": "How does the UAE gratuity differ from the Saudi award, in a sentence a client would understand?",
-    "answer": "Four ways. The UAE accrues 21 days of basic wage a year for the first five years and 30 after, where Saudi accrues half a month and then a full month of the last wage. The UAE caps the total at two years of wage; Saudi does not. The UAE pays in full from one year of service; Saudi reduces it on resignation below ten years. And the UAE base is basic wage, so the salary component split decides the liability. An element built for one country is wrong in the other in at least three places.",
+    "answer": "Four ways. The UAE accrues 21 days of basic wage a year for the first five years and 30 after, where Saudi accrues half a month and then a full month of the last wage. The UAE caps the total at two years of wage; Saudi does not. The UAE pays in full from one year of service; Saudi reduces it on resignation below ten years. And the UAE base is basic wage, so the salary component split decides the liability. An element built for one country is wrong in the other in at least three places. Figures checked in 2026 against Federal Decree-Law 33/2021 and the Saudi Labour Law; both move, so re-verify before quoting them.",
     "terms": [
       "end-of-service-benefit-eosb-gratuity",
       "salary-component"
@@ -13893,7 +13914,7 @@ FIGS.push({
   ch: 'gulf',
   title: 'GOSI is three rates, not one',
   caption: 'Nationality and registration date decide the contribution, which is why nationality is a payroll-driving attribute in Saudi Arabia and merely demographic in Egypt. Rates checked in 2026 — re-verify with GOSI before configuring.',
-  svg: () => `<svg viewBox="0 0 760 344" role="img" aria-label="Three GOSI contribution populations: Saudi nationals registered before 3 July 2024 at 21.5 percent combined, nationals registered on or after that date on a phased schedule rising to 23.5 percent, and expatriates at 2 percent employer-only.">
+  svg: () => `<svg viewBox="0 0 760 344" role="img" aria-label="Three GOSI contribution populations: Saudi nationals registered before 3 July 2024 at 21.5 percent combined, nationals registered on or after that date at 23.5 percent combined since July 2026, and expatriates at 2 percent employer-only.">
     ${FIG_DEFS}
     ${F.head(30, 20, 'SAUDI NATIONAL — registered before 3 Jul 2024')}
     <text class="f-big" x="30" y="52">21.5%</text>
@@ -13907,10 +13928,10 @@ FIGS.push({
     ${F.note(320, 108, '9% pension + 2% occupational hazards + 0.75% SANED')}
 
     ${F.head(30, 146, 'SAUDI NATIONAL — registered on or after 3 Jul 2024')}
-    <text class="f-big" x="30" y="178">22.5%</text>
-    ${F.note(122, 178, 'rising to 23.5% from 1 Jul 2026, then further annual steps · retirement age 65')}
+    <text class="f-big" x="30" y="178">23.5%</text>
+    ${F.note(122, 178, 'since 1 Jul 2026 · 10.75% employee, 12.75% employer · next step due Jul 2027')}
     ${F.bar(30, 190, 700, 26, [
-      { w: 22.5 / 24, label: 'phased schedule', cls: 'a' },
+      { w: 23.5 / 24, label: 'phased schedule', cls: 'a' },
       { w: 1.5 / 24, label: '', cls: 'ghost' },
     ])}
 

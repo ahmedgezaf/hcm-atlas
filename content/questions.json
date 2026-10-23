@@ -186,7 +186,7 @@
   {
     "chapter": "egypt-payroll",
     "question": "Under the current Egyptian brackets, why might a naive progressive tax calculation understate tax for a senior employee?",
-    "answer": "Because of bracket elimination. Above defined net-income thresholds the lower bands are removed — above EGP 600,000 the 0% band goes, above 700,000 the 10% band too, and so on until above 1.2 million only the 25% and 27.5% bands apply. A calculator that applies every band to everyone gives senior staff lower-band relief they are not entitled to.",
+    "answer": "Because of bracket elimination. Above defined net-income thresholds the lower bands are removed — above EGP 600,000 the 0% band goes, above 700,000 the 10% band too, and so on until above 1.2 million only the 25% and 27.5% bands apply. A calculator that applies every band to everyone gives senior staff lower-band relief they are not entitled to. Brackets and thresholds checked in 2026; the ladder moves by decree, so verify against the Egyptian Tax Authority.",
     "terms": [
       "bracket-elimination-for-high-earners",
       "progressive-tax-brackets"
@@ -833,7 +833,7 @@
   {
     "chapter": "uae",
     "question": "A client runs payroll in Saudi Arabia and is adding the UAE. What can be reused and what has to be built again?",
-    "answer": "The chain itself — elements, eligibility, entries, run, balances, prepayments, payment, costing — is the same, and so are the structures. Almost nothing statutory transfers. End-of-service is 21 days of basic wage per year for the first five years and 30 after, capped at two years' pay and payable from one year of service, against the Saudi award on last wage with a resignation scale. The wage-protection file is a UAE Salary Information File through MOHRE, not Mudad. Pension covers nationals through GPSSA, not GOSI. Each country is its own legislative data group, so the elements and formulas are rebuilt regardless.",
+    "answer": "The chain itself — elements, eligibility, entries, run, balances, prepayments, payment, costing — is the same, and so are the structures. Almost nothing statutory transfers. End-of-service is 21 days of basic wage per year for the first five years and 30 after, capped at two years' pay and payable from one year of service, against the Saudi award on last wage with a resignation scale. The wage-protection file is a UAE Salary Information File through MOHRE, not Mudad. Pension covers nationals through GPSSA, not GOSI. Each country is its own legislative data group, so the elements and formulas are rebuilt regardless. Figures checked in 2026 — re-verify against MOHRE and the Saudi labour law.",
     "terms": [
       "end-of-service-benefit-eosb-gratuity",
       "gpssa",
@@ -991,7 +991,7 @@
   {
     "chapter": "payroll",
     "question": "How do hours get into payroll, and what does an overtime element need?",
-    "answer": "Hours arrive from a time card in Oracle Time and Labor, from an interface with an attendance or shift system, or from a bulk load — and which one is a design decision with an owner. An overtime element needs a rate source, which is a rate definition, and a multiplier, which is statutory: Egypt's Law 14/2025 sets at least 35% above the hourly wage by day and 70% at night, and Saudi Article 107 sets 150%. Sources disagree on whether the Saudi base is basic or total wage, so that goes in writing from the client's counsel before anything is built.",
+    "answer": "Hours arrive from a time card in Oracle Time and Labor, from an interface with an attendance or shift system, or from a bulk load — and which one is a design decision with an owner. An overtime element needs a rate source, which is a rate definition, and a multiplier, which is statutory: Egypt's Law 14/2025 sets at least 35% above the hourly wage by day and 70% at night, and Saudi Article 107 sets 150%. Sources disagree on whether the Saudi base is basic or total wage, so that goes in writing from the client's counsel before anything is built. Both checked in 2026; overtime multipliers move with the statute.",
     "terms": [
       "time-card",
       "rate-definition",
@@ -1127,7 +1127,7 @@
   {
     "chapter": "uae",
     "question": "How does the UAE gratuity differ from the Saudi award, in a sentence a client would understand?",
-    "answer": "Four ways. The UAE accrues 21 days of basic wage a year for the first five years and 30 after, where Saudi accrues half a month and then a full month of the last wage. The UAE caps the total at two years of wage; Saudi does not. The UAE pays in full from one year of service; Saudi reduces it on resignation below ten years. And the UAE base is basic wage, so the salary component split decides the liability. An element built for one country is wrong in the other in at least three places.",
+    "answer": "Four ways. The UAE accrues 21 days of basic wage a year for the first five years and 30 after, where Saudi accrues half a month and then a full month of the last wage. The UAE caps the total at two years of wage; Saudi does not. The UAE pays in full from one year of service; Saudi reduces it on resignation below ten years. And the UAE base is basic wage, so the salary component split decides the liability. An element built for one country is wrong in the other in at least three places. Figures checked in 2026 against Federal Decree-Law 33/2021 and the Saudi Labour Law; both move, so re-verify before quoting them.",
     "terms": [
       "end-of-service-benefit-eosb-gratuity",
       "salary-component"

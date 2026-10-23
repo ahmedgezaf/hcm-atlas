@@ -23,7 +23,7 @@ The discipline that prevents it is one sentence long: say what a single row mean
 
 [[lab:grain-trap]]
 
-Three constraints catch people. Two subject areas cannot be joined in a single analysis. There is a default row limit — commonly cited around 65,000 — past which OTBI can truncate silently. And subject areas are predefined; their grain cannot be changed. When one subject area is not enough there are three workarounds: a Combined Analysis joining two analyses on a shared key such as person number; moving to BI Publisher and writing the SQL; or an HCM Extract for genuinely large volumes.
+Three constraints catch people. Subject areas can be combined in one analysis, but only on a dimension they share — so the link people most often want, an attribute one side does not carry, is the one that is not available. There is a default row limit — commonly cited around 65,000 — past which OTBI can truncate silently. And subject areas are predefined; their grain cannot be changed. When the areas share nothing that answers the question there are three routes: a combined analysis, which stacks result sets rather than joining them; moving to BI Publisher and writing the SQL; or an HCM Extract for genuinely large volumes.
 
 ## BI Publisher: pixel-controlled documents
 
@@ -77,6 +77,7 @@ Two requests that sound like reporting questions are not. Anything coming *into*
 ## Sources
 
 - Oracle, *Creating and Administering Analytics and Reports for HCM* — "HCM Subject Areas for Transactional Business Intelligence". https://docs.oracle.com/en/cloud/saas/human-resources/fahca/hcm-subject-areas-for-transactional-business-intelligence.html
+- Oracle, *Creating Analyses and Dashboards in OTBI* — "Combine Subject Areas in Analyses". https://docs.oracle.com/en/cloud/saas/otbi/otbi-user/combine-subject-areas-analyses.html
 - HCM Tables, "Oracle Fusion HCM OTBI Subject Areas — Complete Guide with Decision Tree". https://www.hcm-tables.com/blog/otbi-subject-area-guide
 - Hexstream, "Oracle Fusion OTBI vs BI Publisher". https://www.hexstream.com/tech-corner/oracle-fusion-otbi-vs-bi-publisher
 - SplashBI, "How To Join Two Subject Areas in OTBI". https://splashbi.com/blog/cross-subject-area-otbi-reporting/

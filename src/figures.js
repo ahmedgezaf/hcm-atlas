@@ -271,7 +271,7 @@ FIGS.push({
   ch: 'gulf',
   title: 'GOSI is three rates, not one',
   caption: 'Nationality and registration date decide the contribution, which is why nationality is a payroll-driving attribute in Saudi Arabia and merely demographic in Egypt. Rates checked in 2026 — re-verify with GOSI before configuring.',
-  svg: () => `<svg viewBox="0 0 760 344" role="img" aria-label="Three GOSI contribution populations: Saudi nationals registered before 3 July 2024 at 21.5 percent combined, nationals registered on or after that date on a phased schedule rising to 23.5 percent, and expatriates at 2 percent employer-only.">
+  svg: () => `<svg viewBox="0 0 760 344" role="img" aria-label="Three GOSI contribution populations: Saudi nationals registered before 3 July 2024 at 21.5 percent combined, nationals registered on or after that date at 23.5 percent combined since July 2026, and expatriates at 2 percent employer-only.">
     ${FIG_DEFS}
     ${F.head(30, 20, 'SAUDI NATIONAL — registered before 3 Jul 2024')}
     <text class="f-big" x="30" y="52">21.5%</text>
@@ -285,10 +285,10 @@ FIGS.push({
     ${F.note(320, 108, '9% pension + 2% occupational hazards + 0.75% SANED')}
 
     ${F.head(30, 146, 'SAUDI NATIONAL — registered on or after 3 Jul 2024')}
-    <text class="f-big" x="30" y="178">22.5%</text>
-    ${F.note(122, 178, 'rising to 23.5% from 1 Jul 2026, then further annual steps · retirement age 65')}
+    <text class="f-big" x="30" y="178">23.5%</text>
+    ${F.note(122, 178, 'since 1 Jul 2026 · 10.75% employee, 12.75% employer · next step due Jul 2027')}
     ${F.bar(30, 190, 700, 26, [
-      { w: 22.5 / 24, label: 'phased schedule', cls: 'a' },
+      { w: 23.5 / 24, label: 'phased schedule', cls: 'a' },
       { w: 1.5 / 24, label: '', cls: 'ghost' },
     ])}
 
