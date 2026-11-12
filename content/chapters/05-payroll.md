@@ -8,7 +8,7 @@ subtitle: Element → eligibility → entry → run → balance → prepayment �
 hue: 152
 minutes: 18
 labs: payroll, payslip, balances, parallel-run
-terms: element, element-classification, element-eligibility-element-link, element-entry, input-value, balance, salary-basis, payroll-definition, payroll-run, quickpay, prepayments, payment-process-bank-file, costing, parallel-run, salary-record, salary-component, rate-definition, time-card, payroll-flow, mark-for-retry-and-roll-back
+terms: element, element-classification, element-eligibility-element-link, element-entry, input-value, balance, salary-basis, payroll-definition, payroll-run, quickpay, prepayments, payment-process-bank-file, costing, parallel-run, salary-record, salary-component, rate-definition, time-card, payroll-flow, mark-for-retry-and-roll-back, latest-entry-date, balance-feed, balance-dimension, initial-balance-load, processing-priority
 ---
 
 Payroll in Oracle is a chain of objects, each depending on the one before it. A consultant who can recite the chain and explain what breaks when a link is missing can debug most payroll problems without opening a log. The chain runs: element → element eligibility → element entry → payroll run → balance → prepayment → payment → costing.

@@ -8,7 +8,7 @@ subtitle: Person → work relationship → assignment. There is no employee tabl
 hue: 246
 minutes: 32
 labs: model
-terms: person, work-relationship, work-terms, assignment, payroll-relationship, concurrent-employment, global-transfer, worker-types, seniority-date, assignment-status, action-and-action-reason, primary-assignment, last-standard-process-date
+terms: person, work-relationship, work-terms, assignment, payroll-relationship, concurrent-employment, global-transfer, worker-types, seniority-date, assignment-status, action-and-action-reason, primary-assignment, last-standard-process-date, payroll-relationship-rule, hr-status-and-payroll-status, global-temporary-assignment
 ---
 
 This is the single most important structure in the product. Payroll, absence, security and reporting all read from it. If a new consultant learns only one chapter cold, it should be this one.
@@ -103,7 +103,7 @@ Assignments grouped in one payroll relationship must share the same payroll stat
 
 The two cases behave differently and the difference is the whole point. Two assignments under one work relationship means one employer, one payroll relationship, one set of balances and one statutory ceiling applied across both jobs.
 
-Two work relationships means two employers — but not, automatically, two payroll relationships. The relationship is keyed on the payroll statutory unit and the person type, exactly as stated above, so two employers that are separate PSUs produce two relationships calculating independently, while two employers sharing one parent PSU produce a single relationship, with one set of balances and one ceiling across both jobs. The shared-services shape in Chapter 1, where several legal employers name one parent PSU, is precisely that second case. Which of the two happens is also legislation-dependent: under the payroll relationship rules Oracle ships, Lifetime Record and Last Record group a new assignment under an existing relationship for the same PSU and person type, while New Record creates one per assignment regardless.
+Two work relationships means two employers — but not, automatically, two payroll relationships. The relationship is keyed on the payroll statutory unit and the person type, exactly as stated above, so two employers that are separate PSUs produce two relationships calculating independently, while two employers sharing one parent PSU produce a single relationship, with one set of balances and one ceiling across both jobs. The shared-services shape in Chapter 1, where several legal employers name one parent PSU, is precisely that second case. Which of the two happens is also legislation-dependent: under the payroll relationship rules Oracle ships, Lifetime Record and Last Record group a new assignment under an existing relationship for the same PSU and person type — Lifetime Record reviving a terminated one, Last Record reusing only an active one — while New Record creates one per assignment regardless.
 
 When a client describes somebody who "works for both companies", the useful follow-up is: which PSU files for this person, and is it the same one for both companies? The answer decides the shape, and it decides whether a statutory ceiling applies once or twice.
 

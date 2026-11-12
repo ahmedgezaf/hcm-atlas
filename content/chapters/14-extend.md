@@ -8,7 +8,7 @@ subtitle: Flexfields, lookups, design studio, sandboxes — the answer to "can y
 hue: 262
 minutes: 12
 labs: 
-terms: dff-descriptive-flexfield, lookup-type-and-lookup-code, value-set, sandbox, journey, redwood, quarterly-update-26a-26d, transaction-design-studio, autocomplete-rule, alerts-composer
+terms: dff-descriptive-flexfield, lookup-type-and-lookup-code, value-set, sandbox, journey, redwood, quarterly-update-26a-26d, transaction-design-studio, autocomplete-rule, alerts-composer, context-sensitive-segment
 ---
 
 Every client needs a field Oracle did not ship, an option Oracle did not put in a dropdown, and a screen that behaves slightly differently for one group of users. In a SaaS product none of that can be done by changing code. Oracle's answer is a set of configuration tools that survive upgrades, and the correct response to most "can you add…" requests is one of them — said with the name of the tool, which is what separates a consultant from a note-taker.

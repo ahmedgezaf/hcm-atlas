@@ -8,7 +8,7 @@ subtitle: Where the payroll lands in Finance, and how Oracle decides which accou
 hue: 315
 minutes: 12
 labs: cost-hierarchy
-terms: cost-allocation-key-flexfield, cost-hierarchy, costing-type, distributed-costing, offset-account, suspense-and-default-account, priority-account, transfer-to-subledger-accounting
+terms: cost-allocation-key-flexfield, cost-hierarchy, costing-type, distributed-costing, offset-account, suspense-and-default-account, priority-account, transfer-to-subledger-accounting, partial-period-accrual
 ---
 
 Chapter 5 ends the payroll cycle at the bank file, and for the payroll team that is the end. For Finance it is the start. Every amount the run calculated — each earning, each deduction, each employer contribution — has to land in a general-ledger account, against the right company, cost centre and natural account, so that the month-end close shows what people cost and where. That is **costing**, and it is the part of a payroll design that the payroll team does not see until Finance rejects the journal.

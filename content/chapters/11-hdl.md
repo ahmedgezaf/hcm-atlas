@@ -8,7 +8,7 @@ subtitle: The highest-value technical skill a functional consultant can arrive w
 hue: 232
 minutes: 10
 labs: hdl, import-load, source-keys
-terms: hdl-hcm-data-loader, hsdl-hcm-spreadsheet-data-loader, source-system-key-vs-person-number
+terms: hdl-hcm-data-loader, hsdl-hcm-spreadsheet-data-loader, source-system-key-vs-person-number, metadata-and-merge-lines, purge-future-changes, hdl-import-and-load, business-object-component
 ---
 
 In Oracle HCM, "functional" consultants are expected to be mildly technical. On real projects, bulk data loads land on strong functional people, and many avoid them. **HCM Data Loader (HDL)** is Oracle's bulk loading tool: nobody hand-enters ten thousand employees, so data migration and mass updates run through it. Comfort with HDL makes a consultant useful immediately.

@@ -8,7 +8,7 @@ subtitle: Jobs, positions, grades — what work exists and at what level
 hue: 200
 minutes: 12
 labs: jobpos
-terms: job, position, grade, grade-step, job-family, position-synchronization, grade-rate, job-profile
+terms: job, position, grade, grade-step, job-family, position-synchronization, grade-rate, job-profile, shared-position
 ---
 
 If Chapter 1 is the compliance skeleton, this is the work skeleton: how an organization defines what work exists, at what level, and in which seat. One distinction in this chapter — job versus position — is the most frequently tested concept in Oracle HCM interviews, and the fastest way to look unprepared in front of a trainer is to treat the two as synonyms.

@@ -1,6 +1,6 @@
 ---
 id: egypt-payroll
-minutes: 35
+minutes: 36
 ---
 
 Oracle does not deliver a pre-built, maintained Egyptian payroll localization the way it does for some markets. The implementation partner builds the statutory rules — in elements, balances and Fast Formulas (Chapter 12). A consultant who knows the Egyptian mechanics is therefore useful on day one in a way that one who only knows the product is not.

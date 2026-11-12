@@ -1,6 +1,6 @@
 ---
 id: reporting
-minutes: 35
+minutes: 36
 ---
 
 There is no SQL Developer connection to a SaaS pod. When someone asks how to get data out of Oracle HCM, the complete answer names four paths and a reason for each: OTBI for ad-hoc analysis, BI Publisher for formatted output and complex SQL, HCM Extract for scheduled or large-volume outbound files, and REST for real-time integration.

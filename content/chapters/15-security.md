@@ -8,7 +8,7 @@ subtitle: What you can do versus whose data you can see
 hue: 300
 minutes: 11
 labs: security
-terms: job-role, abstract-role, duty-role, data-role-and-security-profile, area-of-responsibility-aor, role-provisioning-rule, security-console, ldap-synchronization
+terms: job-role, abstract-role, duty-role, data-role-and-security-profile, area-of-responsibility-aor, role-provisioning-rule, security-console, ldap-synchronization, role-mapping, public-person-security-profile
 ---
 
 Security determines who can see and do what. A consultant needs conceptual fluency rather than deep architecture skill, but the vocabulary appears in almost every requirements workshop, and one distinction carries most of it: function versus data scope. The second half of this chapter is the part that earns its keep on a live project — how a role actually reaches a user, and what to check when someone opens a page and finds it empty.

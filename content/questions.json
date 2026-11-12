@@ -1398,5 +1398,290 @@
       "self-service",
       "acting-on-behalf"
     ]
+  },
+  {
+    "chapter": "hdl",
+    "question": "A mass update loaded cleanly yesterday. Today a manager reports that next month's promotions have vanished. What happened?",
+    "answer": "The file was loaded without SET PURGE_FUTURE_CHANGES N. The default is Y, which replaces every dated version inside the range on each line, so the future-dated promotions already entered were deleted and the record rebuilt from the file. The load reported success because it did exactly what it was told. The fix is to restore the lost changes from the list that should have been taken beforehand, and to make N plus a pre-load list of existing future-dated changes a standing rule for every update.",
+    "terms": [
+      "purge-future-changes"
+    ]
+  },
+  {
+    "chapter": "hdl",
+    "question": "A file names a source system owner and every line fails. The data is right. What is missing?",
+    "answer": "The owner value is not free text — it is validated against the HRC_SOURCE_SYSTEM_OWNER lookup. The source system has to be added to that lookup through Manage Common Lookups before any file referencing it will load. The error does not say that, which is why it costs an afternoon the first time.",
+    "terms": [
+      "source-system-key-vs-person-number"
+    ]
+  },
+  {
+    "chapter": "hdl",
+    "question": "How does HDL know whether a line is a correction or an update?",
+    "answer": "From the effective start date. If it matches an existing dated row, that row is changed in place — a correction, and only the attributes supplied change. If it matches nothing, a new row is created and the previous one is end-dated the day before — an update. The file never says which it wants; the dates say it, which is why a wrong date silently rewrites history.",
+    "terms": [
+      "metadata-and-merge-lines",
+      "update-vs-correction"
+    ]
+  },
+  {
+    "chapter": "ff",
+    "question": "A formula works in one formula type and will not compile when copied to another. The syntax is identical. Why?",
+    "answer": "Because of contexts, not syntax. Each formula type supplies its own set of contexts — effective date, assignment, payroll relationship — and a database item only resolves where the contexts it needs are present. In the new type those contexts are missing, so the database items the formula reads do not exist there. Start from a delivered formula of the target type instead.",
+    "terms": [
+      "formula-context",
+      "database-item"
+    ]
+  },
+  {
+    "chapter": "ff",
+    "question": "Where should the Egyptian tax brackets live, and why not in the formula?",
+    "answer": "In a dated user-defined table, read by a short formula. The ladder is a table of boundaries and rates that changes by decree, so holding it as data means a change is a new dated row somebody non-technical can maintain. Written as nested conditions in the formula, every change is an edit to logic that then has to be retested, and one day it is edited wrongly.",
+    "terms": [
+      "user-defined-table",
+      "global-value"
+    ]
+  },
+  {
+    "chapter": "dating",
+    "question": "A salary award effective 5 March is entered, then a job change effective 1 February. From when does retro recalculate?",
+    "answer": "From February, and for whole periods. The first event raised a notification with a process date of 5 March; the second, earlier event moved that same notification's process date back to 1 February rather than creating another. Recalculation starts at the beginning of the pay period containing the process date, so all of February onward is recalculated, with the differences landing as retro entries in the current period.",
+    "terms": [
+      "retroactive-notification",
+      "retroactive-change-retro"
+    ]
+  },
+  {
+    "chapter": "dating",
+    "question": "The retro process ran after Calculate Payroll this month. What is the consequence?",
+    "answer": "Nothing is lost, but the arrears wait. Retro writes its differences as entries in the current period for the payroll calculation to pick up; run after the calculation, those entries sit until next period. A one-month delay becomes two. The order is the notifications report, the recalculation, the retro entries report, and only then the payroll calculation.",
+    "terms": [
+      "retroactive-change-retro"
+    ]
+  },
+  {
+    "chapter": "payroll",
+    "question": "A leaver's bonus was declared a month after they left and cannot be entered. Which setting is responsible?",
+    "answer": "The bonus element's latest entry date. If it is last standard earning date, entries stop on the day the person leaves; last standard process date runs to the end of that pay period; only final close keeps the element open afterwards. Elements that can legitimately be paid late — end of service, leave settlement, a bonus — need final close. And in Fusion it is called latest entry date; 'termination rule' and 'actual termination' are the E-Business Suite names.",
+    "terms": [
+      "latest-entry-date"
+    ]
+  },
+  {
+    "chapter": "payroll",
+    "question": "Every line on the payslip is right and the year-to-date total is wrong. Where do you look?",
+    "answer": "At the balance feed. A balance only accumulates what feeds it, by named input values or by a classification's run results. A new element that was never given a feed is paid correctly and never reaches the total. If the feed exists, check the dimension the payslip reads — the same balance at a different dimension is a different, equally plausible number.",
+    "terms": [
+      "balance-feed",
+      "balance-dimension"
+    ]
+  },
+  {
+    "chapter": "payroll",
+    "question": "The client wants to run one test payroll in production before loading opening balances. What do you say?",
+    "answer": "No. Balances can only be initialised before any payroll process has run in that environment. Once one has, the load is closed and every opening figure has to be put in as an individual balance adjustment. Test in a non-production environment, load the balances in production first, and only then run.",
+    "terms": [
+      "initial-balance-load"
+    ]
+  },
+  {
+    "chapter": "model",
+    "question": "A leaver is rehired by the same company. Do their year-to-date balances continue?",
+    "answer": "It depends on the payroll relationship rule the legislation runs. Under Lifetime Record the application finds the terminated relationship, removes its end date and reuses it, so balances continue. Under Last Record it looks only for an active relationship, finds none, and creates a new one that starts from zero. Under New Record it always starts fresh. So the answer is a check, not a promise — and some legislations, Saudi Arabia among them, add their own date test.",
+    "terms": [
+      "payroll-relationship-rule",
+      "payroll-relationship"
+    ]
+  },
+  {
+    "chapter": "model",
+    "question": "An employee is Active on screen and was not paid. What is the five-second diagnosis?",
+    "answer": "Look at the payroll status behind the assignment status, not the label. An assignment status sets two things: an HR status and a payroll status. 'Active - no payroll' is active for HR and not processed by payroll — correct for unpaid leave, and the usual culprit when it was set by accident.",
+    "terms": [
+      "hr-status-and-payroll-status",
+      "assignment-status"
+    ]
+  },
+  {
+    "chapter": "model",
+    "question": "A Dubai employee goes to the Riyadh entity for eighteen months and will come back. Transfer or temporary assignment?",
+    "answer": "A global temporary assignment, if the original employment continues. It suspends the source assignment and leaves the source work relationship open, where a transfer ends the source employment and starts a new one. But the system choice follows the paperwork: if the contract and the work permit say the Dubai employment ended, it is a transfer whatever anyone intends. The person who knows is usually in legal.",
+    "terms": [
+      "global-temporary-assignment",
+      "global-transfer"
+    ]
+  },
+  {
+    "chapter": "security",
+    "question": "You add a role to a role mapping so that managers can request it. Next morning every manager has it. Why?",
+    "answer": "Autoprovision is selected by default on a role in a mapping. Adding the role to make it requestable without clearing that flag also grants it automatically to everyone who meets the conditions. Clear autoprovision, leave requestable or self-requestable on, and run the autoprovisioning process once to take the role back from the people who should not have it.",
+    "terms": [
+      "role-mapping",
+      "role-provisioning-rule"
+    ]
+  },
+  {
+    "chapter": "security",
+    "question": "An HR representative can change the people in their plant but cannot find anyone else in the directory. What is missing?",
+    "answer": "A public person security profile. Access to people is two profiles of different sizes: the managed person profile covers whose records they can act on, the public one covers whose basic details they can look up. With only the first, search outside their own population returns nothing and gets reported as broken search.",
+    "terms": [
+      "public-person-security-profile",
+      "data-role-and-security-profile"
+    ]
+  },
+  {
+    "chapter": "reporting",
+    "question": "What is the security risk in a BI Publisher payslip report, and how is it closed?",
+    "answer": "A data model that selects directly from the tables returns rows with no HCM data security — unlike OTBI, which inherits the running user's access. A report built that way returns everyone's pay to whoever can run it. It is closed by joining to a secured list view, so the rows follow the user's security profiles, by restricting who can run the report, and by treating the privilege to write SQL in a data model as a substantial grant.",
+    "terms": [
+      "secured-list-view",
+      "bi-publisher-bip"
+    ]
+  },
+  {
+    "chapter": "reporting",
+    "question": "Can two OTBI subject areas be used in one analysis?",
+    "answer": "Yes, on what they share. Subject areas from the same application can be combined in one analysis joined on a common dimension. What is not possible is joining on an attribute only one of them carries, which is usually the link people want. Beyond that the routes are a combined analysis, which stacks result sets rather than joining them, BI Publisher with SQL, or an extract.",
+    "terms": [
+      "subject-area",
+      "combined-analysis"
+    ]
+  },
+  {
+    "chapter": "reporting",
+    "question": "Which tool produces the wage-protection bank file?",
+    "answer": "BI Publisher with an eText template, fed by the payment process or an extract. eText produces a fixed-format text file to a bank's specification, which is what an electronic funds file is. The file should be tested with the real bank early, because the bank's own validation cycle is measured in weeks.",
+    "terms": [
+      "etext-template",
+      "wps-and-sif-file"
+    ]
+  },
+  {
+    "chapter": "approvals",
+    "question": "A finance director must be told about every salary change but never decides one. How is that configured?",
+    "answer": "As a notification, not as an approver. Making a notify-only stakeholder a participant gives a decision to someone who has none and stops every transaction when they travel. The approval matrix should have a separate column for who is informed, and the rule should send an FYI.",
+    "terms": [
+      "approval-matrix",
+      "approver-type"
+    ]
+  },
+  {
+    "chapter": "approvals",
+    "question": "The annual increase was loaded through HDL and nobody approved anything. Is that a defect?",
+    "answer": "No — bulk loads, integrations and administrative corrections write directly and do not route through approval rules, which is the point of them. It is a control gap the client should know about. The governance has to come from outside the rules: restrict who can load, and keep a record of what was loaded, by whom, when and on whose authority.",
+    "terms": [
+      "approval-rule"
+    ]
+  },
+  {
+    "chapter": "approvals",
+    "question": "Approvals were switched off for cutover. What has to be true before go-live?",
+    "answer": "They have to be switched back on, and that has to be a dated item on the cutover plan with an owner. 'No approvals' is configured as an auto-approval rule rather than by deleting rules, so it is easy to leave in place, and a live system still auto-approving is a control finding waiting for an auditor.",
+    "terms": [
+      "auto-approval"
+    ]
+  },
+  {
+    "chapter": "costing",
+    "question": "A weekly payroll runs 29 July to 3 August and Finance closes July on the 31st. How does July get its cost?",
+    "answer": "Through a partial period accrual. The process estimates the period's cost from a previous payroll period and takes the share of the period that falls up to the process date, accounted on 31 July. A matching reversal is created, and when the real run is costed the actual entries replace the estimate. Which date the reversal lands on is a configuration setting worth checking rather than assuming.",
+    "terms": [
+      "partial-period-accrual"
+    ]
+  },
+  {
+    "chapter": "costing",
+    "question": "Total employer insurance cost is right but every department's share is wrong. What do you check?",
+    "answer": "The distribution group. Distributed costing spreads a liability across the same accounts, in the same proportions, as the earnings elements in its group, so the total is always fully allocated. If the group holds basic salary only where basic plus allowances was meant, the split is plausible and wrong. Test with one person whose earnings split across two cost centres: the contribution should split in the same ratio.",
+    "terms": [
+      "distributed-costing"
+    ]
+  },
+  {
+    "chapter": "absence",
+    "question": "A client says leave is capped at 'thirty days in any twelve-month period'. Why should that sentence stop you?",
+    "answer": "Because a rolling window is not an accrual term. An accrual plan runs on a calendar year or an anniversary year; rolling backward and rolling forward are qualification plan term types. So the requirement may not be an accrual plan at all, or the policy needs restating in a way an accrual plan can hold. Either way it is a design conversation, not something to configure around.",
+    "terms": [
+      "accrual-term",
+      "qualification-plan"
+    ]
+  },
+  {
+    "chapter": "absence",
+    "question": "A worker takes 80 days of sick leave, returns, and takes 30 more in the same year. How is the second absence paid in Egypt?",
+    "answer": "Partly at each rate. The bands are read by cumulative days in the window, not per absence: the first 90 days are at 75% of the insurable wage and days after that at 85%, to a ceiling of 180 in the calendar year. So ten days of the second absence are at 75% and twenty at 85%. Checked in 2026 against the social-insurance rules; re-verify. A plan tested only with one long absence never proves this.",
+    "terms": [
+      "qualification-plan",
+      "sick-leave"
+    ]
+  },
+  {
+    "chapter": "workforce",
+    "question": "A director's position falls vacant and a whole team's approvals start going to the chief executive. Why?",
+    "answer": "Where the manager is derived from the position hierarchy, a vacant parent position makes the application climb to the next position up until it finds an incumbent. That is delivered behaviour. It is worth telling the client before it happens, and either filling the seat with an acting incumbent or accepting the route.",
+    "terms": [
+      "position",
+      "position-synchronization"
+    ]
+  },
+  {
+    "chapter": "org",
+    "question": "Why might nobody be able to save an address in week one, and what decision prevents it?",
+    "answer": "Because geography validation is set stricter than the reference data supports. Addresses are checked against a country's geography structure and hierarchy; at the error level only a fully valid address saves, and where the hierarchy is thin real addresses fail. Decide the validation level per country deliberately, and load the geography data before hand-building anything, since the import is disabled once data exists.",
+    "terms": [
+      "geography-validation",
+      "location"
+    ]
+  },
+  {
+    "chapter": "lifecycle",
+    "question": "A resignation is withdrawn within the legal window after HR already terminated the record. What do you do in the system?",
+    "answer": "Reverse the termination. That removes it so the employment continues unbroken, with the reverse action on the payroll side as well. Do not re-hire: that leaves a closed employment recording an event that did not happen and starts a new one, with a new service date and possibly new balances. Correcting a termination is a different action, for when the person did leave and a date was wrong.",
+    "terms": [
+      "reverse-termination",
+      "resignation"
+    ]
+  },
+  {
+    "chapter": "lifecycle",
+    "question": "Someone resigns on 1 March, stops working on 15 March and is employed until 31 March. Which date stops their salary?",
+    "answer": "The termination date, 31 March — it is the last day of employment and becomes the last standard earning date, the point where regular earnings stop. 1 March is the notification date and 15 March the last working date. All three are held because different things read each of them, and system access is removed the day after the termination date unless immediate removal is requested.",
+    "terms": [
+      "termination-dates",
+      "last-standard-process-date"
+    ]
+  },
+  {
+    "chapter": "gulf",
+    "question": "Which fact about a Saudi national decides their GOSI rate, and why does it matter to a migration?",
+    "answer": "The date they were first registered with GOSI. Nationals registered before 3 July 2024 stay on the 21.5% schedule; those registered on or after it are on the phased schedule, 23.5% combined since 1 July 2026 with further steps. It cannot be derived from hire date or age, so it has to be captured and migrated. Checked October 2026; rates move, so take the current figure from GOSI.",
+    "terms": [
+      "gosi"
+    ]
+  },
+  {
+    "chapter": "uae",
+    "question": "A UAE annual-leave plan gives everyone slightly more leave than their contracts say. What is the likely cause?",
+    "answer": "The plan counts working days where the entitlement is 30 calendar days. A leave taken in working days skips the weekends, so the balance lasts longer than the law intends. Build the plan in calendar days. Entitlement checked in 2026 against Federal Decree-Law 33 of 2021; re-verify.",
+    "terms": [
+      "uae-fixed-term-contract"
+    ]
+  },
+  {
+    "chapter": "personas",
+    "question": "What three numbers tell you whether self-service is actually working after go-live?",
+    "answer": "The share of absence requests entered by employees rather than by HR, how long an approval typically waits, and how many transactions are sitting in the Transaction Console. All three come from the system. Watched for the first quarter, they show whether managers are approving and employees are self-serving while there is still time to fix the cause.",
+    "terms": [
+      "self-service"
+    ]
+  },
+  {
+    "chapter": "extend",
+    "question": "You configured a flexfield segment and it is not on the page. What did you forget?",
+    "answer": "To deploy the flexfield. Configuration is not visible until the flexfield is deployed, and the same is true after every later change. If it is deployed and still missing, the segment may be context-sensitive and the context not selected, or the page may be hiding it through a design studio rule.",
+    "terms": [
+      "context-sensitive-segment",
+      "dff-descriptive-flexfield"
+    ]
   }
 ]

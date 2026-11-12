@@ -8,7 +8,7 @@ subtitle: The compliance skeleton — legal view versus operational view
 hue: 214
 minutes: 36
 labs: org
-terms: enterprise, legal-entity, legal-employer, payroll-statutory-unit-psu, tax-reporting-unit-tru, legislative-data-group-ldg, business-unit-bu, department, division, location, legal-jurisdiction, reference-data-set, organization-tree, employment-model, enterprise-structures-configurator
+terms: enterprise, legal-entity, legal-employer, payroll-statutory-unit-psu, tax-reporting-unit-tru, legislative-data-group-ldg, business-unit-bu, department, division, location, legal-jurisdiction, reference-data-set, organization-tree, employment-model, enterprise-structures-configurator, geography-validation
 ---
 
 Every Oracle HCM implementation starts here, because nothing else can be configured until these objects exist. No worker can be hired, no element defined, no payroll run, no report filtered, until the structures in this chapter are in place. That order is not a preference — the application enforces it, and a project that rushes this stage pays for it for years.

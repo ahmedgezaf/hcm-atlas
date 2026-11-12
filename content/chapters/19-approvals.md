@@ -8,7 +8,7 @@ subtitle: Where a transaction goes after someone presses submit
 hue: 80
 minutes: 11
 labs: 
-terms: approval-rule, approver-type, serial-vs-parallel-approval, transaction-console, auto-approval
+terms: approval-rule, approver-type, serial-vs-parallel-approval, transaction-console, auto-approval, approval-matrix
 ---
 
 Every chapter before this one ends at submit. This one covers what happens next, which is where a surprising share of a project's first live month actually goes. Approval routing is named in requirements workshops constantly, configured late, tested by the person who built it, and then found to be wrong by a manager who never received a notification. "How would you configure approvals for a promotion?" is also a standard interview question, and a candidate who can name where the rules live and what an approver type needs in order to resolve sounds like someone who has shipped one.

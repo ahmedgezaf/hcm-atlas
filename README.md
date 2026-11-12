@@ -4,7 +4,7 @@
 
 Two collections so far. **Oracle HCM** is Fusion HCM Cloud for functional
 consultants in Egypt and the Gulf: twenty-two chapters each written twice — a readable pass and an
-in-depth one — thirty-two interactive labs, eighteen diagrams, a 195-term bilingual glossary and a drill deck, covering
+in-depth one — thirty-two interactive labs, eighteen diagrams, a 225-term bilingual glossary and a drill deck, covering
 the three modules juniors are hired for plus the Egyptian and Saudi statutory
 knowledge Oracle does not ship. Every HCM term carries the Arabic a consultant
 will actually hear — the formal term, and what people say on the floor.
@@ -80,8 +80,8 @@ python scripts/import_portable.py path/to/moon-learning.html --apply  # write it
 | **Chapters** | 31 chapters, ~40,200 words — plus ~84,400 words of in-depth versions for all 22 HCM chapters |
 | **Figures** | 20 inline SVG diagrams |
 | **Labs** | 36 interactive pieces |
-| **Glossary** | 261 terms |
-| **Drill** | 149 questions |
+| **Glossary** | 291 terms |
+| **Drill** | 182 questions |
 | **Search** | <kbd>Ctrl</kbd>/<kbd>⌘</kbd>+<kbd>K</kbd>, or just <kbd>/</kbd>, across **every** collection at once — chapters, individual sections, terms, labs, figures and questions, with snippets and a jump straight to the heading that answers it. |
 | **Listen** | Any chapter read aloud by the browser's speech engine, paragraph by paragraph with the current one highlighted. Offline, free, no key. |
 

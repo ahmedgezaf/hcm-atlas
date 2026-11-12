@@ -8,7 +8,7 @@ subtitle: Where labour law becomes configuration
 hue: 98
 minutes: 13
 labs: leave
-terms: absence-type, absence-plan, accrual-plan, qualification-plan, no-entitlement-plan, compensatory-plan, eligibility-profile, accrual-band, carryover, leave-encashment, work-schedule, absence-certification, accrual-processing
+terms: absence-type, absence-plan, accrual-plan, qualification-plan, no-entitlement-plan, compensatory-plan, eligibility-profile, accrual-band, carryover, leave-encashment, work-schedule, absence-certification, accrual-processing, accrual-term, vesting-period
 ---
 
 Absence is the module where a country's labour law turns into configuration. Every leave entitlement in the statute becomes an absence plan with rules, and every rule becomes a test script. The Egyptian annual-leave ladder is the classic accrual exercise; Egyptian sick leave is the classic qualification plan.

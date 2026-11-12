@@ -183,7 +183,7 @@ subtitle: The compliance skeleton — legal view versus operational view
 hue: 214
 minutes: 36
 labs: org
-terms: enterprise, legal-entity, legal-employer, payroll-statutory-unit-psu, tax-reporting-unit-tru, legislative-data-group-ldg, business-unit-bu, department, division, location, legal-jurisdiction, reference-data-set, organization-tree, employment-model, enterprise-structures-configurator
+terms: enterprise, legal-entity, legal-employer, payroll-statutory-unit-psu, tax-reporting-unit-tru, legislative-data-group-ldg, business-unit-bu, department, division, location, legal-jurisdiction, reference-data-set, organization-tree, employment-model, enterprise-structures-configurator, geography-validation
 ---
 
 Every Oracle HCM implementation starts here, because nothing else can be configured until these objects exist. No worker can be hired, no element defined, no payroll run, no report filtered, until the structures in this chapter are in place. That order is not a preference — the application enforces it, and a project that rushes this stage pays for it for years.
@@ -506,7 +506,7 @@ subtitle: Jobs, positions, grades — what work exists and at what level
 hue: 200
 minutes: 12
 labs: jobpos
-terms: job, position, grade, grade-step, job-family, position-synchronization, grade-rate, job-profile
+terms: job, position, grade, grade-step, job-family, position-synchronization, grade-rate, job-profile, shared-position
 ---
 
 If Chapter 1 is the compliance skeleton, this is the work skeleton: how an organization defines what work exists, at what level, and in which seat. One distinction in this chapter — job versus position — is the most frequently tested concept in Oracle HCM interviews, and the fastest way to look unprepared in front of a trainer is to treat the two as synonyms.
@@ -581,7 +581,7 @@ subtitle: Person → work relationship → assignment. There is no employee tabl
 hue: 246
 minutes: 32
 labs: model
-terms: person, work-relationship, work-terms, assignment, payroll-relationship, concurrent-employment, global-transfer, worker-types, seniority-date, assignment-status, action-and-action-reason, primary-assignment, last-standard-process-date
+terms: person, work-relationship, work-terms, assignment, payroll-relationship, concurrent-employment, global-transfer, worker-types, seniority-date, assignment-status, action-and-action-reason, primary-assignment, last-standard-process-date, payroll-relationship-rule, hr-status-and-payroll-status, global-temporary-assignment
 ---
 
 This is the single most important structure in the product. Payroll, absence, security and reporting all read from it. If a new consultant learns only one chapter cold, it should be this one.
@@ -676,7 +676,7 @@ Assignments grouped in one payroll relationship must share the same payroll stat
 
 The two cases behave differently and the difference is the whole point. Two assignments under one work relationship means one employer, one payroll relationship, one set of balances and one statutory ceiling applied across both jobs.
 
-Two work relationships means two employers — but not, automatically, two payroll relationships. The relationship is keyed on the payroll statutory unit and the person type, exactly as stated above, so two employers that are separate PSUs produce two relationships calculating independently, while two employers sharing one parent PSU produce a single relationship, with one set of balances and one ceiling across both jobs. The shared-services shape in Chapter 1, where several legal employers name one parent PSU, is precisely that second case. Which of the two happens is also legislation-dependent: under the payroll relationship rules Oracle ships, Lifetime Record and Last Record group a new assignment under an existing relationship for the same PSU and person type, while New Record creates one per assignment regardless.
+Two work relationships means two employers — but not, automatically, two payroll relationships. The relationship is keyed on the payroll statutory unit and the person type, exactly as stated above, so two employers that are separate PSUs produce two relationships calculating independently, while two employers sharing one parent PSU produce a single relationship, with one set of balances and one ceiling across both jobs. The shared-services shape in Chapter 1, where several legal employers name one parent PSU, is precisely that second case. Which of the two happens is also legislation-dependent: under the payroll relationship rules Oracle ships, Lifetime Record and Last Record group a new assignment under an existing relationship for the same PSU and person type — Lifetime Record reviving a terminated one, Last Record reusing only an active one — while New Record creates one per assignment regardless.
 
 When a client describes somebody who "works for both companies", the useful follow-up is: which PSU files for this person, and is it the same one for both companies? The answer decides the shape, and it decides whether a statutory ceiling applies once or twice.
 
@@ -834,7 +834,7 @@ subtitle: Nothing is deleted. Everything has the date it became true.
 hue: 278
 minutes: 12
 labs: dating
-terms: effective-date, update-vs-correction, retroactive-change-retro, end-dating, future-dated-change, retroactive-event-group, proration
+terms: effective-date, update-vs-correction, retroactive-change-retro, end-dating, future-dated-change, retroactive-event-group, proration, retroactive-notification
 ---
 
 Oracle HCM is a date-effective system. Almost nothing is ever deleted; changes are recorded with the date on which they become true in the real world. People coming from transactional systems trip over this more than anything else, and it has direct payroll consequences — which is why this short chapter sits underneath every record in the atlas.
@@ -1074,7 +1074,7 @@ subtitle: Element → eligibility → entry → run → balance → prepayment �
 hue: 152
 minutes: 18
 labs: payroll, payslip, balances, parallel-run
-terms: element, element-classification, element-eligibility-element-link, element-entry, input-value, balance, salary-basis, payroll-definition, payroll-run, quickpay, prepayments, payment-process-bank-file, costing, parallel-run, salary-record, salary-component, rate-definition, time-card, payroll-flow, mark-for-retry-and-roll-back
+terms: element, element-classification, element-eligibility-element-link, element-entry, input-value, balance, salary-basis, payroll-definition, payroll-run, quickpay, prepayments, payment-process-bank-file, costing, parallel-run, salary-record, salary-component, rate-definition, time-card, payroll-flow, mark-for-retry-and-roll-back, latest-entry-date, balance-feed, balance-dimension, initial-balance-load, processing-priority
 ---
 
 Payroll in Oracle is a chain of objects, each depending on the one before it. A consultant who can recite the chain and explain what breaks when a link is missing can debug most payroll problems without opening a log. The chain runs: element → element eligibility → element entry → payroll run → balance → prepayment → payment → costing.
@@ -1177,7 +1177,7 @@ subtitle: Where labour law becomes configuration
 hue: 98
 minutes: 13
 labs: leave
-terms: absence-type, absence-plan, accrual-plan, qualification-plan, no-entitlement-plan, compensatory-plan, eligibility-profile, accrual-band, carryover, leave-encashment, work-schedule, absence-certification, accrual-processing
+terms: absence-type, absence-plan, accrual-plan, qualification-plan, no-entitlement-plan, compensatory-plan, eligibility-profile, accrual-band, carryover, leave-encashment, work-schedule, absence-certification, accrual-processing, accrual-term, vesting-period
 ---
 
 Absence is the module where a country's labour law turns into configuration. Every leave entitlement in the statute becomes an absence plan with rules, and every rule becomes a test script. The Egyptian annual-leave ladder is the classic accrual exercise; Egyptian sick leave is the classic qualification plan.
@@ -1475,7 +1475,7 @@ subtitle: Hire to exit — every event is a dated transaction with a payroll con
 hue: 26
 minutes: 13
 labs: lifecycle
-terms: probation, notice-period, resignation, termination, end-of-contract, final-settlement, end-of-service-benefit-eosb-gratuity, action-and-action-reason
+terms: probation, notice-period, resignation, termination, end-of-contract, final-settlement, end-of-service-benefit-eosb-gratuity, action-and-action-reason, termination-dates, reverse-termination
 ---
 
 Every event in an employee's working life is, in Oracle, a dated transaction against the assignment, with an approver and a downstream payroll consequence. Thinking in those terms is the consultant's default mental mode. This chapter follows a worker from hire to exit and, because the rules are statutory, uses Egypt's Labour Law No. 14 of 2025 (in force since 1 September 2025) as the worked example; Chapter 10 has the fuller statutory detail and Chapter 17 the Gulf equivalents.
@@ -1860,7 +1860,7 @@ subtitle: The highest-value technical skill a functional consultant can arrive w
 hue: 232
 minutes: 10
 labs: hdl, import-load, source-keys
-terms: hdl-hcm-data-loader, hsdl-hcm-spreadsheet-data-loader, source-system-key-vs-person-number
+terms: hdl-hcm-data-loader, hsdl-hcm-spreadsheet-data-loader, source-system-key-vs-person-number, metadata-and-merge-lines, purge-future-changes, hdl-import-and-load, business-object-component
 ---
 
 In Oracle HCM, "functional" consultants are expected to be mildly technical. On real projects, bulk data loads land on strong functional people, and many avoid them. **HCM Data Loader (HDL)** is Oracle's bulk loading tool: nobody hand-enters ten thousand employees, so data migration and mass updates run through it. Comfort with HDL makes a consultant useful immediately.
@@ -1934,7 +1934,7 @@ subtitle: Oracle's rule language — learn it by reading, not by studying gramma
 hue: 330
 minutes: 13
 labs: ff, ff-run, ff-bugs
-terms: fast-formula, formula-result, global-value
+terms: fast-formula, formula-result, global-value, database-item, formula-context, user-defined-table
 ---
 
 Statutory rules vary too much across countries to hard-code, so Oracle exposes a rule layer. **Fast Formula** is a simple expression language for calculations, validations and rules, written in near-English rather than a full programming language. In payroll it computes rates and amounts; in absence it drives accrual rules; elsewhere it handles eligibility and defaulting. Because Oracle ships no maintained Egyptian localization, Egyptian social-insurance and tax calculations are built here — and it may be the functional consultant who writes them.
@@ -2038,7 +2038,7 @@ subtitle: OTBI, BI Publisher, HCM Extract, REST — four ways out, and when each
 hue: 186
 minutes: 10
 labs: reporting, grain-trap, which-door
-terms: otbi, subject-area, bi-publisher-bip, bursting, hcm-extract, rest-api
+terms: otbi, subject-area, bi-publisher-bip, bursting, hcm-extract, rest-api, secured-list-view, etext-template, combined-analysis
 ---
 
 There is no SQL Developer connection to a SaaS pod. When someone asks how to get data out of Oracle HCM, the complete answer names four paths and a reason for each: OTBI for ad-hoc analysis, BI Publisher for formatted output and complex SQL, HCM Extract for scheduled or large-volume outbound files, and REST for real-time integration.
@@ -2124,7 +2124,7 @@ subtitle: Flexfields, lookups, design studio, sandboxes — the answer to "can y
 hue: 262
 minutes: 12
 labs: 
-terms: dff-descriptive-flexfield, lookup-type-and-lookup-code, value-set, sandbox, journey, redwood, quarterly-update-26a-26d, transaction-design-studio, autocomplete-rule, alerts-composer
+terms: dff-descriptive-flexfield, lookup-type-and-lookup-code, value-set, sandbox, journey, redwood, quarterly-update-26a-26d, transaction-design-studio, autocomplete-rule, alerts-composer, context-sensitive-segment
 ---
 
 Every client needs a field Oracle did not ship, an option Oracle did not put in a dropdown, and a screen that behaves slightly differently for one group of users. In a SaaS product none of that can be done by changing code. Oracle's answer is a set of configuration tools that survive upgrades, and the correct response to most "can you add…" requests is one of them — said with the name of the tool, which is what separates a consultant from a note-taker.
@@ -2208,7 +2208,7 @@ subtitle: What you can do versus whose data you can see
 hue: 300
 minutes: 11
 labs: security
-terms: job-role, abstract-role, duty-role, data-role-and-security-profile, area-of-responsibility-aor, role-provisioning-rule, security-console, ldap-synchronization
+terms: job-role, abstract-role, duty-role, data-role-and-security-profile, area-of-responsibility-aor, role-provisioning-rule, security-console, ldap-synchronization, role-mapping, public-person-security-profile
 ---
 
 Security determines who can see and do what. A consultant needs conceptual fluency rather than deep architecture skill, but the vocabulary appears in almost every requirements workshop, and one distinction carries most of it: function versus data scope. The second half of this chapter is the part that earns its keep on a live project — how a role actually reaches a user, and what to check when someone opens a page and finds it empty.
@@ -2493,7 +2493,7 @@ subtitle: Where a transaction goes after someone presses submit
 hue: 80
 minutes: 11
 labs: 
-terms: approval-rule, approver-type, serial-vs-parallel-approval, transaction-console, auto-approval
+terms: approval-rule, approver-type, serial-vs-parallel-approval, transaction-console, auto-approval, approval-matrix
 ---
 
 Every chapter before this one ends at submit. This one covers what happens next, which is where a surprising share of a project's first live month actually goes. Approval routing is named in requirements workshops constantly, configured late, tested by the person who built it, and then found to be wrong by a manager who never received a notification. "How would you configure approvals for a promotion?" is also a standard interview question, and a candidate who can name where the rules live and what an approver type needs in order to resolve sounds like someone who has shipped one.
@@ -2693,7 +2693,7 @@ subtitle: Where the payroll lands in Finance, and how Oracle decides which accou
 hue: 315
 minutes: 12
 labs: cost-hierarchy
-terms: cost-allocation-key-flexfield, cost-hierarchy, costing-type, distributed-costing, offset-account, suspense-and-default-account, priority-account, transfer-to-subledger-accounting
+terms: cost-allocation-key-flexfield, cost-hierarchy, costing-type, distributed-costing, offset-account, suspense-and-default-account, priority-account, transfer-to-subledger-accounting, partial-period-accrual
 ---
 
 Chapter 5 ends the payroll cycle at the bank file, and for the payroll team that is the end. For Finance it is the start. Every amount the run calculated — each earning, each deduction, each employer contribution — has to land in a general-ledger account, against the right company, cost centre and natural account, so that the month-end close shows what people cost and where. That is **costing**, and it is the part of a payroll design that the payroll team does not see until Finance rejects the journal.
@@ -2831,7 +2831,7 @@ The opposite failure is self-service switched on everywhere with no change plan.
 <script type="text/markdown" class="src-deep">
 ---
 id: absence
-minutes: 35
+minutes: 36
 ---
 
 Absence is the module where a country's labour law turns into configuration. Every leave entitlement in the statute becomes an absence plan with rules, and every rule becomes a test script. The Egyptian annual-leave ladder is the classic accrual exercise; Egyptian sick leave is the classic qualification plan.
@@ -3773,7 +3773,7 @@ A configuration workbook written like that can be re-verified in an afternoon wh
 <script type="text/markdown" class="src-deep">
 ---
 id: egypt-payroll
-minutes: 35
+minutes: 36
 ---
 
 Oracle does not deliver a pre-built, maintained Egyptian payroll localization the way it does for some markets. The implementation partner builds the statutory rules — in elements, balances and Fast Formulas (Chapter 12). A consultant who knows the Egyptian mechanics is therefore useful on day one in a way that one who only knows the product is not.
@@ -4318,7 +4318,7 @@ And if the requirement is a calculation the product already performs, the delive
 <script type="text/markdown" class="src-deep">
 ---
 id: gulf
-minutes: 34
+minutes: 35
 ---
 
 A Saudi implementation runs on government platforms that have no Egyptian equivalent, and Oracle's generic Gulf localization does not reach them. This chapter covers the systems, the numbers that matter, and the ways a Saudi implementation differs structurally from an Egyptian one.
@@ -5017,7 +5017,7 @@ Working through that grid once, with the client, produces a design document that
 <script type="text/markdown" class="src-deep">
 ---
 id: method
-minutes: 25
+minutes: 26
 ---
 
 This is the vocabulary of how projects are delivered. Trainers and interviewers use it constantly, and using it correctly makes a consultant sound like someone who has been on a project rather than someone who has read about one. Oracle's current methodology for Fusion Cloud projects is the **Oracle True Cloud Method**, successor to older methodologies such as AIM — whose document codes still appear in conversation: BR100 for setup documents, MD050 for functional designs, TE040 for test scripts.
@@ -5166,7 +5166,7 @@ That is not modesty. It is the only arrangement that survives the consultant lea
 <script type="text/markdown" class="src-deep">
 ---
 id: model
-minutes: 74
+minutes: 75
 ---
 
 This is the single most important structure in the product. Payroll, absence, security and reporting all read from it. If a new consultant learns only one chapter cold, it should be this one.
@@ -5943,7 +5943,7 @@ Stated as a sequence, because the dependencies are real and the application enfo
 <script type="text/markdown" class="src-deep">
 ---
 id: payroll
-minutes: 56
+minutes: 58
 ---
 
 Payroll in Oracle is a chain of objects, each depending on the one before it. A consultant who can recite the chain and explain what breaks when a link is missing can debug most payroll problems without opening a log. The chain runs: element → element eligibility → element entry → payroll run → balance → prepayment → payment → costing.
@@ -6351,7 +6351,7 @@ The support model follows the same shape: employee questions are a help-desk scr
 <script type="text/markdown" class="src-deep">
 ---
 id: reporting
-minutes: 35
+minutes: 36
 ---
 
 There is no SQL Developer connection to a SaaS pod. When someone asks how to get data out of Oracle HCM, the complete answer names four paths and a reason for each: OTBI for ad-hoc analysis, BI Publisher for formatted output and complex SQL, HCM Extract for scheduled or large-volume outbound files, and REST for real-time integration.
@@ -9233,6 +9233,276 @@ Clients who are told this and choose positions do well. Clients who are sold pos
     "watchOut": "Not deciding which transactions still need approval when HR is the one keying them.",
     "ar": "التنفيذ بالنيابة عن الموظف",
     "say": "الـ HR بيدخلها بالنيابة"
+  },
+  {
+    "id": "metadata-and-merge-lines",
+    "name": "METADATA and MERGE lines",
+    "chapter": "hdl",
+    "definition": "The two instruction lines of an HDL file: METADATA declares a component's columns once, and each MERGE line supplies data in that order, creating the record or updating it.",
+    "watchOut": "A MERGE line whose pipe count differs from its METADATA line fails, even when the meaning is obvious to a person.",
+    "ar": "سطور التعريف وسطور البيانات",
+    "say": "الـ METADATA والـ MERGE"
+  },
+  {
+    "id": "purge-future-changes",
+    "name": "SET PURGE_FUTURE_CHANGES",
+    "chapter": "hdl",
+    "definition": "The HDL instruction that decides what happens to dated versions after the one being loaded: Y replaces them from the file, N keeps them.",
+    "watchOut": "The default is Y. A mass update loaded without N silently deletes future-dated changes somebody already entered.",
+    "ar": "حذف التغييرات المستقبلية",
+    "say": "الـ purge future changes"
+  },
+  {
+    "id": "hdl-import-and-load",
+    "name": "Import and load",
+    "chapter": "hdl",
+    "definition": "The two inspections an HDL file passes: import checks the file's shape and stages the lines, load builds whole business objects and checks what they mean.",
+    "watchOut": "A file that fails import wrote nothing; one that passes import and fails load usually refers to something not loaded yet.",
+    "ar": "الاستيراد ثم التحميل",
+    "say": "الـ import والـ load"
+  },
+  {
+    "id": "business-object-component",
+    "name": "Business object and component",
+    "chapter": "hdl",
+    "definition": "In HDL a business object is a tree, not a table: Worker is the object, and person name, work relationship, work terms and assignment are components carried in the one file.",
+    "watchOut": "One rejected component can fail the whole object, so a bad assignment line can sink the person.",
+    "ar": "كائن الأعمال ومكوّناته",
+    "say": "الـ business object"
+  },
+  {
+    "id": "database-item",
+    "name": "Database item",
+    "chapter": "ff",
+    "definition": "A named value a formula reads from the application rather than receiving as an input. Static ones are delivered; dynamic ones are generated when elements, balances and flexfields are created.",
+    "watchOut": "On an element allowing multiple entries, the entry-value database item holds the sum of all entries, not one of them.",
+    "ar": "عنصر قاعدة البيانات",
+    "say": "الـ database item"
+  },
+  {
+    "id": "formula-context",
+    "name": "Formula context",
+    "chapter": "ff",
+    "definition": "A value the calling process supplies to a formula implicitly — effective date, assignment, payroll relationship — which is what lets a database item resolve.",
+    "watchOut": "A formula copied to another formula type fails because the contexts differ, not because the syntax does.",
+    "ar": "سياق المعادلة",
+    "say": "الـ context"
+  },
+  {
+    "id": "user-defined-table",
+    "name": "User-defined table",
+    "chapter": "ff",
+    "definition": "A dated lookup table a formula reads by key — the right home for a rule that is a ladder or a band table rather than a single number.",
+    "watchOut": "Writing a bracket ladder as nested IF conditions means editing logic every time the law changes.",
+    "ar": "جدول معرّف من المستخدم",
+    "say": "الـ user table"
+  },
+  {
+    "id": "retroactive-notification",
+    "name": "Retroactive notification",
+    "chapter": "dating",
+    "definition": "The record a retroactive event raises for a person, carrying a process date from which payroll will be recalculated. A later, earlier-dated event moves that date back rather than creating a second notification.",
+    "watchOut": "Recalculation always covers whole pay periods from the process date, never part of one.",
+    "ar": "إشعار الأثر الرجعي",
+    "say": "الـ retro notification"
+  },
+  {
+    "id": "latest-entry-date",
+    "name": "Latest entry date",
+    "chapter": "payroll",
+    "definition": "The element setting that decides how late its entries can run after someone leaves: last standard earning date, last standard process date or final close.",
+    "watchOut": "Fusion does not call this a termination rule and has no 'actual termination' value; those names belong to E-Business Suite.",
+    "ar": "آخر تاريخ إدخال",
+    "say": "الـ latest entry date"
+  },
+  {
+    "id": "balance-feed",
+    "name": "Balance feed",
+    "chapter": "payroll",
+    "definition": "What adds to or subtracts from a balance — either named element input values or the run results of a whole classification.",
+    "watchOut": "A new element with no feed shows correct payslip lines and a wrong year-to-date.",
+    "ar": "تغذية الرصيد",
+    "say": "الـ balance feed"
+  },
+  {
+    "id": "balance-dimension",
+    "name": "Balance dimension",
+    "chapter": "payroll",
+    "definition": "The window and scope a balance accumulates over: period, month or year to date, at assignment or payroll relationship level.",
+    "watchOut": "The same balance read with the wrong dimension returns a real, plausible number for the wrong period.",
+    "ar": "بُعد الرصيد",
+    "say": "الـ dimension"
+  },
+  {
+    "id": "initial-balance-load",
+    "name": "Initial balance load",
+    "chapter": "payroll",
+    "definition": "The one-off go-live process that brings year-to-date figures from the old payroll into the new one so the first payslip starts from the right totals.",
+    "watchOut": "Balances cannot be initialised once any payroll process has run; after that it is adjustments, one at a time.",
+    "ar": "تحميل الأرصدة الافتتاحية",
+    "say": "الـ initial balances"
+  },
+  {
+    "id": "processing-priority",
+    "name": "Processing priority",
+    "chapter": "payroll",
+    "definition": "The number that orders elements inside a run: lower numbers process first, within the range the element's classification allows.",
+    "watchOut": "An element that reads another's result must have the higher number, or it calculates on a value that does not exist yet.",
+    "ar": "أولوية المعالجة",
+    "say": "الـ priority"
+  },
+  {
+    "id": "payroll-relationship-rule",
+    "name": "Payroll relationship rule",
+    "chapter": "model",
+    "definition": "The legislation-level rule deciding whether a new employment joins an existing payroll relationship: Lifetime Record revives a terminated one, Last Record reuses only an active one, New Record always creates one.",
+    "watchOut": "Whether a rehire keeps year-to-date balances depends on this rule, so it cannot be promised before checking the legislation.",
+    "ar": "قاعدة علاقة الرواتب",
+    "say": "الـ payroll relationship rule"
+  },
+  {
+    "id": "hr-status-and-payroll-status",
+    "name": "HR status and payroll status",
+    "chapter": "model",
+    "definition": "The two values behind every assignment status: the HR status says active, suspended or inactive, and the payroll status says whether and how payroll processes the assignment.",
+    "watchOut": "Active for HR and not processed by payroll is a valid combination — and the usual cause of 'active but not paid'.",
+    "ar": "حالة الموارد البشرية وحالة الرواتب",
+    "say": "الـ HR status والـ payroll status"
+  },
+  {
+    "id": "global-temporary-assignment",
+    "name": "Global temporary assignment",
+    "chapter": "model",
+    "definition": "A secondment: the worker takes an assignment with another legal employer while the source work relationship stays open and its assignment is suspended.",
+    "watchOut": "It is not a transfer. A transfer ends the source employment; choosing between them follows the contract, not preference.",
+    "ar": "تكليف مؤقت خارجي",
+    "say": "الـ temporary assignment"
+  },
+  {
+    "id": "role-mapping",
+    "name": "Role mapping",
+    "chapter": "security",
+    "definition": "The object holding provisioning conditions and the roles they grant, each flagged autoprovision, requestable or self-requestable.",
+    "watchOut": "Autoprovision is selected by default, so a role added only to be requestable is also handed to everyone who qualifies.",
+    "ar": "ربط الأدوار",
+    "say": "الـ role mapping"
+  },
+  {
+    "id": "public-person-security-profile",
+    "name": "Public person security profile",
+    "chapter": "security",
+    "definition": "The profile that decides whose basic directory details a user can look up, as distinct from the managed person profile that decides whose records they can act on.",
+    "watchOut": "Without it the directory comes back empty and the client reports that search is broken.",
+    "ar": "ملف أمان بيانات الأشخاص العامة",
+    "say": "الـ public person profile"
+  },
+  {
+    "id": "secured-list-view",
+    "name": "Secured list view",
+    "chapter": "reporting",
+    "definition": "A view a BI Publisher data model joins to so the rows returned follow the running user's security profiles.",
+    "watchOut": "A data model that selects straight from a base table returns data with no HCM data security applied at all.",
+    "ar": "عرض القائمة المؤمَّنة",
+    "say": "الـ secured view"
+  },
+  {
+    "id": "etext-template",
+    "name": "eText template",
+    "chapter": "reporting",
+    "definition": "The BI Publisher template type that produces a fixed-format text file for banks and electronic data interchange.",
+    "watchOut": "A wage-protection or bank file formatted by hand instead is how a go-live is delayed by a rejected file.",
+    "ar": "قالب النص الإلكتروني",
+    "say": "الـ eText"
+  },
+  {
+    "id": "combined-analysis",
+    "name": "Combined analysis",
+    "chapter": "reporting",
+    "definition": "An OTBI analysis that stacks result sets with a set operation — the same columns, in the same order — rather than joining them.",
+    "watchOut": "It is not a join. Using it to get one row per person with columns from two areas produces something that only looks assembled.",
+    "ar": "تحليل مدمج",
+    "say": "الـ combined analysis"
+  },
+  {
+    "id": "approval-matrix",
+    "name": "Approval matrix",
+    "chapter": "approvals",
+    "definition": "The signed design document with one row per transaction: who starts it, who approves in what order, which conditions change the route, who is only notified.",
+    "watchOut": "Without it, approval rules are configured from memory and tested by the person who built them.",
+    "ar": "مصفوفة الاعتمادات",
+    "say": "الـ approval matrix"
+  },
+  {
+    "id": "partial-period-accrual",
+    "name": "Partial period accrual",
+    "chapter": "costing",
+    "definition": "An estimate of payroll cost for the part of a pay period that falls before a month end, based on a previous period and reversed when the real costs are calculated.",
+    "watchOut": "Check which date the reversal lands on in the process configuration rather than assuming it.",
+    "ar": "استحقاق الفترة الجزئية",
+    "say": "الـ accrual بتاع آخر الشهر"
+  },
+  {
+    "id": "accrual-term",
+    "name": "Accrual term",
+    "chapter": "absence",
+    "definition": "The period an accrual plan accumulates over before carryover applies — a calendar year, or an anniversary year from each worker's own date.",
+    "watchOut": "A rolling twelve-month window is a qualification plan term type, not an accrual one.",
+    "ar": "فترة الاستحقاق",
+    "say": "الـ plan term"
+  },
+  {
+    "id": "vesting-period",
+    "name": "Vesting period",
+    "chapter": "absence",
+    "definition": "A waiting period during which leave accrues but cannot yet be taken — the proper way to express a probation rule.",
+    "watchOut": "Delaying enrolment instead loses the entitlement that should have been building.",
+    "ar": "فترة الاستحقاق المؤجل",
+    "say": "الـ vesting"
+  },
+  {
+    "id": "shared-position",
+    "name": "Shared position",
+    "chapter": "workforce",
+    "definition": "A position that may hold several incumbents up to its FTE limit, where a single-incumbent position holds one person at an FTE of one or less.",
+    "watchOut": "Incumbent validation warns when open FTE or headcount is exceeded; it does not necessarily block.",
+    "ar": "وظيفة مشتركة",
+    "say": "الـ shared position"
+  },
+  {
+    "id": "geography-validation",
+    "name": "Geography validation",
+    "chapter": "org",
+    "definition": "The setup that tells the application what a valid address looks like in a country: a structure, then a hierarchy of values, then the levels that are validated.",
+    "watchOut": "Set to error in a country with thin reference data, it stops users saving real addresses.",
+    "ar": "التحقق من البيانات الجغرافية",
+    "say": "الـ geography validation"
+  },
+  {
+    "id": "context-sensitive-segment",
+    "name": "Context-sensitive segment",
+    "chapter": "extend",
+    "definition": "A flexfield segment that appears only when a particular context value is chosen, which is how one flexfield serves several populations.",
+    "watchOut": "A flexfield has to be deployed after any change before the segment appears at all.",
+    "ar": "حقل مرتبط بالسياق",
+    "say": "الـ context segment"
+  },
+  {
+    "id": "termination-dates",
+    "name": "Notification, last working and termination dates",
+    "chapter": "lifecycle",
+    "definition": "The three dates a termination carries: when it was communicated, the last day actually worked, and the last day of employment.",
+    "watchOut": "They are frequently three different days, and payroll, access removal and service each read a different one.",
+    "ar": "تواريخ الإخطار وآخر يوم عمل وإنهاء الخدمة",
+    "say": "تاريخ الـ notification وآخر يوم شغل والـ termination"
+  },
+  {
+    "id": "reverse-termination",
+    "name": "Reverse termination",
+    "chapter": "lifecycle",
+    "definition": "Removing a termination that should not have happened, so the employment continues unbroken — as opposed to correcting one that did happen.",
+    "watchOut": "Re-hiring instead leaves a closed employment describing an event that never occurred.",
+    "ar": "إلغاء إنهاء الخدمة",
+    "say": "الـ reverse termination"
   }
 ]
 </script>
@@ -10641,6 +10911,291 @@ Clients who are told this and choose positions do well. Clients who are sold pos
     "terms": [
       "self-service",
       "acting-on-behalf"
+    ]
+  },
+  {
+    "chapter": "hdl",
+    "question": "A mass update loaded cleanly yesterday. Today a manager reports that next month's promotions have vanished. What happened?",
+    "answer": "The file was loaded without SET PURGE_FUTURE_CHANGES N. The default is Y, which replaces every dated version inside the range on each line, so the future-dated promotions already entered were deleted and the record rebuilt from the file. The load reported success because it did exactly what it was told. The fix is to restore the lost changes from the list that should have been taken beforehand, and to make N plus a pre-load list of existing future-dated changes a standing rule for every update.",
+    "terms": [
+      "purge-future-changes"
+    ]
+  },
+  {
+    "chapter": "hdl",
+    "question": "A file names a source system owner and every line fails. The data is right. What is missing?",
+    "answer": "The owner value is not free text — it is validated against the HRC_SOURCE_SYSTEM_OWNER lookup. The source system has to be added to that lookup through Manage Common Lookups before any file referencing it will load. The error does not say that, which is why it costs an afternoon the first time.",
+    "terms": [
+      "source-system-key-vs-person-number"
+    ]
+  },
+  {
+    "chapter": "hdl",
+    "question": "How does HDL know whether a line is a correction or an update?",
+    "answer": "From the effective start date. If it matches an existing dated row, that row is changed in place — a correction, and only the attributes supplied change. If it matches nothing, a new row is created and the previous one is end-dated the day before — an update. The file never says which it wants; the dates say it, which is why a wrong date silently rewrites history.",
+    "terms": [
+      "metadata-and-merge-lines",
+      "update-vs-correction"
+    ]
+  },
+  {
+    "chapter": "ff",
+    "question": "A formula works in one formula type and will not compile when copied to another. The syntax is identical. Why?",
+    "answer": "Because of contexts, not syntax. Each formula type supplies its own set of contexts — effective date, assignment, payroll relationship — and a database item only resolves where the contexts it needs are present. In the new type those contexts are missing, so the database items the formula reads do not exist there. Start from a delivered formula of the target type instead.",
+    "terms": [
+      "formula-context",
+      "database-item"
+    ]
+  },
+  {
+    "chapter": "ff",
+    "question": "Where should the Egyptian tax brackets live, and why not in the formula?",
+    "answer": "In a dated user-defined table, read by a short formula. The ladder is a table of boundaries and rates that changes by decree, so holding it as data means a change is a new dated row somebody non-technical can maintain. Written as nested conditions in the formula, every change is an edit to logic that then has to be retested, and one day it is edited wrongly.",
+    "terms": [
+      "user-defined-table",
+      "global-value"
+    ]
+  },
+  {
+    "chapter": "dating",
+    "question": "A salary award effective 5 March is entered, then a job change effective 1 February. From when does retro recalculate?",
+    "answer": "From February, and for whole periods. The first event raised a notification with a process date of 5 March; the second, earlier event moved that same notification's process date back to 1 February rather than creating another. Recalculation starts at the beginning of the pay period containing the process date, so all of February onward is recalculated, with the differences landing as retro entries in the current period.",
+    "terms": [
+      "retroactive-notification",
+      "retroactive-change-retro"
+    ]
+  },
+  {
+    "chapter": "dating",
+    "question": "The retro process ran after Calculate Payroll this month. What is the consequence?",
+    "answer": "Nothing is lost, but the arrears wait. Retro writes its differences as entries in the current period for the payroll calculation to pick up; run after the calculation, those entries sit until next period. A one-month delay becomes two. The order is the notifications report, the recalculation, the retro entries report, and only then the payroll calculation.",
+    "terms": [
+      "retroactive-change-retro"
+    ]
+  },
+  {
+    "chapter": "payroll",
+    "question": "A leaver's bonus was declared a month after they left and cannot be entered. Which setting is responsible?",
+    "answer": "The bonus element's latest entry date. If it is last standard earning date, entries stop on the day the person leaves; last standard process date runs to the end of that pay period; only final close keeps the element open afterwards. Elements that can legitimately be paid late — end of service, leave settlement, a bonus — need final close. And in Fusion it is called latest entry date; 'termination rule' and 'actual termination' are the E-Business Suite names.",
+    "terms": [
+      "latest-entry-date"
+    ]
+  },
+  {
+    "chapter": "payroll",
+    "question": "Every line on the payslip is right and the year-to-date total is wrong. Where do you look?",
+    "answer": "At the balance feed. A balance only accumulates what feeds it, by named input values or by a classification's run results. A new element that was never given a feed is paid correctly and never reaches the total. If the feed exists, check the dimension the payslip reads — the same balance at a different dimension is a different, equally plausible number.",
+    "terms": [
+      "balance-feed",
+      "balance-dimension"
+    ]
+  },
+  {
+    "chapter": "payroll",
+    "question": "The client wants to run one test payroll in production before loading opening balances. What do you say?",
+    "answer": "No. Balances can only be initialised before any payroll process has run in that environment. Once one has, the load is closed and every opening figure has to be put in as an individual balance adjustment. Test in a non-production environment, load the balances in production first, and only then run.",
+    "terms": [
+      "initial-balance-load"
+    ]
+  },
+  {
+    "chapter": "model",
+    "question": "A leaver is rehired by the same company. Do their year-to-date balances continue?",
+    "answer": "It depends on the payroll relationship rule the legislation runs. Under Lifetime Record the application finds the terminated relationship, removes its end date and reuses it, so balances continue. Under Last Record it looks only for an active relationship, finds none, and creates a new one that starts from zero. Under New Record it always starts fresh. So the answer is a check, not a promise — and some legislations, Saudi Arabia among them, add their own date test.",
+    "terms": [
+      "payroll-relationship-rule",
+      "payroll-relationship"
+    ]
+  },
+  {
+    "chapter": "model",
+    "question": "An employee is Active on screen and was not paid. What is the five-second diagnosis?",
+    "answer": "Look at the payroll status behind the assignment status, not the label. An assignment status sets two things: an HR status and a payroll status. 'Active - no payroll' is active for HR and not processed by payroll — correct for unpaid leave, and the usual culprit when it was set by accident.",
+    "terms": [
+      "hr-status-and-payroll-status",
+      "assignment-status"
+    ]
+  },
+  {
+    "chapter": "model",
+    "question": "A Dubai employee goes to the Riyadh entity for eighteen months and will come back. Transfer or temporary assignment?",
+    "answer": "A global temporary assignment, if the original employment continues. It suspends the source assignment and leaves the source work relationship open, where a transfer ends the source employment and starts a new one. But the system choice follows the paperwork: if the contract and the work permit say the Dubai employment ended, it is a transfer whatever anyone intends. The person who knows is usually in legal.",
+    "terms": [
+      "global-temporary-assignment",
+      "global-transfer"
+    ]
+  },
+  {
+    "chapter": "security",
+    "question": "You add a role to a role mapping so that managers can request it. Next morning every manager has it. Why?",
+    "answer": "Autoprovision is selected by default on a role in a mapping. Adding the role to make it requestable without clearing that flag also grants it automatically to everyone who meets the conditions. Clear autoprovision, leave requestable or self-requestable on, and run the autoprovisioning process once to take the role back from the people who should not have it.",
+    "terms": [
+      "role-mapping",
+      "role-provisioning-rule"
+    ]
+  },
+  {
+    "chapter": "security",
+    "question": "An HR representative can change the people in their plant but cannot find anyone else in the directory. What is missing?",
+    "answer": "A public person security profile. Access to people is two profiles of different sizes: the managed person profile covers whose records they can act on, the public one covers whose basic details they can look up. With only the first, search outside their own population returns nothing and gets reported as broken search.",
+    "terms": [
+      "public-person-security-profile",
+      "data-role-and-security-profile"
+    ]
+  },
+  {
+    "chapter": "reporting",
+    "question": "What is the security risk in a BI Publisher payslip report, and how is it closed?",
+    "answer": "A data model that selects directly from the tables returns rows with no HCM data security — unlike OTBI, which inherits the running user's access. A report built that way returns everyone's pay to whoever can run it. It is closed by joining to a secured list view, so the rows follow the user's security profiles, by restricting who can run the report, and by treating the privilege to write SQL in a data model as a substantial grant.",
+    "terms": [
+      "secured-list-view",
+      "bi-publisher-bip"
+    ]
+  },
+  {
+    "chapter": "reporting",
+    "question": "Can two OTBI subject areas be used in one analysis?",
+    "answer": "Yes, on what they share. Subject areas from the same application can be combined in one analysis joined on a common dimension. What is not possible is joining on an attribute only one of them carries, which is usually the link people want. Beyond that the routes are a combined analysis, which stacks result sets rather than joining them, BI Publisher with SQL, or an extract.",
+    "terms": [
+      "subject-area",
+      "combined-analysis"
+    ]
+  },
+  {
+    "chapter": "reporting",
+    "question": "Which tool produces the wage-protection bank file?",
+    "answer": "BI Publisher with an eText template, fed by the payment process or an extract. eText produces a fixed-format text file to a bank's specification, which is what an electronic funds file is. The file should be tested with the real bank early, because the bank's own validation cycle is measured in weeks.",
+    "terms": [
+      "etext-template",
+      "wps-and-sif-file"
+    ]
+  },
+  {
+    "chapter": "approvals",
+    "question": "A finance director must be told about every salary change but never decides one. How is that configured?",
+    "answer": "As a notification, not as an approver. Making a notify-only stakeholder a participant gives a decision to someone who has none and stops every transaction when they travel. The approval matrix should have a separate column for who is informed, and the rule should send an FYI.",
+    "terms": [
+      "approval-matrix",
+      "approver-type"
+    ]
+  },
+  {
+    "chapter": "approvals",
+    "question": "The annual increase was loaded through HDL and nobody approved anything. Is that a defect?",
+    "answer": "No — bulk loads, integrations and administrative corrections write directly and do not route through approval rules, which is the point of them. It is a control gap the client should know about. The governance has to come from outside the rules: restrict who can load, and keep a record of what was loaded, by whom, when and on whose authority.",
+    "terms": [
+      "approval-rule"
+    ]
+  },
+  {
+    "chapter": "approvals",
+    "question": "Approvals were switched off for cutover. What has to be true before go-live?",
+    "answer": "They have to be switched back on, and that has to be a dated item on the cutover plan with an owner. 'No approvals' is configured as an auto-approval rule rather than by deleting rules, so it is easy to leave in place, and a live system still auto-approving is a control finding waiting for an auditor.",
+    "terms": [
+      "auto-approval"
+    ]
+  },
+  {
+    "chapter": "costing",
+    "question": "A weekly payroll runs 29 July to 3 August and Finance closes July on the 31st. How does July get its cost?",
+    "answer": "Through a partial period accrual. The process estimates the period's cost from a previous payroll period and takes the share of the period that falls up to the process date, accounted on 31 July. A matching reversal is created, and when the real run is costed the actual entries replace the estimate. Which date the reversal lands on is a configuration setting worth checking rather than assuming.",
+    "terms": [
+      "partial-period-accrual"
+    ]
+  },
+  {
+    "chapter": "costing",
+    "question": "Total employer insurance cost is right but every department's share is wrong. What do you check?",
+    "answer": "The distribution group. Distributed costing spreads a liability across the same accounts, in the same proportions, as the earnings elements in its group, so the total is always fully allocated. If the group holds basic salary only where basic plus allowances was meant, the split is plausible and wrong. Test with one person whose earnings split across two cost centres: the contribution should split in the same ratio.",
+    "terms": [
+      "distributed-costing"
+    ]
+  },
+  {
+    "chapter": "absence",
+    "question": "A client says leave is capped at 'thirty days in any twelve-month period'. Why should that sentence stop you?",
+    "answer": "Because a rolling window is not an accrual term. An accrual plan runs on a calendar year or an anniversary year; rolling backward and rolling forward are qualification plan term types. So the requirement may not be an accrual plan at all, or the policy needs restating in a way an accrual plan can hold. Either way it is a design conversation, not something to configure around.",
+    "terms": [
+      "accrual-term",
+      "qualification-plan"
+    ]
+  },
+  {
+    "chapter": "absence",
+    "question": "A worker takes 80 days of sick leave, returns, and takes 30 more in the same year. How is the second absence paid in Egypt?",
+    "answer": "Partly at each rate. The bands are read by cumulative days in the window, not per absence: the first 90 days are at 75% of the insurable wage and days after that at 85%, to a ceiling of 180 in the calendar year. So ten days of the second absence are at 75% and twenty at 85%. Checked in 2026 against the social-insurance rules; re-verify. A plan tested only with one long absence never proves this.",
+    "terms": [
+      "qualification-plan",
+      "sick-leave"
+    ]
+  },
+  {
+    "chapter": "workforce",
+    "question": "A director's position falls vacant and a whole team's approvals start going to the chief executive. Why?",
+    "answer": "Where the manager is derived from the position hierarchy, a vacant parent position makes the application climb to the next position up until it finds an incumbent. That is delivered behaviour. It is worth telling the client before it happens, and either filling the seat with an acting incumbent or accepting the route.",
+    "terms": [
+      "position",
+      "position-synchronization"
+    ]
+  },
+  {
+    "chapter": "org",
+    "question": "Why might nobody be able to save an address in week one, and what decision prevents it?",
+    "answer": "Because geography validation is set stricter than the reference data supports. Addresses are checked against a country's geography structure and hierarchy; at the error level only a fully valid address saves, and where the hierarchy is thin real addresses fail. Decide the validation level per country deliberately, and load the geography data before hand-building anything, since the import is disabled once data exists.",
+    "terms": [
+      "geography-validation",
+      "location"
+    ]
+  },
+  {
+    "chapter": "lifecycle",
+    "question": "A resignation is withdrawn within the legal window after HR already terminated the record. What do you do in the system?",
+    "answer": "Reverse the termination. That removes it so the employment continues unbroken, with the reverse action on the payroll side as well. Do not re-hire: that leaves a closed employment recording an event that did not happen and starts a new one, with a new service date and possibly new balances. Correcting a termination is a different action, for when the person did leave and a date was wrong.",
+    "terms": [
+      "reverse-termination",
+      "resignation"
+    ]
+  },
+  {
+    "chapter": "lifecycle",
+    "question": "Someone resigns on 1 March, stops working on 15 March and is employed until 31 March. Which date stops their salary?",
+    "answer": "The termination date, 31 March — it is the last day of employment and becomes the last standard earning date, the point where regular earnings stop. 1 March is the notification date and 15 March the last working date. All three are held because different things read each of them, and system access is removed the day after the termination date unless immediate removal is requested.",
+    "terms": [
+      "termination-dates",
+      "last-standard-process-date"
+    ]
+  },
+  {
+    "chapter": "gulf",
+    "question": "Which fact about a Saudi national decides their GOSI rate, and why does it matter to a migration?",
+    "answer": "The date they were first registered with GOSI. Nationals registered before 3 July 2024 stay on the 21.5% schedule; those registered on or after it are on the phased schedule, 23.5% combined since 1 July 2026 with further steps. It cannot be derived from hire date or age, so it has to be captured and migrated. Checked October 2026; rates move, so take the current figure from GOSI.",
+    "terms": [
+      "gosi"
+    ]
+  },
+  {
+    "chapter": "uae",
+    "question": "A UAE annual-leave plan gives everyone slightly more leave than their contracts say. What is the likely cause?",
+    "answer": "The plan counts working days where the entitlement is 30 calendar days. A leave taken in working days skips the weekends, so the balance lasts longer than the law intends. Build the plan in calendar days. Entitlement checked in 2026 against Federal Decree-Law 33 of 2021; re-verify.",
+    "terms": [
+      "uae-fixed-term-contract"
+    ]
+  },
+  {
+    "chapter": "personas",
+    "question": "What three numbers tell you whether self-service is actually working after go-live?",
+    "answer": "The share of absence requests entered by employees rather than by HR, how long an approval typically waits, and how many transactions are sitting in the Transaction Console. All three come from the system. Watched for the first quarter, they show whether managers are approving and employees are self-serving while there is still time to fix the cause.",
+    "terms": [
+      "self-service"
+    ]
+  },
+  {
+    "chapter": "extend",
+    "question": "You configured a flexfield segment and it is not on the page. What did you forget?",
+    "answer": "To deploy the flexfield. Configuration is not visible until the flexfield is deployed, and the same is true after every later change. If it is deployed and still missing, the segment may be context-sensitive and the context not selected, or the page may be hiding it through a design studio rule.",
+    "terms": [
+      "context-sensitive-segment",
+      "dff-descriptive-flexfield"
     ]
   }
 ]

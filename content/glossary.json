@@ -2188,5 +2188,275 @@
     "watchOut": "Not deciding which transactions still need approval when HR is the one keying them.",
     "ar": "التنفيذ بالنيابة عن الموظف",
     "say": "الـ HR بيدخلها بالنيابة"
+  },
+  {
+    "id": "metadata-and-merge-lines",
+    "name": "METADATA and MERGE lines",
+    "chapter": "hdl",
+    "definition": "The two instruction lines of an HDL file: METADATA declares a component's columns once, and each MERGE line supplies data in that order, creating the record or updating it.",
+    "watchOut": "A MERGE line whose pipe count differs from its METADATA line fails, even when the meaning is obvious to a person.",
+    "ar": "سطور التعريف وسطور البيانات",
+    "say": "الـ METADATA والـ MERGE"
+  },
+  {
+    "id": "purge-future-changes",
+    "name": "SET PURGE_FUTURE_CHANGES",
+    "chapter": "hdl",
+    "definition": "The HDL instruction that decides what happens to dated versions after the one being loaded: Y replaces them from the file, N keeps them.",
+    "watchOut": "The default is Y. A mass update loaded without N silently deletes future-dated changes somebody already entered.",
+    "ar": "حذف التغييرات المستقبلية",
+    "say": "الـ purge future changes"
+  },
+  {
+    "id": "hdl-import-and-load",
+    "name": "Import and load",
+    "chapter": "hdl",
+    "definition": "The two inspections an HDL file passes: import checks the file's shape and stages the lines, load builds whole business objects and checks what they mean.",
+    "watchOut": "A file that fails import wrote nothing; one that passes import and fails load usually refers to something not loaded yet.",
+    "ar": "الاستيراد ثم التحميل",
+    "say": "الـ import والـ load"
+  },
+  {
+    "id": "business-object-component",
+    "name": "Business object and component",
+    "chapter": "hdl",
+    "definition": "In HDL a business object is a tree, not a table: Worker is the object, and person name, work relationship, work terms and assignment are components carried in the one file.",
+    "watchOut": "One rejected component can fail the whole object, so a bad assignment line can sink the person.",
+    "ar": "كائن الأعمال ومكوّناته",
+    "say": "الـ business object"
+  },
+  {
+    "id": "database-item",
+    "name": "Database item",
+    "chapter": "ff",
+    "definition": "A named value a formula reads from the application rather than receiving as an input. Static ones are delivered; dynamic ones are generated when elements, balances and flexfields are created.",
+    "watchOut": "On an element allowing multiple entries, the entry-value database item holds the sum of all entries, not one of them.",
+    "ar": "عنصر قاعدة البيانات",
+    "say": "الـ database item"
+  },
+  {
+    "id": "formula-context",
+    "name": "Formula context",
+    "chapter": "ff",
+    "definition": "A value the calling process supplies to a formula implicitly — effective date, assignment, payroll relationship — which is what lets a database item resolve.",
+    "watchOut": "A formula copied to another formula type fails because the contexts differ, not because the syntax does.",
+    "ar": "سياق المعادلة",
+    "say": "الـ context"
+  },
+  {
+    "id": "user-defined-table",
+    "name": "User-defined table",
+    "chapter": "ff",
+    "definition": "A dated lookup table a formula reads by key — the right home for a rule that is a ladder or a band table rather than a single number.",
+    "watchOut": "Writing a bracket ladder as nested IF conditions means editing logic every time the law changes.",
+    "ar": "جدول معرّف من المستخدم",
+    "say": "الـ user table"
+  },
+  {
+    "id": "retroactive-notification",
+    "name": "Retroactive notification",
+    "chapter": "dating",
+    "definition": "The record a retroactive event raises for a person, carrying a process date from which payroll will be recalculated. A later, earlier-dated event moves that date back rather than creating a second notification.",
+    "watchOut": "Recalculation always covers whole pay periods from the process date, never part of one.",
+    "ar": "إشعار الأثر الرجعي",
+    "say": "الـ retro notification"
+  },
+  {
+    "id": "latest-entry-date",
+    "name": "Latest entry date",
+    "chapter": "payroll",
+    "definition": "The element setting that decides how late its entries can run after someone leaves: last standard earning date, last standard process date or final close.",
+    "watchOut": "Fusion does not call this a termination rule and has no 'actual termination' value; those names belong to E-Business Suite.",
+    "ar": "آخر تاريخ إدخال",
+    "say": "الـ latest entry date"
+  },
+  {
+    "id": "balance-feed",
+    "name": "Balance feed",
+    "chapter": "payroll",
+    "definition": "What adds to or subtracts from a balance — either named element input values or the run results of a whole classification.",
+    "watchOut": "A new element with no feed shows correct payslip lines and a wrong year-to-date.",
+    "ar": "تغذية الرصيد",
+    "say": "الـ balance feed"
+  },
+  {
+    "id": "balance-dimension",
+    "name": "Balance dimension",
+    "chapter": "payroll",
+    "definition": "The window and scope a balance accumulates over: period, month or year to date, at assignment or payroll relationship level.",
+    "watchOut": "The same balance read with the wrong dimension returns a real, plausible number for the wrong period.",
+    "ar": "بُعد الرصيد",
+    "say": "الـ dimension"
+  },
+  {
+    "id": "initial-balance-load",
+    "name": "Initial balance load",
+    "chapter": "payroll",
+    "definition": "The one-off go-live process that brings year-to-date figures from the old payroll into the new one so the first payslip starts from the right totals.",
+    "watchOut": "Balances cannot be initialised once any payroll process has run; after that it is adjustments, one at a time.",
+    "ar": "تحميل الأرصدة الافتتاحية",
+    "say": "الـ initial balances"
+  },
+  {
+    "id": "processing-priority",
+    "name": "Processing priority",
+    "chapter": "payroll",
+    "definition": "The number that orders elements inside a run: lower numbers process first, within the range the element's classification allows.",
+    "watchOut": "An element that reads another's result must have the higher number, or it calculates on a value that does not exist yet.",
+    "ar": "أولوية المعالجة",
+    "say": "الـ priority"
+  },
+  {
+    "id": "payroll-relationship-rule",
+    "name": "Payroll relationship rule",
+    "chapter": "model",
+    "definition": "The legislation-level rule deciding whether a new employment joins an existing payroll relationship: Lifetime Record revives a terminated one, Last Record reuses only an active one, New Record always creates one.",
+    "watchOut": "Whether a rehire keeps year-to-date balances depends on this rule, so it cannot be promised before checking the legislation.",
+    "ar": "قاعدة علاقة الرواتب",
+    "say": "الـ payroll relationship rule"
+  },
+  {
+    "id": "hr-status-and-payroll-status",
+    "name": "HR status and payroll status",
+    "chapter": "model",
+    "definition": "The two values behind every assignment status: the HR status says active, suspended or inactive, and the payroll status says whether and how payroll processes the assignment.",
+    "watchOut": "Active for HR and not processed by payroll is a valid combination — and the usual cause of 'active but not paid'.",
+    "ar": "حالة الموارد البشرية وحالة الرواتب",
+    "say": "الـ HR status والـ payroll status"
+  },
+  {
+    "id": "global-temporary-assignment",
+    "name": "Global temporary assignment",
+    "chapter": "model",
+    "definition": "A secondment: the worker takes an assignment with another legal employer while the source work relationship stays open and its assignment is suspended.",
+    "watchOut": "It is not a transfer. A transfer ends the source employment; choosing between them follows the contract, not preference.",
+    "ar": "تكليف مؤقت خارجي",
+    "say": "الـ temporary assignment"
+  },
+  {
+    "id": "role-mapping",
+    "name": "Role mapping",
+    "chapter": "security",
+    "definition": "The object holding provisioning conditions and the roles they grant, each flagged autoprovision, requestable or self-requestable.",
+    "watchOut": "Autoprovision is selected by default, so a role added only to be requestable is also handed to everyone who qualifies.",
+    "ar": "ربط الأدوار",
+    "say": "الـ role mapping"
+  },
+  {
+    "id": "public-person-security-profile",
+    "name": "Public person security profile",
+    "chapter": "security",
+    "definition": "The profile that decides whose basic directory details a user can look up, as distinct from the managed person profile that decides whose records they can act on.",
+    "watchOut": "Without it the directory comes back empty and the client reports that search is broken.",
+    "ar": "ملف أمان بيانات الأشخاص العامة",
+    "say": "الـ public person profile"
+  },
+  {
+    "id": "secured-list-view",
+    "name": "Secured list view",
+    "chapter": "reporting",
+    "definition": "A view a BI Publisher data model joins to so the rows returned follow the running user's security profiles.",
+    "watchOut": "A data model that selects straight from a base table returns data with no HCM data security applied at all.",
+    "ar": "عرض القائمة المؤمَّنة",
+    "say": "الـ secured view"
+  },
+  {
+    "id": "etext-template",
+    "name": "eText template",
+    "chapter": "reporting",
+    "definition": "The BI Publisher template type that produces a fixed-format text file for banks and electronic data interchange.",
+    "watchOut": "A wage-protection or bank file formatted by hand instead is how a go-live is delayed by a rejected file.",
+    "ar": "قالب النص الإلكتروني",
+    "say": "الـ eText"
+  },
+  {
+    "id": "combined-analysis",
+    "name": "Combined analysis",
+    "chapter": "reporting",
+    "definition": "An OTBI analysis that stacks result sets with a set operation — the same columns, in the same order — rather than joining them.",
+    "watchOut": "It is not a join. Using it to get one row per person with columns from two areas produces something that only looks assembled.",
+    "ar": "تحليل مدمج",
+    "say": "الـ combined analysis"
+  },
+  {
+    "id": "approval-matrix",
+    "name": "Approval matrix",
+    "chapter": "approvals",
+    "definition": "The signed design document with one row per transaction: who starts it, who approves in what order, which conditions change the route, who is only notified.",
+    "watchOut": "Without it, approval rules are configured from memory and tested by the person who built them.",
+    "ar": "مصفوفة الاعتمادات",
+    "say": "الـ approval matrix"
+  },
+  {
+    "id": "partial-period-accrual",
+    "name": "Partial period accrual",
+    "chapter": "costing",
+    "definition": "An estimate of payroll cost for the part of a pay period that falls before a month end, based on a previous period and reversed when the real costs are calculated.",
+    "watchOut": "Check which date the reversal lands on in the process configuration rather than assuming it.",
+    "ar": "استحقاق الفترة الجزئية",
+    "say": "الـ accrual بتاع آخر الشهر"
+  },
+  {
+    "id": "accrual-term",
+    "name": "Accrual term",
+    "chapter": "absence",
+    "definition": "The period an accrual plan accumulates over before carryover applies — a calendar year, or an anniversary year from each worker's own date.",
+    "watchOut": "A rolling twelve-month window is a qualification plan term type, not an accrual one.",
+    "ar": "فترة الاستحقاق",
+    "say": "الـ plan term"
+  },
+  {
+    "id": "vesting-period",
+    "name": "Vesting period",
+    "chapter": "absence",
+    "definition": "A waiting period during which leave accrues but cannot yet be taken — the proper way to express a probation rule.",
+    "watchOut": "Delaying enrolment instead loses the entitlement that should have been building.",
+    "ar": "فترة الاستحقاق المؤجل",
+    "say": "الـ vesting"
+  },
+  {
+    "id": "shared-position",
+    "name": "Shared position",
+    "chapter": "workforce",
+    "definition": "A position that may hold several incumbents up to its FTE limit, where a single-incumbent position holds one person at an FTE of one or less.",
+    "watchOut": "Incumbent validation warns when open FTE or headcount is exceeded; it does not necessarily block.",
+    "ar": "وظيفة مشتركة",
+    "say": "الـ shared position"
+  },
+  {
+    "id": "geography-validation",
+    "name": "Geography validation",
+    "chapter": "org",
+    "definition": "The setup that tells the application what a valid address looks like in a country: a structure, then a hierarchy of values, then the levels that are validated.",
+    "watchOut": "Set to error in a country with thin reference data, it stops users saving real addresses.",
+    "ar": "التحقق من البيانات الجغرافية",
+    "say": "الـ geography validation"
+  },
+  {
+    "id": "context-sensitive-segment",
+    "name": "Context-sensitive segment",
+    "chapter": "extend",
+    "definition": "A flexfield segment that appears only when a particular context value is chosen, which is how one flexfield serves several populations.",
+    "watchOut": "A flexfield has to be deployed after any change before the segment appears at all.",
+    "ar": "حقل مرتبط بالسياق",
+    "say": "الـ context segment"
+  },
+  {
+    "id": "termination-dates",
+    "name": "Notification, last working and termination dates",
+    "chapter": "lifecycle",
+    "definition": "The three dates a termination carries: when it was communicated, the last day actually worked, and the last day of employment.",
+    "watchOut": "They are frequently three different days, and payroll, access removal and service each read a different one.",
+    "ar": "تواريخ الإخطار وآخر يوم عمل وإنهاء الخدمة",
+    "say": "تاريخ الـ notification وآخر يوم شغل والـ termination"
+  },
+  {
+    "id": "reverse-termination",
+    "name": "Reverse termination",
+    "chapter": "lifecycle",
+    "definition": "Removing a termination that should not have happened, so the employment continues unbroken — as opposed to correcting one that did happen.",
+    "watchOut": "Re-hiring instead leaves a closed employment describing an event that never occurred.",
+    "ar": "إلغاء إنهاء الخدمة",
+    "say": "الـ reverse termination"
   }
 ]

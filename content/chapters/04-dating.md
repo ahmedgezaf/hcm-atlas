@@ -8,7 +8,7 @@ subtitle: Nothing is deleted. Everything has the date it became true.
 hue: 278
 minutes: 12
 labs: dating
-terms: effective-date, update-vs-correction, retroactive-change-retro, end-dating, future-dated-change, retroactive-event-group, proration
+terms: effective-date, update-vs-correction, retroactive-change-retro, end-dating, future-dated-change, retroactive-event-group, proration, retroactive-notification
 ---
 
 Oracle HCM is a date-effective system. Almost nothing is ever deleted; changes are recorded with the date on which they become true in the real world. People coming from transactional systems trip over this more than anything else, and it has direct payroll consequences — which is why this short chapter sits underneath every record in the atlas.
