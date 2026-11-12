@@ -107,6 +107,7 @@ function render(){
   speechStop();
   renderNav();
   ({overview:renderOverview,home:renderHome,chapters:renderChapters,labs:renderLabs,glossary:renderGlossary,drill:renderDrill,about:renderAbout}[route.view]||renderOverview)($('#view'));
+  if(typeof readProgress==='function') requestAnimationFrame(readProgress);
 }
 document.querySelectorAll('[data-go]').forEach(b=>{ if(b.closest('.topbar')&&!b.closest('#sectionNav')) b.addEventListener('click',()=>go(b.dataset.go)); });
 $('#themeBtn').addEventListener('click',()=>{ const r=document.documentElement; const cur=r.getAttribute('data-theme'); const next=cur==='dark'?'light':cur==='light'?'':'dark'; if(next) r.setAttribute('data-theme',next); else r.removeAttribute('data-theme'); try{localStorage.setItem('hcm-theme',next);}catch(e){} });
@@ -315,10 +316,12 @@ function renderReader(v,c){
 let glQ='', glCh=null;
 function renderGlossary(v){
   const list=domTerms().filter(t=>(!glCh||t.ch===glCh)&&(!glQ||(t.name+' '+t.what+' '+(t.trap||'')+' '+(t.ar||'')+' '+(t.say||'')).toLowerCase().includes(glQ.toLowerCase()))).sort((a,b)=>a.name.localeCompare(b.name));
-  let letter=''; const rows=list.map(t=>{ const c=chById(t.ch); const L=t.name[0].toUpperCase(); const head=L!==letter?`<div class="gl-letter">${L}</div>`:''; letter=L; return head+`<div class="gterm card" data-h style="--h:${c?c.hue:210}">${knownBtn(t.id)}<div><b>${esc(t.name)}${t.mine?' <span class="mine">yours</span>':''}</b><div class="d">${esc(t.what)}</div>${t.ar||t.say?`<div class="ar-row">${t.ar?`<span>Arabic <span class="ar">${esc(t.ar)}</span></span>`:''}${t.say?`<span>On the floor <span class="ar">${esc(t.say)}</span></span>`:''}</div>`:''}${t.trap?`<div class="w"><b>Watch out</b> · ${esc(t.trap)}</div>`:''}</div>${c?`<a class="go" href="#chapters/${c.id}" data-ch="${c.id}">Ch. ${c.num} →</a>`:''}${t.mine?`<button class="btn sm ghost" data-del="${t.id}">Delete</button>`:''}</div>`; }).join('');
+  let letter=''; const rows=list.map(t=>{ const c=chById(t.ch); const L=t.name[0].toUpperCase(); const head=L!==letter?`<div class="gl-letter" id="gl-${L}">${L}</div>`:''; letter=L; return head+`<div class="gterm card" data-h style="--h:${c?c.hue:210}">${knownBtn(t.id)}<div><b>${esc(t.name)}${t.mine?' <span class="mine">yours</span>':''}</b><div class="d">${esc(t.what)}</div>${t.ar||t.say?`<div class="ar-row">${t.ar?`<span>Arabic <span class="ar">${esc(t.ar)}</span></span>`:''}${t.say?`<span>On the floor <span class="ar">${esc(t.say)}</span></span>`:''}</div>`:''}${t.trap?`<div class="w"><b>Watch out</b> · ${esc(t.trap)}</div>`:''}</div>${c?`<a class="go" href="#chapters/${c.id}" data-ch="${c.id}">Ch. ${c.num} →</a>`:''}${t.mine?`<button class="btn sm ghost" data-del="${t.id}">Delete</button>`:''}</div>`; }).join('');
   v.innerHTML=`<div class="view-head"><div><div class="eyebrow">${domTerms().length} terms · A to Z</div><h1>Glossary</h1><p>One definition per term, the trap that usually comes with it, and the chapter that explains it properly. Tick a term when you can say it out loud without looking.${domTerms().some(t=>t.ar)?' Each HCM term also carries the formal Arabic, and most carry what is actually said on the floor. That is the business vocabulary of a project in Egypt or the Gulf, not Oracle\'s Arabic interface labels, which differ.':''}</p></div></div>
   <div class="gl-top"><input type="search" id="glSearch" placeholder="Search terms…" value="${esc(glQ)}"><div class="chk">${CHD().map(c=>`<label class="${glCh===c.id?'on':''}" data-h style="--h:${c.hue}"><input type="checkbox" hidden data-gc="${c.id}">${c.num}</label>`).join('')}<span class="small muted" style="align-self:center">${glCh?chById(glCh).title:'all chapters'}</span></div></div>
+  ${list.length>12?`<nav class="gl-az" aria-label="Jump to a letter">${[...new Set(list.map(t=>t.name[0].toUpperCase()))].map(L=>`<button type="button" data-az="${L}">${L}</button>`).join('')}</nav>`:''}
   <div class="gl">${rows||'<div class="empty">No term matches.</div>'}</div>`;
+  v.querySelectorAll('[data-az]').forEach(b=>b.addEventListener('click',()=>{ const el=document.getElementById('gl-'+b.dataset.az); if(el) el.scrollIntoView({behavior:'smooth',block:'start'}); }));
   const si=$('#glSearch'); si.addEventListener('input',()=>{ glQ=si.value; const pos=si.selectionStart; renderGlossary(v); const e=$('#glSearch'); e.focus(); e.setSelectionRange(pos,pos); });
   v.querySelectorAll('[data-gc]').forEach(b=>b.addEventListener('change',()=>{ glCh=glCh===b.dataset.gc?null:b.dataset.gc; renderGlossary(v); }));
   v.querySelectorAll('[data-ch]').forEach(a=>a.addEventListener('click',e=>{ e.preventDefault(); go('chapters',{ch:a.dataset.ch}); }));
@@ -510,5 +513,24 @@ function renderAbout(v){
 
 /* @include search.js */
 
+/* ---------- reading progress ----------
+   An in-depth chapter can be an hour long, so the reader gets a thin bar for
+   how far through it they are and a button back to the top. Both exist only
+   while a chapter is open; every other view hides them. */
+function readProgress(){
+  const bar=$('#readbar'), top=$('#toTop'), prose=$('#prose');
+  const on=route.view==='chapters'&&!!route.ch&&!!prose;
+  bar.classList.toggle('on',on);
+  if(!on){ top.hidden=true; return; }
+  const r=prose.getBoundingClientRect(), span=Math.max(1,r.height-window.innerHeight*.6);
+  const done=Math.min(1,Math.max(0,-r.top/span));
+  bar.firstElementChild.style.width=(done*100).toFixed(1)+'%';
+  bar.style.setProperty('--h',getComputedStyle(prose.closest('.reader')).getPropertyValue('--h'));
+  top.hidden=window.scrollY<900;
+}
+window.addEventListener('scroll',readProgress,{passive:true});
+window.addEventListener('resize',readProgress);
+$('#toTop').addEventListener('click',()=>window.scrollTo({top:0,behavior:'smooth'}));
+
 /* ---------- boot ---------- */
-route=parseHash(); lastHash=location.hash.slice(1); render();
+route=parseHash(); lastHash=location.hash.slice(1); render(); readProgress();

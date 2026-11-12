@@ -11538,12 +11538,29 @@ pre.code{background:var(--navy);color:var(--navy-ink);border-radius:8px;padding:
 .depth button.on{background:var(--p);color:var(--surface)}
 .chrow .m .dp{font-size:11px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;color:var(--p);border:1px solid var(--p);border-radius:999px;padding:1px 7px}
 
+/* ---- reading progress, back to top, and the glossary's letter strip */
+.readbar{position:fixed;top:0;left:0;right:0;height:3px;z-index:60;pointer-events:none;opacity:0;transition:opacity .2s}
+.readbar.on{opacity:1}
+.readbar i{display:block;height:100%;width:0;background:hsl(var(--h,214) 62% 46%);border-radius:0 2px 2px 0}
+.to-top{position:fixed;right:22px;bottom:22px;z-index:55;width:42px;height:42px;border-radius:50%;display:grid;place-items:center;cursor:pointer;
+  background:var(--surface);color:var(--ink-2);border:1px solid var(--line-2);box-shadow:var(--shadow)}
+.to-top[hidden]{display:none}
+.to-top:hover{color:var(--ink);border-color:var(--ink-2)}
+.to-top svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.gl-az{position:sticky;top:110px;z-index:5;display:flex;flex-wrap:wrap;gap:4px;padding:6px;margin-bottom:6px;border:1px solid var(--line);border-radius:12px;background:var(--surface)}
+.gl-az button{font:inherit;font-family:var(--display);font-weight:800;font-size:12.5px;min-width:28px;height:28px;border:0;border-radius:7px;background:none;color:var(--muted);cursor:pointer}
+.gl-az button:hover{background:var(--surface-2);color:var(--ink)}
+.gl-letter{scroll-margin-top:172px}
+@media (max-width:700px){.gl-az{position:static}.gl-letter{scroll-margin-top:112px}.to-top{right:14px;bottom:14px}}
+.dcard-prog .bar{box-shadow:inset 0 0 0 1px var(--line)}
+
 /* ---- READER */
 .reader{display:grid;grid-template-columns:1fr 230px;gap:40px;align-items:start}
 /* An in-depth chapter can run to nineteen sections, which is taller than a
    laptop viewport. The contents scroll inside themselves rather than
-   hiding their last entries behind the fold. */
-.reader-toc{position:sticky;top:24px;display:grid;gap:4px;font-size:13.5px;max-height:calc(100vh - 48px);overflow-y:auto;overscroll-behavior:contain}
+   hiding their last entries behind the fold, and they stick below the top
+   bar, which is itself sticky and about 102px tall. */
+.reader-toc{position:sticky;top:118px;display:grid;gap:4px;font-size:13.5px;max-height:calc(100vh - 142px);overflow-y:auto;overscroll-behavior:contain}
 .reader-toc a{color:var(--muted);text-decoration:none;padding:5px 10px;border-left:2px solid var(--line);display:block}
 .reader-toc a:hover,.reader-toc a.on{color:var(--ink);border-color:var(--p)}
 .reader-toc .tt{font-size:11px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);font-weight:700;padding:4px 10px 6px}
@@ -11558,7 +11575,7 @@ pre.code{background:var(--navy);color:var(--navy-ink);border-radius:8px;padding:
 .prose > *{max-width:68ch}
 .prose > .fig-embed,.prose > .lab-embed{max-width:none}
 .prose p{margin:0 0 18px}
-.prose h2{font-family:var(--display);font-size:22px;margin:38px 0 12px;scroll-margin-top:24px;letter-spacing:-.01em}
+.prose h2{font-family:var(--display);font-size:22px;margin:38px 0 12px;scroll-margin-top:122px;letter-spacing:-.01em}
 .prose h2::before{content:"";display:block;width:36px;height:3px;background:var(--p);margin-bottom:10px;border-radius:2px}
 .prose strong{font-weight:600;color:var(--ink)}
 .prose ul{padding-left:22px;margin:0 0 18px}
@@ -12112,7 +12129,7 @@ pre.code{background:var(--navy);color:var(--navy-ink);border-radius:8px;padding:
   html,body{background:#fff}
   .app{display:block}
   .topbar,.sections,.reader-bar,.sync,.search-btn,.pal,.toast,.reader-toc,.ch-nav,.notes,.ask-box,.needs-sample,.ch-cover,.listen,
-  .toggle,.depth,#addTermBtn,#addTermForm,.drill-top,.grade,.selfans,.labs-nav,.hero-side,.legend,.backup,.ivbar{display:none!important}
+  .toggle,.depth,.readbar,.to-top,.gl-az,#addTermBtn,#addTermForm,.drill-top,.grade,.selfans,.labs-nav,.hero-side,.legend,.backup,.ivbar{display:none!important}
   .main{padding:0;max-width:none}
   .reader{display:block}
   .card{box-shadow:none;break-inside:avoid}
@@ -12191,6 +12208,8 @@ pre.code{background:var(--navy);color:var(--navy-ink);border-radius:8px;padding:
 </div>
 
 <div class="sync" id="sync" hidden><i></i><span>Progress saved in this browser</span></div>
+<div class="readbar" id="readbar" aria-hidden="true"><i></i></div>
+<button class="to-top" id="toTop" type="button" aria-label="Back to the top of the chapter" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 19V5M5 12l7-7 7 7"/></svg></button>
 <div class="toast" id="toast"></div>
 <script id="hcm-data" type="application/json">{}</script>
 <script>
@@ -12480,6 +12499,7 @@ function render(){
   speechStop();
   renderNav();
   ({overview:renderOverview,home:renderHome,chapters:renderChapters,labs:renderLabs,glossary:renderGlossary,drill:renderDrill,about:renderAbout}[route.view]||renderOverview)($('#view'));
+  if(typeof readProgress==='function') requestAnimationFrame(readProgress);
 }
 document.querySelectorAll('[data-go]').forEach(b=>{ if(b.closest('.topbar')&&!b.closest('#sectionNav')) b.addEventListener('click',()=>go(b.dataset.go)); });
 $('#themeBtn').addEventListener('click',()=>{ const r=document.documentElement; const cur=r.getAttribute('data-theme'); const next=cur==='dark'?'light':cur==='light'?'':'dark'; if(next) r.setAttribute('data-theme',next); else r.removeAttribute('data-theme'); try{localStorage.setItem('hcm-theme',next);}catch(e){} });
@@ -12688,10 +12708,12 @@ function renderReader(v,c){
 let glQ='', glCh=null;
 function renderGlossary(v){
   const list=domTerms().filter(t=>(!glCh||t.ch===glCh)&&(!glQ||(t.name+' '+t.what+' '+(t.trap||'')+' '+(t.ar||'')+' '+(t.say||'')).toLowerCase().includes(glQ.toLowerCase()))).sort((a,b)=>a.name.localeCompare(b.name));
-  let letter=''; const rows=list.map(t=>{ const c=chById(t.ch); const L=t.name[0].toUpperCase(); const head=L!==letter?`<div class="gl-letter">${L}</div>`:''; letter=L; return head+`<div class="gterm card" data-h style="--h:${c?c.hue:210}">${knownBtn(t.id)}<div><b>${esc(t.name)}${t.mine?' <span class="mine">yours</span>':''}</b><div class="d">${esc(t.what)}</div>${t.ar||t.say?`<div class="ar-row">${t.ar?`<span>Arabic <span class="ar">${esc(t.ar)}</span></span>`:''}${t.say?`<span>On the floor <span class="ar">${esc(t.say)}</span></span>`:''}</div>`:''}${t.trap?`<div class="w"><b>Watch out</b> · ${esc(t.trap)}</div>`:''}</div>${c?`<a class="go" href="#chapters/${c.id}" data-ch="${c.id}">Ch. ${c.num} →</a>`:''}${t.mine?`<button class="btn sm ghost" data-del="${t.id}">Delete</button>`:''}</div>`; }).join('');
+  let letter=''; const rows=list.map(t=>{ const c=chById(t.ch); const L=t.name[0].toUpperCase(); const head=L!==letter?`<div class="gl-letter" id="gl-${L}">${L}</div>`:''; letter=L; return head+`<div class="gterm card" data-h style="--h:${c?c.hue:210}">${knownBtn(t.id)}<div><b>${esc(t.name)}${t.mine?' <span class="mine">yours</span>':''}</b><div class="d">${esc(t.what)}</div>${t.ar||t.say?`<div class="ar-row">${t.ar?`<span>Arabic <span class="ar">${esc(t.ar)}</span></span>`:''}${t.say?`<span>On the floor <span class="ar">${esc(t.say)}</span></span>`:''}</div>`:''}${t.trap?`<div class="w"><b>Watch out</b> · ${esc(t.trap)}</div>`:''}</div>${c?`<a class="go" href="#chapters/${c.id}" data-ch="${c.id}">Ch. ${c.num} →</a>`:''}${t.mine?`<button class="btn sm ghost" data-del="${t.id}">Delete</button>`:''}</div>`; }).join('');
   v.innerHTML=`<div class="view-head"><div><div class="eyebrow">${domTerms().length} terms · A to Z</div><h1>Glossary</h1><p>One definition per term, the trap that usually comes with it, and the chapter that explains it properly. Tick a term when you can say it out loud without looking.${domTerms().some(t=>t.ar)?' Each HCM term also carries the formal Arabic, and most carry what is actually said on the floor. That is the business vocabulary of a project in Egypt or the Gulf, not Oracle\'s Arabic interface labels, which differ.':''}</p></div></div>
   <div class="gl-top"><input type="search" id="glSearch" placeholder="Search terms…" value="${esc(glQ)}"><div class="chk">${CHD().map(c=>`<label class="${glCh===c.id?'on':''}" data-h style="--h:${c.hue}"><input type="checkbox" hidden data-gc="${c.id}">${c.num}</label>`).join('')}<span class="small muted" style="align-self:center">${glCh?chById(glCh).title:'all chapters'}</span></div></div>
+  ${list.length>12?`<nav class="gl-az" aria-label="Jump to a letter">${[...new Set(list.map(t=>t.name[0].toUpperCase()))].map(L=>`<button type="button" data-az="${L}">${L}</button>`).join('')}</nav>`:''}
   <div class="gl">${rows||'<div class="empty">No term matches.</div>'}</div>`;
+  v.querySelectorAll('[data-az]').forEach(b=>b.addEventListener('click',()=>{ const el=document.getElementById('gl-'+b.dataset.az); if(el) el.scrollIntoView({behavior:'smooth',block:'start'}); }));
   const si=$('#glSearch'); si.addEventListener('input',()=>{ glQ=si.value; const pos=si.selectionStart; renderGlossary(v); const e=$('#glSearch'); e.focus(); e.setSelectionRange(pos,pos); });
   v.querySelectorAll('[data-gc]').forEach(b=>b.addEventListener('change',()=>{ glCh=glCh===b.dataset.gc?null:b.dataset.gc; renderGlossary(v); }));
   v.querySelectorAll('[data-ch]').forEach(a=>a.addEventListener('click',e=>{ e.preventDefault(); go('chapters',{ch:a.dataset.ch}); }));
@@ -15142,8 +15164,27 @@ if (/Mac|iPhone|iPad|iPod/.test((navigator.userAgentData && navigator.userAgentD
 }
 
 
+/* ---------- reading progress ----------
+   An in-depth chapter can be an hour long, so the reader gets a thin bar for
+   how far through it they are and a button back to the top. Both exist only
+   while a chapter is open; every other view hides them. */
+function readProgress(){
+  const bar=$('#readbar'), top=$('#toTop'), prose=$('#prose');
+  const on=route.view==='chapters'&&!!route.ch&&!!prose;
+  bar.classList.toggle('on',on);
+  if(!on){ top.hidden=true; return; }
+  const r=prose.getBoundingClientRect(), span=Math.max(1,r.height-window.innerHeight*.6);
+  const done=Math.min(1,Math.max(0,-r.top/span));
+  bar.firstElementChild.style.width=(done*100).toFixed(1)+'%';
+  bar.style.setProperty('--h',getComputedStyle(prose.closest('.reader')).getPropertyValue('--h'));
+  top.hidden=window.scrollY<900;
+}
+window.addEventListener('scroll',readProgress,{passive:true});
+window.addEventListener('resize',readProgress);
+$('#toTop').addEventListener('click',()=>window.scrollTo({top:0,behavior:'smooth'}));
+
 /* ---------- boot ---------- */
-route=parseHash(); lastHash=location.hash.slice(1); render();
+route=parseHash(); lastHash=location.hash.slice(1); render(); readProgress();
 
 </script>
 <script>
